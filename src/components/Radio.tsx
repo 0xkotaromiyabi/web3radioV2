@@ -12,7 +12,7 @@ const Radio = () => {
 
   const stations = {
     web3: 'https://web3radio.cloud/stream',
-    indonesia: 'https://stream-164.zeno.fm/3wiuocujuobtv'
+    indonesia: 'https://stream.rcs.revma.com/ugpyzu9n5k3vv'
   };
 
   useEffect(() => {
