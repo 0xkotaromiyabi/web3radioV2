@@ -12,7 +12,7 @@ const Radio = () => {
 
   const stations = {
     web3: 'https://web3radio.cloud/stream',
-    indonesia: 'https://stream.rcs.revma.com/ugpyzu9n5k3vv'
+    indonesia: 'https://s1.cloudmu.id/listen/female_radio/radio.mp3'
   };
 
   useEffect(() => {
