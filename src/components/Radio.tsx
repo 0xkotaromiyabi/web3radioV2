@@ -93,7 +93,7 @@ const Radio = () => {
   }, []);
 
   const upcomingPrograms = [
-    "10:00 - Crypto Talk with John Doe",
+    "10:00 - Crypto Talk with Kotarominami",
     "12:00 - Web3 News Update",
     "14:00 - NFT Market Analysis",
     "16:00 - DeFi Deep Dive",
