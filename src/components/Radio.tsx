@@ -75,9 +75,10 @@ const Radio = () => {
 
   fetchPrices();
 
-  const interval = setInterval(fetchPrices, 10000); // Update setiap 10 detik
+  const interval = setInterval(fetchPrices, 5000); // Update setiap 10 detik
   return () => clearInterval(interval);
 }, []);
+  
   const upcomingPrograms = [
     "10:00 - Crypto Talk with Kotarominami",
     "12:00 - Web3 News Update",
