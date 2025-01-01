@@ -47,10 +47,15 @@ export default {
           "0%": { transform: "rotate(0deg)" },
           "100%": { transform: "rotate(360deg)" },
         },
+        marquee: {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(-100%)' }
+        }
       },
       animation: {
         "led-glow": "led-glow 2s ease-in-out infinite",
         "dial-turn": "dial-turn 3s ease-in-out",
+        "marquee": "marquee 20s linear infinite"
       },
       backgroundImage: {
         "wood-pattern": "url('/wood-texture.png')",
