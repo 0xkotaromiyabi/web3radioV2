@@ -55,7 +55,7 @@ const Radio = () => {
     const fetchPrices = async () => {
       try {
         const response = await fetch(
-          "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,cardano,polkadot&vs_currencies=usd"
+          "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,solana,cardano,sui,polkadot&vs_currencies=usd"
         );
         const data = await response.json();
         const prices = [
@@ -71,9 +71,17 @@ const Radio = () => {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           })}`,
+          `SOL $${data.solana.usd.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`,
           `ADA $${data.cardano.usd.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
+          })}`,
+          `SUI $${data.Sui.usd.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,  
           })}`,
           `DOT $${data.polkadot.usd.toLocaleString(undefined, {
             minimumFractionDigits: 2,
