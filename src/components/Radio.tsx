@@ -52,32 +52,46 @@ const Radio = () => {
   };
 
    useEffect(() => {
-  const fetchPrices = async () => {
-    try {
-      const response = await fetch(
-        'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,binancecoin,ripple,dogecoin,cardano,polkadot&vs_currencies=usd'
-      );
-      const data = await response.json();
+    const fetchPrices = async () => {
+      try {
+        const response = await fetch(
+          "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,cardano,polkadot&vs_currencies=usd"
+        );
+        const data = await response.json();
+        const prices = [
+          `BTC $${data.bitcoin.usd.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`,
+          `ETH $${data.ethereum.usd.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`,
+          `BNB $${data.binancecoin.usd.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`,
+          `ADA $${data.cardano.usd.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`,
+          `DOT $${data.polkadot.usd.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`,
+        ];
+        setCryptoPrices(prices);
+      } catch (error) {
+        console.error("Error fetching crypto prices:", error);
+      }
+    };
 
-      const formattedPrices = Object.keys(data).reduce((acc, key) => {
-        acc[key] = `$${data[key].usd.toLocaleString(undefined, {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}`;
-        return acc;
-      }, {} as { [key: string]: string });
+    // Fetch prices on component mount and set interval for updates
+    fetchPrices();
+    const interval = setInterval(fetchPrices, 5000);
 
-      setCryptoPrices(formattedPrices);
-    } catch (error) {
-      console.error('Failed to fetch prices:', error);
-    }
-  };
-
-  fetchPrices();
-
-  const interval = setInterval(fetchPrices, 5000); // Update setiap 10 detik
-  return () => clearInterval(interval);
-}, []);
+    return () => clearInterval(interval);
+  }, []);
   
   const upcomingPrograms = [
     "10:00 - Crypto Talk with Kotarominami",
