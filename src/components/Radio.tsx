@@ -51,27 +51,46 @@ const Radio = () => {
     setIsPlaying(false);
   };
 
-  useEffect(() => {
-    const mockPrices = [
-      "BTC $50,000",
-      "ETH $3,000",
-      "BNB $400",
-      "ADA $2",
-      "DOT $30",
-    ];
-    setCryptoPrices(mockPrices);
-  
-    const interval = setInterval(() => {
-      const newPrices = mockPrices.map(price => {
-        const [symbol, priceString] = price.split(' ');
-        const value = parseFloat(priceString.replace(/[$,]/g, '')); // Menghapus simbol $ dan koma
-        const change = (Math.random() - 0.5) * 100; // Fluktuasi acak
-        return `${symbol} $${(value + change).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-      });
-      setCryptoPrices(newPrices);
-    }, 5000);
-  
-    return () => clearInterval(interval); // Bersihkan interval
+   useEffect(() => {
+    const fetchPrices = async () => {
+      try {
+        const response = await fetch(
+          "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,cardano,polkadot&vs_currencies=usd"
+        );
+        const data = await response.json();
+        const prices = [
+          `BTC $${data.bitcoin.usd.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`,
+          `ETH $${data.ethereum.usd.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`,
+          `BNB $${data.binancecoin.usd.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`,
+          `ADA $${data.cardano.usd.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`,
+          `DOT $${data.polkadot.usd.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`,
+        ];
+        setCryptoPrices(prices);
+      } catch (error) {
+        console.error("Error fetching crypto prices:", error);
+      }
+    };
+
+    // Fetch prices on component mount and set interval for updates
+    fetchPrices();
+    const interval = setInterval(fetchPrices, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
   return (
