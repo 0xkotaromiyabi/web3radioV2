@@ -88,7 +88,7 @@ const Radio = () => {
 
     // Fetch prices on component mount and set interval for updates
     fetchPrices();
-    const interval = setInterval(fetchPrices, 5000);
+    const interval = setInterval(fetchPrices, 10000);
 
     return () => clearInterval(interval);
   }, []);
