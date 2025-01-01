@@ -86,12 +86,19 @@ const Radio = () => {
       }
     };
 
-    // Fetch prices on component mount and set interval for updates
     fetchPrices();
     const interval = setInterval(fetchPrices, 5000);
 
     return () => clearInterval(interval);
   }, []);
+
+  const upcomingPrograms = [
+    "10:00 - Crypto Talk with John Doe",
+    "12:00 - Web3 News Update",
+    "14:00 - NFT Market Analysis",
+    "16:00 - DeFi Deep Dive",
+    "18:00 - Blockchain Technology Hour"
+  ];
 
   return (
     <div className="max-w-md mx-auto p-6">
@@ -125,6 +132,18 @@ const Radio = () => {
 
         {/* Main display */}
         <div className="bg-[#000] p-4">
+          {/* Program Schedule */}
+          <div className="h-8 bg-[#0a0a0a] border border-[#333] mb-2 overflow-hidden">
+            <div className="animate-marquee whitespace-nowrap">
+              {upcomingPrograms.map((program, index) => (
+                <span key={index} className="text-[#00ff00] font-mono text-sm mx-4">
+                  📻 {program}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Crypto Prices */}
           <div className="h-8 bg-[#0a0a0a] border border-[#333] mb-2 overflow-hidden">
             <div className="animate-marquee whitespace-nowrap">
               {cryptoPrices.map((price, index) => (
