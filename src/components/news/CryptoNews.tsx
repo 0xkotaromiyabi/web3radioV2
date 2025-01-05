@@ -21,21 +21,34 @@ const CryptoNews = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ["cryptoNews"],
     queryFn: async () => {
-      const response = await fetch(
-        "https://cryptopanic.com/api/v1/posts/?auth_token=a9cc9331ec61b387eb8f535f71426215675b55ec&public=true"
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch news");
+      try {
+        const response = await fetch(
+          "https://cryptopanic.com/api/v1/posts/?auth_token=a9cc9331ec61b387eb8f535f71426215675b55ec&public=true"
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch news");
+        }
+        const data = await response.json() as NewsResponse;
+        return data;
+      } catch (error) {
+        console.error("Error fetching crypto news:", error);
+        throw error;
       }
-      return response.json() as Promise<NewsResponse>;
     },
-    refetchInterval: 300000, // Refetch every 5 minutes
+    refetchInterval: 3600000, // Refetch every 1 hour (3600000 ms)
+    staleTime: 3600000, // Consider data stale after 1 hour
+    retry: 3, // Retry failed requests 3 times
+    refetchOnWindowFocus: false, // Don't refetch when window regains focus
   });
 
   if (isLoading) {
     return (
       <div className="mt-8 text-center text-gray-400">
-        Loading latest crypto news...
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-gray-700 rounded w-3/4 mx-auto"></div>
+          <div className="h-4 bg-gray-700 rounded w-1/2 mx-auto"></div>
+          <div className="h-4 bg-gray-700 rounded w-2/3 mx-auto"></div>
+        </div>
       </div>
     );
   }
@@ -43,7 +56,8 @@ const CryptoNews = () => {
   if (error) {
     return (
       <div className="mt-8 text-center text-red-400">
-        Error loading news. Please try again later.
+        <p>Error loading news. Please try again later.</p>
+        <p className="text-sm mt-2">{error instanceof Error ? error.message : 'Unknown error occurred'}</p>
       </div>
     );
   }
