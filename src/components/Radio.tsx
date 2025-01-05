@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import WalletConnection from './wallet/WalletConnection';
 import RadioControls from './radio/RadioControls';
 import StationSelector from './radio/StationSelector';
+import CryptoNews from './news/CryptoNews';
 
 const Radio = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -106,7 +107,7 @@ const Radio = () => {
   ];
 
   return (
-    <div className="max-w-md mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-6">
       {/* Logo */}
       <div className="mb-8 flex justify-center">
         <img 
@@ -185,6 +186,9 @@ const Radio = () => {
 
         <WalletConnection />
       </div>
+
+      {/* Crypto News Section */}
+      <CryptoNews />
     </div>
   );
 };
