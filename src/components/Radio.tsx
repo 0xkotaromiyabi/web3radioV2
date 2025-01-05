@@ -3,6 +3,10 @@ import WalletConnection from './wallet/WalletConnection';
 import RadioControls from './radio/RadioControls';
 import StationSelector from './radio/StationSelector';
 import CryptoPanicNews from './news/CryptoPanicNews';
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+
 
 const Radio = () => {
   const [isPlaying, setIsPlaying] = useState(false);
