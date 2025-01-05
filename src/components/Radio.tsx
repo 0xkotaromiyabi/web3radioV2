@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import WalletConnection from './wallet/WalletConnection';
 import RadioControls from './radio/RadioControls';
 import StationSelector from './radio/StationSelector';
-import CryptoNews from './news/CryptoNews';
 
 const Radio = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -186,9 +185,6 @@ const Radio = () => {
 
         <WalletConnection />
       </div>
-
-      {/* Crypto News Section */}
-      <CryptoNews />
     </div>
   );
 };
