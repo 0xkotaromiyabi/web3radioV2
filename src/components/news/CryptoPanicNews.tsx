@@ -1,112 +1,104 @@
-import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface NewsItem {
   id: number;
   title: string;
-  url: string;
   published_at: string;
+  url: string;
   currencies: Array<{ code: string; title: string }>;
+  kind: string;
+  domain: string;
+  votes: { positive: number; negative: number; important: number };
 }
 
 interface NewsResponse {
   results: NewsItem[];
 }
 
-const CryptoPanicNews = () => {
-  const [filter, setFilter] = useState('hot');
-  const API_BASE_URL = 'https://cryptopanic.com/api/v1/posts/';
-  const AUTH_TOKEN = localStorage.getItem('CRYPTOPANIC_API_KEY') || '';
-
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['cryptopanic', filter],
+const CryptoNews = () => {
+  const { data, isLoading, error } = useQuery<NewsResponse>({
+    queryKey: ["cryptoNews"],
     queryFn: async () => {
-      if (!AUTH_TOKEN) {
-        throw new Error('Please set your CryptoPanic API key');
+      try {
+        const response = await fetch(
+          "https://cryptopanic.com/api/v1/posts/?auth_token=a9cc9331ec61b387eb8f535f71426215675b55ec&public=true"
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch news");
+        }
+        return response.json();
+      } catch (error) {
+        console.error("Error fetching crypto news:", error);
+        throw error;
       }
-      const response = await fetch(
-        `${API_BASE_URL}?auth_token=${AUTH_TOKEN}&filter=${filter}&regions=en&kind=news`
-      );
-      if (!response.ok) {
-        throw new Error('Failed to fetch news');
-      }
-      return response.json() as Promise<NewsResponse>;
     },
-    refetchInterval: 3600000, // Refetch every hour
+    refetchInterval: 3600000, // Refetch every 1 hour (3600000 ms)
+    staleTime: 3600000, // Consider data stale after 1 hour
+    retry: 3, // Retry failed requests 3 times
+    refetchOnWindowFocus: false, // Don't refetch when window regains focus
   });
 
-  if (!AUTH_TOKEN) {
+  if (isLoading) {
     return (
-      <div className="p-4 text-center">
-        <input
-          type="text"
-          placeholder="Enter your CryptoPanic API key"
-          className="px-4 py-2 border rounded"
-          onChange={(e) => {
-            localStorage.setItem('CRYPTOPANIC_API_KEY', e.target.value);
-            window.location.reload();
-          }}
-        />
+      <div className="mt-8 text-center text-gray-400">
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-gray-700 rounded w-3/4 mx-auto"></div>
+          <div className="h-4 bg-gray-700 rounded w-1/2 mx-auto"></div>
+          <div className="h-4 bg-gray-700 rounded w-2/3 mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mt-8 text-center text-red-400">
+        <p>Error loading news. Please try again later.</p>
+        <p className="text-sm mt-2">{error instanceof Error ? error.message : 'Unknown error occurred'}</p>
       </div>
     );
   }
 
   return (
     <div className="mt-8">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-[#00ff00]">CryptoPanic News</h2>
-        <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-32">
-            <SelectValue placeholder="Filter" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="hot">Hot</SelectItem>
-            <SelectItem value="rising">Rising</SelectItem>
-            <SelectItem value="bullish">Bullish</SelectItem>
-            <SelectItem value="bearish">Bearish</SelectItem>
-            <SelectItem value="important">Important</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {isLoading && (
-        <div className="space-y-4">
-          {[...Array(5)].map((_, i) => (
-            <Skeleton key={i} className="h-24 w-full" />
-          ))}
-        </div>
-      )}
-
-      {error && (
-        <div className="text-red-500 p-4 text-center">
-          {error instanceof Error ? error.message : 'Failed to load news'}
-        </div>
-      )}
-
+      <h2 className="text-xl font-bold mb-4 text-[#9b87f5]">Latest Crypto News</h2>
       <div className="space-y-4">
-        {data?.results.map((item) => (
-          <Card key={item.id} className="bg-[#1a1a1a] border-[#333]">
+        {data?.results.map((news) => (
+          <Card key={news.id} className="bg-[#221F26] border-gray-700 hover:bg-gray-800 transition-colors">
             <CardContent className="p-4">
-              <a
-                href={item.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#00ff00] hover:text-[#00cc00] transition-colors"
-              >
-                <h3 className="font-medium">{item.title}</h3>
-              </a>
-              <div className="mt-2 flex justify-between items-center text-sm text-gray-400">
-                <div className="flex gap-2">
-                  {item.currencies?.map((currency) => (
-                    <span key={currency.code} className="bg-[#333] px-2 py-1 rounded">
-                      {currency.code}
-                    </span>
-                  ))}
+              <div className="flex flex-col space-y-2">
+                <div className="flex items-start justify-between">
+                  <a
+                    href={news.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#9b87f5] hover:text-[#8B5CF6] font-medium"
+                  >
+                    {news.title}
+                  </a>
+                  <Badge variant="secondary" className="ml-2 bg-gray-700 text-gray-300">
+                    {news.domain}
+                  </Badge>
                 </div>
-                <time>{new Date(item.published_at).toLocaleDateString()}</time>
+                <div className="flex items-center space-x-2 text-sm text-gray-400">
+                  <span>{new Date(news.published_at).toLocaleString()}</span>
+                  {news.currencies && (
+                    <div className="flex gap-1">
+                      {news.currencies.map((currency) => (
+                        <Badge key={currency.code} variant="outline" className="border-gray-600">
+                          {currency.code}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center space-x-4 text-sm">
+                  <span className="text-green-400">👍 {news.votes.positive}</span>
+                  <span className="text-red-400">👎 {news.votes.negative}</span>
+                  <span className="text-yellow-400">⭐ {news.votes.important}</span>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -116,4 +108,4 @@ const CryptoPanicNews = () => {
   );
 };
 
-export default CryptoPanicNews;
+export default CryptoNews;
