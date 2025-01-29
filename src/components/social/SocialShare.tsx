@@ -5,7 +5,10 @@ import { toast } from 'sonner';
 
 const SocialShare = () => {
   const shareUrl = window.location.href;
-  const shareText = "Check out this awesome Web3 Radio! 🎵";
+  const shareText = "Listen to Web3Radio on your favorite platform! web: http://web3radio.xyz
+telegram bot: http://t.me/web3radio_botI… 
+discord bot: http://bit.ly/web3radioDC
+ENS webhash: http://2cva5js2vf.hash.is 🎵";
 
   const handleShare = (platform: string) => {
     let shareLink = '';
