@@ -1,11 +1,15 @@
-import React from 'react';
+import React from 'react'; 
 import { Twitter, Share2, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 const SocialShare = () => {
   const shareUrl = window.location.href;
-  const shareText = "Listen to Web3Radio on your favorite platform! 🎵";
+  const shareText = "Listen to Web3Radio on your favorite platform! 🎵\n\n" +
+                    "Web: http://web3radio.xyz\n" +
+                    "Telegram Bot: http://t.me/web3radio_bot\n" +
+                    "Invite… Discord Bot: http://bit.ly/web3radioDC\n" +
+                    "ENS Webhash: http://2cva5js2vf.hash.is";
 
   const handleShare = (platform: string) => {
     let shareLink = '';
@@ -18,13 +22,12 @@ const SocialShare = () => {
         shareLink = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;
         break;
       case 'farcaster':
-        // Since Farcaster doesn't have a direct share URL, we'll copy the text to clipboard
         navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
         toast.success('Share text copied to clipboard for Farcaster!');
         return;
       case 'copy':
-        navigator.clipboard.writeText(shareUrl);
-        toast.success('Link copied to clipboard!');
+        navigator.clipboard.writeText(shareText);
+        toast.success('Share text copied to clipboard!');
         return;
     }
 
