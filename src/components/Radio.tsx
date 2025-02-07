@@ -17,7 +17,7 @@ const Radio = () => {
 
   const stations = {
     web3: 'https://web3radio.cloud/stream',
-    indonesia: 'https://s1.cloudmu.id/listen/female_radio/radio.mp3'
+    indonesia: 'https://stream.zeno.fm/3wiuocujuobtv'
   };
 
   useEffect(() => {
