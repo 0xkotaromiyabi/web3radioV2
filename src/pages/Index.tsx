@@ -1,4 +1,6 @@
+
 import Radio from '@/components/Radio';
+import NavBar from '@/components/navigation/NavBar';
 import { WagmiConfig, createConfig, http } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
@@ -26,7 +28,7 @@ const Index = () => {
   return (
     <WagmiConfig config={config}>
       <TonConnectUIProvider manifestUrl="https://ton.org/app-manifest.json">
-        <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 py-12 relative">
+        <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 py-0 relative">
           <Particles
             id="tsparticles"
             init={particlesInit}
@@ -79,8 +81,11 @@ const Index = () => {
             }}
             className="absolute inset-0"
           />
-          <div className="relative z-10">
-            <Radio />
+          <div className="relative z-10 flex flex-col">
+            <NavBar />
+            <div className="container py-12">
+              <Radio />
+            </div>
           </div>
         </div>
       </TonConnectUIProvider>
