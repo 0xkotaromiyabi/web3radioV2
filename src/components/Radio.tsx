@@ -8,6 +8,7 @@ import SocialShare from './social/SocialShare';
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Radio = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -15,6 +16,7 @@ const Radio = () => {
   const [currentStation, setCurrentStation] = useState('web3');
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [cryptoPrices, setCryptoPrices] = useState<string[]>([]);
+  const isMobile = useIsMobile();
 
   const stations = {
     web3: 'https://web3radio.cloud/stream',
@@ -143,8 +145,8 @@ const Radio = () => {
 
         {/* Main display */}
         <div className="bg-[#000] p-4">
-          {/* Program Schedule */}
-          <div className="h-8 bg-[#0a0a0a] border border-[#333] mb-2 overflow-hidden">
+          {/* Program Schedule - adjust height on mobile */}
+          <div className={`h-${isMobile ? '12' : '8'} bg-[#0a0a0a] border border-[#333] mb-2 overflow-hidden`}>
             <div className="animate-marquee whitespace-nowrap">
               {upcomingPrograms.map((program, index) => (
                 <span key={index} className="text-[#00ff00] font-mono text-sm mx-4">
@@ -154,8 +156,8 @@ const Radio = () => {
             </div>
           </div>
 
-          {/* Crypto Prices */}
-          <div className="h-8 bg-[#0a0a0a] border border-[#333] mb-2 overflow-hidden">
+          {/* Crypto Prices - adjust height on mobile */}
+          <div className={`h-${isMobile ? '12' : '8'} bg-[#0a0a0a] border border-[#333] mb-2 overflow-hidden`}>
             <div className="animate-marquee whitespace-nowrap">
               {cryptoPrices.map((price, index) => (
                 <span key={index} className="text-[#00ff00] font-mono text-sm mx-4">

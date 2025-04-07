@@ -29,7 +29,7 @@ const NavBar = () => {
               alt="Web3Radio" 
               className="h-8 w-8" 
             />
-            <span className="hidden font-bold text-white sm:inline-block">Web3Radio</span>
+            <span className="font-bold text-white sm:inline-block">Web3Radio</span>
           </Link>
           
           {/* Desktop Navigation */}
@@ -95,7 +95,7 @@ const NavBar = () => {
           <nav className="flex flex-col space-y-3">
             <Link 
               to="/" 
-              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-gray-800"
+              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800"
               onClick={() => setMobileMenuOpen(false)}
             >
               <Home className="h-4 w-4" />
@@ -103,7 +103,7 @@ const NavBar = () => {
             </Link>
             <Link 
               to="/news" 
-              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-gray-800"
+              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800"
               onClick={() => setMobileMenuOpen(false)}
             >
               <Newspaper className="h-4 w-4" />
@@ -111,7 +111,7 @@ const NavBar = () => {
             </Link>
             <Link 
               to="/events" 
-              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-gray-800"
+              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800"
               onClick={() => setMobileMenuOpen(false)}
             >
               <Calendar className="h-4 w-4" />
@@ -119,7 +119,7 @@ const NavBar = () => {
             </Link>
             <Link 
               to="/stations" 
-              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-gray-800"
+              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800"
               onClick={() => setMobileMenuOpen(false)}
             >
               <Radio className="h-4 w-4" />
