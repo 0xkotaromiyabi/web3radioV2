@@ -1,9 +1,15 @@
+
 import React from 'react';
 import { useConnect, useAccount, useDisconnect } from 'wagmi';
 import { injected } from 'wagmi/connectors';
 import { TonConnectButton } from '@tonconnect/ui-react';
+import ListeningTimeTracker from './ListeningTimeTracker';
 
-const WalletConnection = () => {
+interface WalletConnectionProps {
+  isPlaying: boolean;
+}
+
+const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
   const { connect } = useConnect();
   const { address } = useAccount();
   const { disconnect } = useDisconnect();
@@ -16,6 +22,7 @@ const WalletConnection = () => {
           <p className="text-xs text-gray-400 font-mono">
             Connected: {address.slice(0, 6)}...{address.slice(-4)}
           </p>
+          <ListeningTimeTracker isPlaying={isPlaying} />
           <button
             onClick={() => disconnect()}
             className="w-full px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"

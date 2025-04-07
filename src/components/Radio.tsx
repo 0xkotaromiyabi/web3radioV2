@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import WalletConnection from './wallet/WalletConnection';
 import RadioControls from './radio/RadioControls';
@@ -188,7 +189,7 @@ const Radio = () => {
           setVolume={setVolume}
         />
 
-        <WalletConnection />
+        <WalletConnection isPlaying={isPlaying} />
       </div>
 
       {/* Social Share Buttons */}
