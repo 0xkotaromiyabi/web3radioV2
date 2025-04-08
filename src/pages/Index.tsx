@@ -9,12 +9,15 @@ import Particles from 'react-particles';
 import type { Container, Engine } from 'tsparticles-engine';
 import { loadFull } from 'tsparticles';
 
-// Configure wagmi
+// Configure wagmi with more options for account abstraction
 const config = createConfig({
   chains: [mainnet],
   transports: {
     [mainnet.id]: http(),
   },
+  // Enhanced options for better mobile support
+  ssr: false,
+  syncConnectedChain: true,
 });
 
 const Index = () => {
