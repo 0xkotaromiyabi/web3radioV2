@@ -9,6 +9,7 @@ import Particles from 'react-particles';
 import type { Container, Engine } from 'tsparticles-engine';
 import { loadFull } from 'tsparticles';
 
+// Configure wagmi
 const config = createConfig({
   chains: [mainnet],
   transports: {
