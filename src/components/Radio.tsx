@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import WalletConnection from './wallet/WalletConnection';
 import RadioControls from './radio/RadioControls';
@@ -20,7 +19,10 @@ const Radio = () => {
 
   const stations = {
     web3: 'https://web3radio.cloud/stream',
-    indonesia: 'https://stream.zeno.fm/3wiuocujuobtv'
+    venus: 'https://stream.zeno.fm/3wiuocujuobtv',
+    iradio: 'https://n04.radiojar.com/4ywdgup3bnzuv?1744076195=&rj-tok=AAABlhMxTIcARnjabAV4uyOIpA&rj-ttl=5',
+    female: 'https://s1.cloudmu.id/listen/female_radio/radio.mp3',
+    delta: 'https://s1.cloudmu.id/listen/delta_fm/radio.mp3'
   };
 
   useEffect(() => {
@@ -51,7 +53,7 @@ const Radio = () => {
     }
   };
 
-  const changeStation = (station: 'web3' | 'indonesia') => {
+  const changeStation = (station: 'web3' | 'venus' | 'iradio' | 'female' | 'delta') => {
     if (audioRef.current) {
       audioRef.current.pause();
     }
@@ -98,7 +100,6 @@ const Radio = () => {
       }
     };
 
-    // Fetch prices on component mount and set interval for updates
     fetchPrices();
     const interval = setInterval(fetchPrices, 10000);
 
@@ -134,7 +135,10 @@ const Radio = () => {
         {/* Title bar */}
         <div className="bg-gradient-to-r from-[#1a1a1a] to-[#333] p-1 flex justify-between items-center">
           <div className="text-[#00ff00] text-xs font-bold">
-            {currentStation === 'web3' ? 'Web3 Radio' : 'Radio Indonesia'}
+            {currentStation === 'web3' ? 'Web3 Radio' : 
+             currentStation === 'venus' ? 'Venus Radio' : 
+             currentStation === 'iradio' ? 'i-Radio' : 
+             currentStation === 'female' ? 'Female Radio' : 'Delta FM'}
           </div>
           <div className="flex gap-2">
             <button className="text-gray-400 hover:text-white text-xs">_</button>
