@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Music, User, Disc, RefreshCw } from 'lucide-react';
+import { Music, User, Disc, RefreshCw, Clock } from 'lucide-react';
 
 interface SongInfoProps {
   currentSong: {
@@ -11,9 +11,10 @@ interface SongInfoProps {
   isLoading: boolean;
   currentStation: string;
   onRefresh?: () => void;
+  lastUpdated?: string;
 }
 
-const SongInfo = ({ currentSong, isLoading, currentStation, onRefresh }: SongInfoProps) => {
+const SongInfo = ({ currentSong, isLoading, currentStation, onRefresh, lastUpdated }: SongInfoProps) => {
   if (isLoading) {
     return (
       <div className="bg-[#1a1a1a] border border-[#333] rounded p-3 mb-4 animate-pulse">
@@ -71,6 +72,12 @@ const SongInfo = ({ currentSong, isLoading, currentStation, onRefresh }: SongInf
           <Disc size={14} className="text-gray-400" />
           <span>{currentSong.album || 'Unknown Album'}</span>
         </p>
+        {lastUpdated && (
+          <p className="flex items-center gap-2 text-xs text-gray-400">
+            <Clock size={12} className="text-gray-500" />
+            <span>Updated: {lastUpdated}</span>
+          </p>
+        )}
       </div>
       <div className="mt-2 text-[10px] text-gray-500">
         Source: {stationSource}

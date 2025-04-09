@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import WalletConnection from './wallet/WalletConnection';
 import RadioControls from './radio/RadioControls';
@@ -18,6 +17,7 @@ const Radio = () => {
   const [currentStation, setCurrentStation] = useState('web3');
   const [currentSong, setCurrentSong] = useState<{ title: string; artist: string; album: string } | null>(null);
   const [isLoadingSong, setIsLoadingSong] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [cryptoPrices, setCryptoPrices] = useState<string[]>([]);
   const isMobile = useIsMobile();
@@ -68,37 +68,54 @@ const Radio = () => {
     }
   };
   
-  // Mock function for development (simulates external API response)
+  // Enhanced mock function for development (simulates external API response with more variety)
   const mockOnlineRadioBoxResponse = (station: string) => {
     // Simulate network delay
     setTimeout(() => {
       let songInfo;
       
+      // Create an array of possible songs for each station to simulate updates
+      const femaleSongs = [
+        { title: 'Beautiful Life', artist: 'Dipha Barus feat. Afgan', album: 'Female Radio Top Hits' },
+        { title: 'Love Story', artist: 'Taylor Swift', album: 'Fearless' },
+        { title: 'You Belong With Me', artist: 'Taylor Swift', album: 'Fearless' },
+        { title: 'Wildest Dreams', artist: 'Taylor Swift', album: '1989' },
+        { title: 'Hati-Hati di Jalan', artist: 'Tulus', album: 'Monokrom' }
+      ];
+      
+      const deltaSongs = [
+        { title: 'Kau Yang Sempurna', artist: 'Rizky Febian', album: 'Delta FM Showcase' },
+        { title: 'Tak Pernah Padam', artist: 'Afgan', album: 'Delta Top 40' },
+        { title: 'Waktuku Hampa', artist: 'Ari Lasso', album: 'Best of Delta' },
+        { title: 'Separuh Nafas', artist: 'Dewa 19', album: 'Bintang Lima' },
+        { title: 'Bintang di Surga', artist: 'Peterpan', album: 'Bintang di Surga' }
+      ];
+      
+      const iRadioSongs = [
+        { title: 'Pergilah Kasih', artist: 'Chrisye', album: 'i-Radio Indonesian Hits' },
+        { title: 'Harusnya Aku', artist: 'Armada', album: 'Top 40 Indonesia' },
+        { title: 'Adu Rayu', artist: 'Yovie Tulus Glenn', album: 'Indonesian Collaboration' },
+        { title: 'Anganku Anganmu', artist: 'Raisa & Isyana', album: 'Duet Hits' },
+        { title: 'Sebatas Mimpi', artist: 'Nano', album: 'i-Radio Playlist' }
+      ];
+      
+      // Randomly select a song from the appropriate array
       if (station === 'female') {
-        songInfo = {
-          title: 'Beautiful Life',
-          artist: 'Dipha Barus feat. Afgan',
-          album: 'Female Radio Top Hits'
-        };
+        songInfo = femaleSongs[Math.floor(Math.random() * femaleSongs.length)];
       } else if (station === 'delta') {
-        songInfo = {
-          title: 'Kau Yang Sempurna',
-          artist: 'Rizky Febian',
-          album: 'Delta FM Showcase'
-        };
+        songInfo = deltaSongs[Math.floor(Math.random() * deltaSongs.length)];
       } else if (station === 'iradio') {
-        songInfo = {
-          title: 'Pergilah Kasih',
-          artist: 'Chrisye',
-          album: 'i-Radio Indonesian Hits'
-        };
+        songInfo = iRadioSongs[Math.floor(Math.random() * iRadioSongs.length)];
       } else {
         setDefaultSongInfo(station);
         return;
       }
       
       setCurrentSong(songInfo);
+      setLastUpdated(new Date().toLocaleTimeString());
       setIsLoadingSong(false);
+      
+      console.log(`Updated song info for ${station}:`, songInfo);
     }, 1000);
   };
   
@@ -114,8 +131,24 @@ const Radio = () => {
     };
     
     setCurrentSong(stationInfo);
+    setLastUpdated(new Date().toLocaleTimeString());
     setIsLoadingSong(false);
   };
+
+  // Set up auto-refresh for song info every 30 seconds for supported stations
+  useEffect(() => {
+    if (!isPlaying) return;
+    
+    // Only set up auto-refresh for stations that support it
+    if (!['female', 'delta', 'iradio'].includes(currentStation)) return;
+    
+    const refreshInterval = setInterval(() => {
+      console.log(`Auto-refreshing song info for ${currentStation}`);
+      fetchOnlineRadioBoxInfo(currentStation);
+    }, 30000); // Refresh every 30 seconds
+    
+    return () => clearInterval(refreshInterval);
+  }, [isPlaying, currentStation]);
 
   useEffect(() => {
     const audio = new Audio(stations[currentStation]);
@@ -141,6 +174,16 @@ const Radio = () => {
   }, [volume]);
 
   const refreshSongInfo = () => {
+    toast({
+      title: "Refreshing song info",
+      description: `Updating current song information for ${
+        currentStation === 'web3' ? 'Web3 Radio' :
+        currentStation === 'venus' ? 'Venus Radio' :
+        currentStation === 'iradio' ? 'i-Radio' :
+        currentStation === 'female' ? 'Female Radio' : 'Delta FM'
+      }`,
+      duration: 1500,
+    });
     fetchOnlineRadioBoxInfo(currentStation);
   };
 
@@ -183,6 +226,7 @@ const Radio = () => {
     setCurrentStation(station);
     setIsPlaying(false);
     setCurrentSong(null);
+    setLastUpdated(null);
   };
 
   useEffect(() => {
@@ -260,6 +304,7 @@ const Radio = () => {
         isLoading={isLoadingSong}
         currentStation={currentStation}
         onRefresh={refreshSongInfo}
+        lastUpdated={lastUpdated || undefined}
       />
 
       {/* Winamp-style container */}
