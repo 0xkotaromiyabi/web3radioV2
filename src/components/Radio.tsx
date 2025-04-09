@@ -2,20 +2,25 @@ import React, { useState, useEffect, useRef } from 'react';
 import WalletConnection from './wallet/WalletConnection';
 import RadioControls from './radio/RadioControls';
 import StationSelector from './radio/StationSelector';
+import SongInfo from './radio/SongInfo';
 import CryptoPanicNews from './news/CryptoPanicNews';
 import SocialShare from './social/SocialShare';
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useToast } from '@/components/ui/use-toast';
 
 const Radio = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(50);
   const [currentStation, setCurrentStation] = useState('web3');
+  const [currentSong, setCurrentSong] = useState<{ title: string; artist: string; album: string } | null>(null);
+  const [isLoadingSong, setIsLoadingSong] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [cryptoPrices, setCryptoPrices] = useState<string[]>([]);
   const isMobile = useIsMobile();
+  const { toast } = useToast();
 
   const stations = {
     web3: 'https://web3radio.cloud/stream',
@@ -29,8 +34,12 @@ const Radio = () => {
     const audio = new Audio(stations[currentStation]);
     audioRef.current = audio;
     audio.volume = volume / 100;
-
+    
+    // Setup metadata tracking
+    audio.addEventListener('play', handleMetadataCheck);
+    
     return () => {
+      audio.removeEventListener('play', handleMetadataCheck);
       audio.pause();
       audio.src = '';
     };
@@ -42,12 +51,101 @@ const Radio = () => {
     }
   }, [volume]);
 
+  // Function to periodically check for metadata from the audio stream
+  const handleMetadataCheck = () => {
+    if (!audioRef.current) return;
+    
+    setIsLoadingSong(true);
+    
+    // For most radio streams that support Icecast/Shoutcast metadata
+    const checkMetadata = () => {
+      if (audioRef.current) {
+        // Try to get metadata from media session API
+        if ('mediaSession' in navigator && navigator.mediaSession.metadata) {
+          const metadata = navigator.mediaSession.metadata;
+          setCurrentSong({
+            title: metadata.title || 'Unknown Title',
+            artist: metadata.artist || 'Unknown Artist',
+            album: metadata.album || 'Unknown Album'
+          });
+          setIsLoadingSong(false);
+          return;
+        }
+        
+        // Fallback: Try to extract from stream title (limited support)
+        const streamTitle = audioRef.current.mozGetMetadata 
+          ? audioRef.current.mozGetMetadata('StreamTitle') 
+          : null;
+          
+        if (streamTitle) {
+          // Most common format: Artist - Title
+          const parts = streamTitle.split(' - ');
+          if (parts.length >= 2) {
+            setCurrentSong({
+              artist: parts[0],
+              title: parts[1],
+              album: parts[2] || 'Unknown Album'
+            });
+          } else {
+            setCurrentSong({
+              title: streamTitle,
+              artist: 'Unknown Artist',
+              album: 'Unknown Album'
+            });
+          }
+          setIsLoadingSong(false);
+        } else {
+          // Provide station-specific song information when metadata isn't available
+          let stationInfo = {
+            title: 'Live Broadcast',
+            artist: currentStation === 'web3' ? 'Web3 Radio' :
+                  currentStation === 'venus' ? 'Venus Radio' :
+                  currentStation === 'iradio' ? 'i-Radio' :
+                  currentStation === 'female' ? 'Female Radio' : 'Delta FM',
+            album: 'Live Stream'
+          };
+          
+          setCurrentSong(stationInfo);
+          setIsLoadingSong(false);
+        }
+      }
+    };
+    
+    // Check immediately and then periodically
+    checkMetadata();
+    const metadataInterval = setInterval(checkMetadata, 10000);
+    
+    // Clean up interval when component unmounts or stream changes
+    return () => clearInterval(metadataInterval);
+  };
+
   const togglePlay = () => {
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
+        setCurrentSong(null);
       } else {
-        audioRef.current.play();
+        audioRef.current.play()
+          .then(() => {
+            handleMetadataCheck();
+            toast({
+              title: "Radio playing",
+              description: `Now playing ${
+                currentStation === 'web3' ? 'Web3 Radio' :
+                currentStation === 'venus' ? 'Venus Radio' :
+                currentStation === 'iradio' ? 'i-Radio' :
+                currentStation === 'female' ? 'Female Radio' : 'Delta FM'
+              }`,
+            });
+          })
+          .catch((error) => {
+            console.error("Error playing audio:", error);
+            toast({
+              title: "Playback error",
+              description: "There was an error playing this station. Please try again.",
+              variant: "destructive"
+            });
+          });
       }
       setIsPlaying(!isPlaying);
     }
@@ -59,6 +157,7 @@ const Radio = () => {
     }
     setCurrentStation(station);
     setIsPlaying(false);
+    setCurrentSong(null);
   };
 
   useEffect(() => {
@@ -128,6 +227,12 @@ const Radio = () => {
       <StationSelector 
         currentStation={currentStation}
         onStationChange={changeStation}
+      />
+      
+      {/* Song Information Display */}
+      <SongInfo 
+        currentSong={currentSong}
+        isLoading={isLoadingSong}
       />
 
       {/* Winamp-style container */}
