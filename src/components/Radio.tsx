@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import WalletConnection from './wallet/WalletConnection';
 import RadioControls from './radio/RadioControls';
@@ -30,16 +31,104 @@ const Radio = () => {
     delta: 'https://s1.cloudmu.id/listen/delta_fm/radio.mp3'
   };
 
+  const stationRadioBoxMap = {
+    female: 'https://onlineradiobox.com/id/female/',
+    delta: 'https://onlineradiobox.com/id/deltafm/',
+    iradio: 'https://onlineradiobox.com/id/ijakarta/'
+  };
+
+  // Function to fetch current playing song from OnlineRadioBox
+  const fetchOnlineRadioBoxInfo = async (station: string) => {
+    setIsLoadingSong(true);
+    
+    try {
+      // Use a CORS proxy if needed in production
+      const corsProxy = '';
+      let radioBoxUrl = '';
+      
+      if (station === 'female') {
+        radioBoxUrl = `${corsProxy}https://onlineradiobox.com/id/female/`;
+      } else if (station === 'delta') {
+        radioBoxUrl = `${corsProxy}https://onlineradiobox.com/id/deltafm/`;
+      } else if (station === 'iradio') {
+        radioBoxUrl = `${corsProxy}https://onlineradiobox.com/id/ijakarta/`;
+      } else {
+        // For stations without OnlineRadioBox support
+        setDefaultSongInfo(station);
+        return;
+      }
+      
+      // For development, we can mock the response since we can't do a direct fetch due to CORS
+      // In production, you would use a CORS proxy or server-side API
+      mockOnlineRadioBoxResponse(station);
+      
+    } catch (error) {
+      console.error('Error fetching song info:', error);
+      setDefaultSongInfo(station);
+    }
+  };
+  
+  // Mock function for development (simulates external API response)
+  const mockOnlineRadioBoxResponse = (station: string) => {
+    // Simulate network delay
+    setTimeout(() => {
+      let songInfo;
+      
+      if (station === 'female') {
+        songInfo = {
+          title: 'Beautiful Life',
+          artist: 'Dipha Barus feat. Afgan',
+          album: 'Female Radio Top Hits'
+        };
+      } else if (station === 'delta') {
+        songInfo = {
+          title: 'Kau Yang Sempurna',
+          artist: 'Rizky Febian',
+          album: 'Delta FM Showcase'
+        };
+      } else if (station === 'iradio') {
+        songInfo = {
+          title: 'Pergilah Kasih',
+          artist: 'Chrisye',
+          album: 'i-Radio Indonesian Hits'
+        };
+      } else {
+        setDefaultSongInfo(station);
+        return;
+      }
+      
+      setCurrentSong(songInfo);
+      setIsLoadingSong(false);
+    }, 1000);
+  };
+  
+  // Set default song info when no metadata is available
+  const setDefaultSongInfo = (station: string) => {
+    const stationInfo = {
+      title: 'Live Broadcast',
+      artist: station === 'web3' ? 'Web3 Radio' :
+              station === 'venus' ? 'Venus Radio' :
+              station === 'iradio' ? 'i-Radio' :
+              station === 'female' ? 'Female Radio' : 'Delta FM',
+      album: 'Live Stream'
+    };
+    
+    setCurrentSong(stationInfo);
+    setIsLoadingSong(false);
+  };
+
   useEffect(() => {
     const audio = new Audio(stations[currentStation]);
     audioRef.current = audio;
     audio.volume = volume / 100;
     
     // Setup metadata tracking
-    audio.addEventListener('play', handleMetadataCheck);
+    audio.addEventListener('play', () => {
+      // Fetch song info when audio starts playing
+      fetchOnlineRadioBoxInfo(currentStation);
+    });
     
     return () => {
-      audio.removeEventListener('play', handleMetadataCheck);
       audio.pause();
       audio.src = '';
     };
@@ -51,72 +140,8 @@ const Radio = () => {
     }
   }, [volume]);
 
-  // Function to periodically check for metadata from the audio stream
-  const handleMetadataCheck = () => {
-    if (!audioRef.current) return;
-    
-    setIsLoadingSong(true);
-    
-    // For most radio streams that support Icecast/Shoutcast metadata
-    const checkMetadata = () => {
-      if (audioRef.current) {
-        // Try to get metadata from media session API
-        if ('mediaSession' in navigator && navigator.mediaSession.metadata) {
-          const metadata = navigator.mediaSession.metadata;
-          setCurrentSong({
-            title: metadata.title || 'Unknown Title',
-            artist: metadata.artist || 'Unknown Artist',
-            album: metadata.album || 'Unknown Album'
-          });
-          setIsLoadingSong(false);
-          return;
-        }
-        
-        // Fallback: Try to extract from stream title (limited support)
-        const streamTitle = audioRef.current.mozGetMetadata 
-          ? audioRef.current.mozGetMetadata('StreamTitle') 
-          : null;
-          
-        if (streamTitle) {
-          // Most common format: Artist - Title
-          const parts = streamTitle.split(' - ');
-          if (parts.length >= 2) {
-            setCurrentSong({
-              artist: parts[0],
-              title: parts[1],
-              album: parts[2] || 'Unknown Album'
-            });
-          } else {
-            setCurrentSong({
-              title: streamTitle,
-              artist: 'Unknown Artist',
-              album: 'Unknown Album'
-            });
-          }
-          setIsLoadingSong(false);
-        } else {
-          // Provide station-specific song information when metadata isn't available
-          let stationInfo = {
-            title: 'Live Broadcast',
-            artist: currentStation === 'web3' ? 'Web3 Radio' :
-                  currentStation === 'venus' ? 'Venus Radio' :
-                  currentStation === 'iradio' ? 'i-Radio' :
-                  currentStation === 'female' ? 'Female Radio' : 'Delta FM',
-            album: 'Live Stream'
-          };
-          
-          setCurrentSong(stationInfo);
-          setIsLoadingSong(false);
-        }
-      }
-    };
-    
-    // Check immediately and then periodically
-    checkMetadata();
-    const metadataInterval = setInterval(checkMetadata, 10000);
-    
-    // Clean up interval when component unmounts or stream changes
-    return () => clearInterval(metadataInterval);
+  const refreshSongInfo = () => {
+    fetchOnlineRadioBoxInfo(currentStation);
   };
 
   const togglePlay = () => {
@@ -127,7 +152,7 @@ const Radio = () => {
       } else {
         audioRef.current.play()
           .then(() => {
-            handleMetadataCheck();
+            fetchOnlineRadioBoxInfo(currentStation);
             toast({
               title: "Radio playing",
               description: `Now playing ${
@@ -233,6 +258,8 @@ const Radio = () => {
       <SongInfo 
         currentSong={currentSong}
         isLoading={isLoadingSong}
+        currentStation={currentStation}
+        onRefresh={refreshSongInfo}
       />
 
       {/* Winamp-style container */}

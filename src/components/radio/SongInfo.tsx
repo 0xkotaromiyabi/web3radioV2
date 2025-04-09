@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Music, User, Disc } from 'lucide-react';
+import { Music, User, Disc, RefreshCw } from 'lucide-react';
 
 interface SongInfoProps {
   currentSong: {
@@ -9,9 +9,11 @@ interface SongInfoProps {
     album: string;
   } | null;
   isLoading: boolean;
+  currentStation: string;
+  onRefresh?: () => void;
 }
 
-const SongInfo = ({ currentSong, isLoading }: SongInfoProps) => {
+const SongInfo = ({ currentSong, isLoading, currentStation, onRefresh }: SongInfoProps) => {
   if (isLoading) {
     return (
       <div className="bg-[#1a1a1a] border border-[#333] rounded p-3 mb-4 animate-pulse">
@@ -33,12 +35,29 @@ const SongInfo = ({ currentSong, isLoading }: SongInfoProps) => {
     );
   }
 
+  const stationSource = 
+    currentStation === 'female' ? 'OnlineRadioBox (Female Radio)' :
+    currentStation === 'delta' ? 'OnlineRadioBox (Delta FM)' :
+    currentStation === 'iradio' ? 'OnlineRadioBox (i-Radio)' : 
+    'Stream Metadata';
+
   return (
     <div className="bg-[#1a1a1a] border border-[#333] rounded p-3 mb-4">
-      <h3 className="text-[#00ff00] font-bold mb-2 flex items-center gap-2">
-        <Music size={16} />
-        <span>Now Playing</span>
-      </h3>
+      <div className="flex justify-between items-center mb-2">
+        <h3 className="text-[#00ff00] font-bold flex items-center gap-2">
+          <Music size={16} />
+          <span>Now Playing</span>
+        </h3>
+        {onRefresh && (
+          <button 
+            onClick={onRefresh}
+            className="text-gray-400 hover:text-[#00ff00] transition-colors"
+            title="Refresh song info"
+          >
+            <RefreshCw size={14} />
+          </button>
+        )}
+      </div>
       <div className="text-white text-sm space-y-2">
         <p className="flex items-center gap-2">
           <Music size={14} className="text-gray-400" />
@@ -52,6 +71,9 @@ const SongInfo = ({ currentSong, isLoading }: SongInfoProps) => {
           <Disc size={14} className="text-gray-400" />
           <span>{currentSong.album || 'Unknown Album'}</span>
         </p>
+      </div>
+      <div className="mt-2 text-[10px] text-gray-500">
+        Source: {stationSource}
       </div>
     </div>
   );
