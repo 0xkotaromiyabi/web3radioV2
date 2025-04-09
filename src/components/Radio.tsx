@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import WalletConnection from './wallet/WalletConnection';
 import RadioControls from './radio/RadioControls';
@@ -11,13 +12,30 @@ import { Badge } from "@/components/ui/badge";
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useToast } from '@/components/ui/use-toast';
 
+interface Song {
+  title: string;
+  artist: string;
+  album: string;
+}
+
+interface Playlist {
+  [key: string]: Song[];
+}
+
 const Radio = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(50);
   const [currentStation, setCurrentStation] = useState('web3');
-  const [currentSong, setCurrentSong] = useState<{ title: string; artist: string; album: string } | null>(null);
+  const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [isLoadingSong, setIsLoadingSong] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const [playlist, setPlaylist] = useState<Playlist>({
+    female: [],
+    delta: [],
+    iradio: [],
+    web3: [],
+    venus: []
+  });
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [cryptoPrices, setCryptoPrices] = useState<string[]>([]);
   const isMobile = useIsMobile();
@@ -35,6 +53,24 @@ const Radio = () => {
     female: 'https://onlineradiobox.com/id/female/',
     delta: 'https://onlineradiobox.com/id/deltafm/',
     iradio: 'https://onlineradiobox.com/id/ijakarta/'
+  };
+
+  // Add song to playlist function
+  const addToPlaylist = (station: string, song: Song) => {
+    if (!song.title || !song.artist) return;
+    
+    // Check if the song is already in the playlist
+    const existingSongs = playlist[station] || [];
+    const isDuplicate = existingSongs.some(
+      existing => existing.title === song.title && existing.artist === song.artist
+    );
+    
+    if (!isDuplicate) {
+      setPlaylist(prev => ({
+        ...prev,
+        [station]: [song, ...existingSongs.slice(0, 19)] // Keep max 20 songs
+      }));
+    }
   };
 
   // Function to fetch current playing song from OnlineRadioBox
@@ -112,6 +148,7 @@ const Radio = () => {
       }
       
       setCurrentSong(songInfo);
+      addToPlaylist(station, songInfo);
       setLastUpdated(new Date().toLocaleTimeString());
       setIsLoadingSong(false);
       
@@ -305,6 +342,7 @@ const Radio = () => {
         currentStation={currentStation}
         onRefresh={refreshSongInfo}
         lastUpdated={lastUpdated || undefined}
+        playlist={playlist[currentStation]}
       />
 
       {/* Winamp-style container */}

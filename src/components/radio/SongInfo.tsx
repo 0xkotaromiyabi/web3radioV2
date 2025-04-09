@@ -1,20 +1,25 @@
 
-import React from 'react';
-import { Music, User, Disc, RefreshCw, Clock } from 'lucide-react';
+import React, { useState } from 'react';
+import { Music, User, Disc, RefreshCw, Clock, ListMusic } from 'lucide-react';
+
+interface Song {
+  title: string;
+  artist: string;
+  album: string;
+}
 
 interface SongInfoProps {
-  currentSong: {
-    title: string;
-    artist: string;
-    album: string;
-  } | null;
+  currentSong: Song | null;
   isLoading: boolean;
   currentStation: string;
   onRefresh?: () => void;
   lastUpdated?: string;
+  playlist?: Song[];
 }
 
-const SongInfo = ({ currentSong, isLoading, currentStation, onRefresh, lastUpdated }: SongInfoProps) => {
+const SongInfo = ({ currentSong, isLoading, currentStation, onRefresh, lastUpdated, playlist = [] }: SongInfoProps) => {
+  const [showPlaylist, setShowPlaylist] = useState(false);
+  
   if (isLoading) {
     return (
       <div className="bg-[#1a1a1a] border border-[#333] rounded p-3 mb-4 animate-pulse">
@@ -49,15 +54,24 @@ const SongInfo = ({ currentSong, isLoading, currentStation, onRefresh, lastUpdat
           <Music size={16} />
           <span>Now Playing</span>
         </h3>
-        {onRefresh && (
+        <div className="flex gap-2">
+          {onRefresh && (
+            <button 
+              onClick={onRefresh}
+              className="text-gray-400 hover:text-[#00ff00] transition-colors"
+              title="Refresh song info"
+            >
+              <RefreshCw size={14} />
+            </button>
+          )}
           <button 
-            onClick={onRefresh}
-            className="text-gray-400 hover:text-[#00ff00] transition-colors"
-            title="Refresh song info"
+            onClick={() => setShowPlaylist(!showPlaylist)}
+            className={`text-gray-400 hover:text-[#00ff00] transition-colors ${showPlaylist ? 'text-[#00ff00]' : ''}`}
+            title={showPlaylist ? "Hide playlist" : "Show playlist"}
           >
-            <RefreshCw size={14} />
+            <ListMusic size={14} />
           </button>
-        )}
+        </div>
       </div>
       <div className="text-white text-sm space-y-2">
         <p className="flex items-center gap-2">
@@ -79,6 +93,27 @@ const SongInfo = ({ currentSong, isLoading, currentStation, onRefresh, lastUpdat
           </p>
         )}
       </div>
+      
+      {/* Playlist Section */}
+      {showPlaylist && playlist.length > 0 && (
+        <div className="mt-4 pt-3 border-t border-[#333]">
+          <h4 className="text-[#00ff00] text-xs font-bold mb-2 flex items-center gap-2">
+            <ListMusic size={12} />
+            <span>Recent Playlist</span>
+          </h4>
+          <div className="max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+            <ul className="space-y-2">
+              {playlist.map((song, index) => (
+                <li key={index} className="text-xs py-1 border-b border-[#333] last:border-0">
+                  <p className="text-white font-medium">{song.title || 'Unknown'}</p>
+                  <p className="text-gray-400">{song.artist || 'Unknown'}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
       <div className="mt-2 text-[10px] text-gray-500">
         Source: {stationSource}
       </div>
