@@ -42,7 +42,7 @@ const Radio = () => {
   const { toast } = useToast();
 
   const stations = {
-    web3: 'http://web3radio.cloud:8000/stream',
+    web3: 'https://web3radio.cloud/stream',
     venus: 'https://stream.zeno.fm/3wiuocujuobtv',
     iradio: 'https://n04.radiojar.com/4ywdgup3bnzuv?1744076195=&rj-tok=AAABlhMxTIcARnjabAV4uyOIpA&rj-ttl=5',
     female: 'https://s1.cloudmu.id/listen/female_radio/radio.mp3',
