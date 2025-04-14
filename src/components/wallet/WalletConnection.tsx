@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useConnect, useAccount, useDisconnect } from 'wagmi';
 import { mainnet, base } from 'wagmi/chains';
@@ -10,11 +9,12 @@ import {
 import { TonConnectButton } from '@tonconnect/ui-react';
 import ListeningTimeTracker from './ListeningTimeTracker';
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/components/ui/use-toast";
-import { Smartphone, Shield, Wallet, Link, RefreshCw } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
+import { Smartphone, Shield, Wallet, Link, RefreshCw, ArrowRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import * as web3 from '@solana/web3.js';
 import { Card } from "@/components/ui/card";
+import TransferDialog from './TransferDialog';
 
 interface WalletConnectionProps {
   isPlaying: boolean;
@@ -40,6 +40,13 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
   const [loadingBalances, setLoadingBalances] = useState({
     base: false,
     solana: false
+  });
+  const [transferDialogState, setTransferDialogState] = useState<{
+    isOpen: boolean;
+    network: 'base' | 'solana';
+  }>({
+    isOpen: false,
+    network: 'base'
   });
 
   // Function to fetch IDRX balance on Base network
@@ -215,6 +222,70 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
     }
   };
 
+  const openTransferDialog = (network: 'base' | 'solana') => {
+    setTransferDialogState({
+      isOpen: true,
+      network
+    });
+  };
+
+  const closeTransferDialog = () => {
+    setTransferDialogState({
+      ...transferDialogState,
+      isOpen: false
+    });
+  };
+
+  const handleBaseTransfer = async (recipient: string, amount: string) => {
+    try {
+      console.log(`Initiating Base IDRX transfer: ${amount} to ${recipient}`);
+      
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // In a real implementation, you would use ethers or viem to send the token transfer
+      // This is a mock implementation for demonstration
+      
+      // Update balance after transfer (simplified)
+      const newBalance = (parseFloat(idrxBalances.base) - parseFloat(amount)).toFixed(2);
+      setIdrxBalances(prev => ({ ...prev, base: newBalance }));
+      
+      console.log(`Base IDRX transfer completed: ${amount} to ${recipient}`);
+    } catch (error) {
+      console.error('Error during Base IDRX transfer:', error);
+      throw new Error('Failed to transfer IDRX tokens');
+    }
+  };
+
+  const handleSolanaTransfer = async (recipient: string, amount: string) => {
+    try {
+      console.log(`Initiating Solana IDRX transfer: ${amount} to ${recipient}`);
+      
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // In a real implementation, you would use @solana/spl-token to send the token transfer
+      // This is a mock implementation for demonstration
+      
+      // Update balance after transfer (simplified)
+      const newBalance = (parseFloat(idrxBalances.solana) - parseFloat(amount)).toFixed(2);
+      setIdrxBalances(prev => ({ ...prev, solana: newBalance }));
+      
+      console.log(`Solana IDRX transfer completed: ${amount} to ${recipient}`);
+    } catch (error) {
+      console.error('Error during Solana IDRX transfer:', error);
+      throw new Error('Failed to transfer IDRX tokens');
+    }
+  };
+
+  const handleTransfer = async (recipient: string, amount: string) => {
+    if (transferDialogState.network === 'base') {
+      return handleBaseTransfer(recipient, amount);
+    } else {
+      return handleSolanaTransfer(recipient, amount);
+    }
+  };
+
   return (
     <div className="border-t border-[#444] p-4 space-y-4">
       {/* Ethereum Wallet */}
@@ -365,11 +436,24 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
                   <div className="w-3 h-3 rounded-full bg-blue-500"></div>
                   <span className="text-gray-300">Base:</span>
                 </div>
-                {loadingBalances.base ? (
-                  <span className="font-mono text-gray-400">Loading...</span>
-                ) : (
-                  <span className="font-mono text-[#00ff00]">{idrxBalances.base} IDRX</span>
-                )}
+                <div className="flex items-center">
+                  {loadingBalances.base ? (
+                    <span className="font-mono text-gray-400">Loading...</span>
+                  ) : (
+                    <>
+                      <span className="font-mono text-[#00ff00]">{idrxBalances.base} IDRX</span>
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="h-6 ml-2 px-1 text-xs text-blue-400 hover:text-blue-300"
+                        onClick={() => openTransferDialog('base')}
+                        disabled={parseFloat(idrxBalances.base) <= 0}
+                      >
+                        <ArrowRight size={12} className="mr-1" /> Send
+                      </Button>
+                    </>
+                  )}
+                </div>
               </div>
             )}
             
@@ -379,11 +463,24 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
                   <div className="w-3 h-3 rounded-full bg-purple-500"></div>
                   <span className="text-gray-300">Solana:</span>
                 </div>
-                {loadingBalances.solana ? (
-                  <span className="font-mono text-gray-400">Loading...</span>
-                ) : (
-                  <span className="font-mono text-[#00ff00]">{idrxBalances.solana} IDRX</span>
-                )}
+                <div className="flex items-center">
+                  {loadingBalances.solana ? (
+                    <span className="font-mono text-gray-400">Loading...</span>
+                  ) : (
+                    <>
+                      <span className="font-mono text-[#00ff00]">{idrxBalances.solana} IDRX</span>
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="h-6 ml-2 px-1 text-xs text-purple-400 hover:text-purple-300"
+                        onClick={() => openTransferDialog('solana')}
+                        disabled={parseFloat(idrxBalances.solana) <= 0}
+                      >
+                        <ArrowRight size={12} className="mr-1" /> Send
+                      </Button>
+                    </>
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -417,6 +514,15 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
           </div>
         </Card>
       )}
+      
+      {/* Transfer Dialog */}
+      <TransferDialog 
+        isOpen={transferDialogState.isOpen}
+        onClose={closeTransferDialog}
+        network={transferDialogState.network}
+        balance={idrxBalances[transferDialogState.network]}
+        onTransfer={handleTransfer}
+      />
     </div>
   );
 };
