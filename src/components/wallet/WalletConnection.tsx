@@ -11,7 +11,7 @@ import { TonConnectButton } from '@tonconnect/ui-react';
 import ListeningTimeTracker from './ListeningTimeTracker';
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
-import { Smartphone, Shield, Wallet, Link } from 'lucide-react';
+import { Smartphone, Shield, Wallet, Link, RefreshCw } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import * as web3 from '@solana/web3.js';
 import { Card } from "@/components/ui/card";
@@ -243,7 +243,7 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
         <div>
           <button
             onClick={() => setShowConnectors(!showConnectors)}
-            className="w-full px-3 py-1 bg-[#444] text-white text-xs rounded hover:bg-[#555] transition-colors"
+            className="w-full px-3 py-2 bg-[#1a65cf] text-white text-xs rounded hover:bg-[#1254b3] transition-colors font-medium"
             disabled={isPending}
           >
             {isPending ? 'Connecting...' : 'Connect ETH Wallet'}
@@ -295,10 +295,17 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
       )}
 
       {/* Wallet Connect Buttons Row */}
-      <div className="grid grid-cols-2 gap-2">
-        {/* TON Wallet */}
-        <div className="min-w-0">
-          <TonConnectButton />
+      <div className="grid grid-cols-2 gap-3">
+        {/* TON Wallet - Custom styling wrapper */}
+        <div className="min-w-0 flex items-center justify-center">
+          <div className="w-full h-full flex items-center justify-center overflow-hidden" style={{ 
+            minHeight: '36px',
+            '--tonconnect-ui-button-color': '#6a57d5',
+            '--tonconnect-ui-button-text-color': 'white',
+            '--tonconnect-ui-button-radius': '8px',
+          } as React.CSSProperties}>
+            <TonConnectButton />
+          </div>
         </div>
 
         {/* Solana Wallet */}
@@ -308,7 +315,7 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
               onClick={disconnectSolanaWallet}
               variant="destructive"
               size="sm"
-              className="w-full text-xs"
+              className="w-full text-xs h-[36px] font-medium"
             >
               SOL: {solanaWallet.slice(0, 4)}...{solanaWallet.slice(-4)}
             </Button>
@@ -316,7 +323,7 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
             <Button
               onClick={connectSolanaWallet}
               size="sm"
-              className="w-full text-xs bg-purple-600 hover:bg-purple-700"
+              className="w-full text-xs h-[36px] bg-purple-600 hover:bg-purple-700 text-white font-medium"
             >
               <Link size={14} className="mr-1" /> Connect Solana
             </Button>
@@ -332,11 +339,11 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
             <Button 
               size="sm" 
               variant="outline" 
-              className="h-6 text-xs px-2 bg-[#333] hover:bg-[#444] border-[#555]"
+              className="h-6 text-xs px-2 bg-[#333] hover:bg-[#444] border-[#555] text-white"
               onClick={refreshBalances}
               disabled={loadingBalances.base || loadingBalances.solana}
             >
-              Refresh
+              <RefreshCw size={12} className="mr-1" /> Refresh
             </Button>
           </div>
           
