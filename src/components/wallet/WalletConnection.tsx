@@ -243,9 +243,10 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
         <div>
           <button
             onClick={() => setShowConnectors(!showConnectors)}
-            className="w-full px-3 py-2 bg-[#1a65cf] text-white text-xs rounded hover:bg-[#1254b3] transition-colors font-medium"
+            className="w-full px-3 py-2 bg-[#1a65cf] text-white text-xs rounded hover:bg-[#1254b3] transition-colors font-medium h-[36px] flex items-center justify-center"
             disabled={isPending}
           >
+            <Wallet size={14} className="mr-1" />
             {isPending ? 'Connecting...' : 'Connect ETH Wallet'}
           </button>
           
@@ -297,13 +298,23 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
       {/* Wallet Connect Buttons Row */}
       <div className="grid grid-cols-2 gap-3">
         {/* TON Wallet - Custom styling wrapper */}
-        <div className="min-w-0 flex items-center justify-center">
-          <div className="w-full h-full flex items-center justify-center overflow-hidden" style={{ 
-            minHeight: '36px',
-            '--tonconnect-ui-button-color': '#6a57d5',
-            '--tonconnect-ui-button-text-color': 'white',
-            '--tonconnect-ui-button-radius': '8px',
-          } as React.CSSProperties}>
+        <div className="min-w-0">
+          <button 
+            className="w-full text-xs h-[36px] bg-[#6a57d5] hover:bg-[#5946c4] text-white font-medium rounded flex items-center justify-center" 
+            onClick={() => {
+              // This is a wrapper button that will be positioned over the TonConnectButton
+              // The actual TonConnectButton will be triggered via click events
+              const tonButton = document.querySelector('.tc-button');
+              if (tonButton) {
+                (tonButton as HTMLElement).click();
+              }
+            }}
+          >
+            <Link size={14} className="mr-1" /> Connect TON
+          </button>
+          
+          {/* Hidden TonConnectButton that will be triggered by our custom button */}
+          <div className="hidden">
             <TonConnectButton />
           </div>
         </div>
