@@ -37,29 +37,75 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
     base: "0",
     solana: "0"
   });
+  const [loadingBalances, setLoadingBalances] = useState({
+    base: false,
+    solana: false
+  });
 
-  // Mock function to fetch IDRX balance on Base
+  // Function to fetch IDRX balance on Base network
   const fetchBaseIdrxBalance = async (ethAddress: string) => {
     try {
-      // In a real implementation, you would use ethers or viem to query the contract
-      // For now we'll mock the balance with a random number
-      const randomBalance = (Math.random() * 1000).toFixed(2);
-      return randomBalance;
+      setLoadingBalances(prev => ({ ...prev, base: true }));
+      
+      // In a real implementation, you would use ethers or viem to query the ERC20 contract
+      // This is a mock implementation for demonstration
+      console.log(`Fetching Base IDRX balance for address: ${ethAddress}`);
+      
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Generate a consistent random balance based on the address
+      // This ensures the same address always shows the same balance during the session
+      const addressSum = ethAddress.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+      const randomSeed = addressSum / 1000;
+      const balance = (100 + (randomSeed * 900) % 900).toFixed(2);
+      
+      setLoadingBalances(prev => ({ ...prev, base: false }));
+      
+      console.log(`Base IDRX balance for ${ethAddress}: ${balance}`);
+      return balance;
     } catch (error) {
       console.error('Error fetching Base IDRX balance:', error);
+      setLoadingBalances(prev => ({ ...prev, base: false }));
+      toast({
+        title: "Error fetching Base IDRX balance",
+        description: "Could not retrieve your IDRX balance from Base network",
+        variant: "destructive",
+      });
       return "0";
     }
   };
 
-  // Mock function to fetch IDRX balance on Solana
+  // Function to fetch IDRX balance on Solana
   const fetchSolanaIdrxBalance = async (solAddress: string) => {
     try {
+      setLoadingBalances(prev => ({ ...prev, solana: true }));
+      
       // In a real implementation, you would use @solana/spl-token to query the token account
-      // For now we'll mock the balance with a random number
-      const randomBalance = (Math.random() * 1000).toFixed(2);
-      return randomBalance;
+      // This is a mock implementation for demonstration
+      console.log(`Fetching Solana IDRX balance for address: ${solAddress}`);
+      
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Generate a consistent random balance based on the address
+      // This ensures the same address always shows the same balance during the session
+      const addressSum = solAddress.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+      const randomSeed = addressSum / 1000;
+      const balance = (100 + (randomSeed * 900) % 900).toFixed(2);
+      
+      setLoadingBalances(prev => ({ ...prev, solana: false }));
+      
+      console.log(`Solana IDRX balance for ${solAddress}: ${balance}`);
+      return balance;
     } catch (error) {
       console.error('Error fetching Solana IDRX balance:', error);
+      setLoadingBalances(prev => ({ ...prev, solana: false }));
+      toast({
+        title: "Error fetching Solana IDRX balance",
+        description: "Could not retrieve your IDRX balance from Solana network",
+        variant: "destructive",
+      });
       return "0";
     }
   };
@@ -80,8 +126,8 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
     
     updateBalances();
     
-    // Set up polling to update balances every 30 seconds
-    const interval = setInterval(updateBalances, 30000);
+    // Set up polling to update balances every 60 seconds
+    const interval = setInterval(updateBalances, 60000);
     return () => clearInterval(interval);
   }, [address, solanaWallet]);
 
@@ -96,6 +142,7 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
 
   const handleDisconnect = () => {
     disconnect();
+    setIdrxBalances(prev => ({ ...prev, base: "0" }));
     toast({
       title: "Wallet disconnected",
       description: "Your wallet has been disconnected",
@@ -141,11 +188,30 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
     if (window.solana && window.solana.isPhantom) {
       window.solana.disconnect();
       setSolanaWallet(null);
+      setIdrxBalances(prev => ({ ...prev, solana: "0" }));
       toast({
         title: "Solana wallet disconnected",
         description: "Your Solana wallet has been disconnected",
         variant: "destructive",
       });
+    }
+  };
+
+  const refreshBalances = async () => {
+    toast({
+      title: "Refreshing balances",
+      description: "Fetching your latest IDRX token balances",
+      duration: 1500,
+    });
+    
+    if (address) {
+      const baseBalance = await fetchBaseIdrxBalance(address);
+      setIdrxBalances(prev => ({ ...prev, base: baseBalance }));
+    }
+    
+    if (solanaWallet) {
+      const solanaBalance = await fetchSolanaIdrxBalance(solanaWallet);
+      setIdrxBalances(prev => ({ ...prev, solana: solanaBalance }));
     }
   };
 
@@ -261,7 +327,18 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
       {/* IDRX Token Balances */}
       {(address || solanaWallet) && (
         <Card className="p-3 bg-[#222] border-[#444]">
-          <h3 className="text-sm font-bold text-center mb-2 text-white">IDRX Balances</h3>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-sm font-bold text-white">IDRX Balances</h3>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="h-6 text-xs px-2 bg-[#333] hover:bg-[#444] border-[#555]"
+              onClick={refreshBalances}
+              disabled={loadingBalances.base || loadingBalances.solana}
+            >
+              Refresh
+            </Button>
+          </div>
           
           <div className="space-y-2">
             {address && (
@@ -270,7 +347,11 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
                   <div className="w-3 h-3 rounded-full bg-blue-500"></div>
                   <span className="text-gray-300">Base:</span>
                 </div>
-                <span className="font-mono text-[#00ff00]">{idrxBalances.base} IDRX</span>
+                {loadingBalances.base ? (
+                  <span className="font-mono text-gray-400">Loading...</span>
+                ) : (
+                  <span className="font-mono text-[#00ff00]">{idrxBalances.base} IDRX</span>
+                )}
               </div>
             )}
             
@@ -280,23 +361,41 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
                   <div className="w-3 h-3 rounded-full bg-purple-500"></div>
                   <span className="text-gray-300">Solana:</span>
                 </div>
-                <span className="font-mono text-[#00ff00]">{idrxBalances.solana} IDRX</span>
+                {loadingBalances.solana ? (
+                  <span className="font-mono text-gray-400">Loading...</span>
+                ) : (
+                  <span className="font-mono text-[#00ff00]">{idrxBalances.solana} IDRX</span>
+                )}
               </div>
             )}
           </div>
           
-          <div className="mt-2 pt-2 border-t border-[#444] text-center">
-            <a 
-              href="#" 
-              className="text-xs text-blue-400 hover:text-blue-300 flex items-center justify-center gap-1"
-              onClick={(e) => {
-                e.preventDefault();
-                window.open('https://explorer.base.org/token/0x18Bc5bcC660cf2B9cE3cd51a404aFe1a0cBD3C22', '_blank');
-              }}
-            >
-              <Link size={12} />
-              <span>View on Explorer</span>
-            </a>
+          <div className="mt-2 pt-2 border-t border-[#444]">
+            <div className="flex flex-col space-y-1">
+              {address && (
+                <a 
+                  href={`https://explorer.base.org/token/${IDRX_TOKENS.base}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                >
+                  <Link size={12} />
+                  <span>View on Base Explorer</span>
+                </a>
+              )}
+              
+              {solanaWallet && (
+                <a 
+                  href={`https://explorer.solana.com/address/${IDRX_TOKENS.solana}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1"
+                >
+                  <Link size={12} />
+                  <span>View on Solana Explorer</span>
+                </a>
+              )}
+            </div>
           </div>
         </Card>
       )}
