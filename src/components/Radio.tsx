@@ -33,7 +33,7 @@ const Radio = () => {
     delta: [],
     iradio: [],
     web3: [],
-    prambors: []
+    Prambors: []
   });
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [cryptoPrices, setCryptoPrices] = useState<string[]>([]);

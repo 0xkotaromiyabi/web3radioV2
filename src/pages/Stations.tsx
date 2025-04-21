@@ -20,8 +20,12 @@ const Stations = () => {
           <div className="relative z-10">
             <NavBar />
             <div className="container py-12">
-              <h1 className="text-4xl font-bold text-white">Radio Stations</h1>
-              <p className="mt-4 text-gray-300">Browse our collection of web3 radio stations.</p>
+              <h1 className="font-bold text-white text-3xl md:text-4xl lg:text-5xl leading-tight break-words">
+                Radio Stations
+              </h1>
+              <p className="mt-4 text-gray-300 text-base md:text-lg lg:text-xl leading-normal max-w-xl">
+                Browse our collection of web3 radio stations.
+              </p>
             </div>
           </div>
         </div>
@@ -31,3 +35,4 @@ const Stations = () => {
 };
 
 export default Stations;
+

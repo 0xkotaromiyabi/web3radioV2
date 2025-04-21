@@ -5,19 +5,19 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 interface StationSelectorProps {
   currentStation: string;
-  onStationChange: (station: 'web3' | 'Prambors' | 'venus' | 'iradio' | 'female' | 'delta') => void;
+  onStationChange: (station: 'web3' | 'Prambors' | 'iradio' | 'female' | 'delta') => void;
 }
 
 const StationSelector = ({ currentStation, onStationChange }: StationSelectorProps) => {
   const isMobile = useIsMobile();
-  
+
   return (
     <div className={`mb-4 flex ${isMobile ? 'flex-wrap' : ''} gap-2 justify-center`}>
       <button
         onClick={() => onStationChange('web3')}
         className={`px-4 py-2 rounded-full flex items-center gap-2 ${
-          currentStation === 'web3' 
-            ? 'bg-[#00ff00] text-black' 
+          currentStation === 'web3'
+            ? 'bg-[#00ff00] text-black'
             : 'bg-[#333] text-gray-300'
         } ${isMobile ? 'mb-2' : ''}`}
       >
@@ -27,8 +27,8 @@ const StationSelector = ({ currentStation, onStationChange }: StationSelectorPro
       <button
         onClick={() => onStationChange('Prambors')}
         className={`px-4 py-2 rounded-full flex items-center gap-2 ${
-          currentStation === 'Prambors' 
-            ? 'bg-[#00ff00] text-black' 
+          currentStation === 'Prambors'
+            ? 'bg-[#00ff00] text-black'
             : 'bg-[#333] text-gray-300'
         } ${isMobile ? 'mb-2' : ''}`}
       >
@@ -36,21 +36,10 @@ const StationSelector = ({ currentStation, onStationChange }: StationSelectorPro
         Prambors Radio
       </button>
       <button
-        onClick={() => onStationChange('venus')}
-        className={`px-4 py-2 rounded-full flex items-center gap-2 ${
-          currentStation === 'venus' 
-            ? 'bg-[#00ff00] text-black' 
-            : 'bg-[#333] text-gray-300'
-        } ${isMobile ? 'mb-2' : ''}`}
-      >
-        <RadioIcon size={16} />
-        Venus Radio
-      </button>
-      <button
         onClick={() => onStationChange('iradio')}
         className={`px-4 py-2 rounded-full flex items-center gap-2 ${
-          currentStation === 'iradio' 
-            ? 'bg-[#00ff00] text-black' 
+          currentStation === 'iradio'
+            ? 'bg-[#00ff00] text-black'
             : 'bg-[#333] text-gray-300'
         } ${isMobile ? 'mb-2' : ''}`}
       >
@@ -60,8 +49,8 @@ const StationSelector = ({ currentStation, onStationChange }: StationSelectorPro
       <button
         onClick={() => onStationChange('female')}
         className={`px-4 py-2 rounded-full flex items-center gap-2 ${
-          currentStation === 'female' 
-            ? 'bg-[#00ff00] text-black' 
+          currentStation === 'female'
+            ? 'bg-[#00ff00] text-black'
             : 'bg-[#333] text-gray-300'
         } ${isMobile ? 'mb-2' : ''}`}
       >
@@ -71,8 +60,8 @@ const StationSelector = ({ currentStation, onStationChange }: StationSelectorPro
       <button
         onClick={() => onStationChange('delta')}
         className={`px-4 py-2 rounded-full flex items-center gap-2 ${
-          currentStation === 'delta' 
-            ? 'bg-[#00ff00] text-black' 
+          currentStation === 'delta'
+            ? 'bg-[#00ff00] text-black'
             : 'bg-[#333] text-gray-300'
         }`}
       >
@@ -84,3 +73,4 @@ const StationSelector = ({ currentStation, onStationChange }: StationSelectorPro
 };
 
 export default StationSelector;
+
