@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import WalletConnection from './wallet/WalletConnection';
 import RadioControls from './radio/RadioControls';
@@ -55,11 +54,9 @@ const Radio = () => {
     iradio: 'https://onlineradiobox.com/id/ijakarta/'
   };
 
-  // Add song to playlist function
   const addToPlaylist = (station: string, song: Song) => {
     if (!song.title || !song.artist) return;
     
-    // Check if the song is already in the playlist
     const existingSongs = playlist[station] || [];
     const isDuplicate = existingSongs.some(
       existing => existing.title === song.title && existing.artist === song.artist
@@ -68,17 +65,15 @@ const Radio = () => {
     if (!isDuplicate) {
       setPlaylist(prev => ({
         ...prev,
-        [station]: [song, ...existingSongs.slice(0, 19)] // Keep max 20 songs
+        [station]: [song, ...existingSongs.slice(0, 19)]
       }));
     }
   };
 
-  // Function to fetch current playing song from OnlineRadioBox
   const fetchOnlineRadioBoxInfo = async (station: string) => {
     setIsLoadingSong(true);
     
     try {
-      // Use a CORS proxy if needed in production
       const corsProxy = '';
       let radioBoxUrl = '';
       
@@ -89,28 +84,21 @@ const Radio = () => {
       } else if (station === 'iradio') {
         radioBoxUrl = `${corsProxy}https://onlineradiobox.com/id/ijakarta/`;
       } else {
-        // For stations without OnlineRadioBox support
         setDefaultSongInfo(station);
         return;
       }
       
-      // For development, we can mock the response since we can't do a direct fetch due to CORS
-      // In production, you would use a CORS proxy or server-side API
       mockOnlineRadioBoxResponse(station);
-      
     } catch (error) {
       console.error('Error fetching song info:', error);
       setDefaultSongInfo(station);
     }
   };
-  
-  // Enhanced mock function for development (simulates external API response with more variety)
+
   const mockOnlineRadioBoxResponse = (station: string) => {
-    // Simulate network delay
     setTimeout(() => {
       let songInfo;
       
-      // Create an array of possible songs for each station to simulate updates
       const femaleSongs = [
         { title: 'Beautiful Life', artist: 'Dipha Barus feat. Afgan', album: 'Female Radio Top Hits' },
         { title: 'Love Story', artist: 'Taylor Swift', album: 'Fearless' },
@@ -135,7 +123,6 @@ const Radio = () => {
         { title: 'Sebatas Mimpi', artist: 'Nano', album: 'i-Radio Playlist' }
       ];
       
-      // Randomly select a song from the appropriate array
       if (station === 'female') {
         songInfo = femaleSongs[Math.floor(Math.random() * femaleSongs.length)];
       } else if (station === 'delta') {
@@ -155,8 +142,7 @@ const Radio = () => {
       console.log(`Updated song info for ${station}:`, songInfo);
     }, 1000);
   };
-  
-  // Set default song info when no metadata is available
+
   const setDefaultSongInfo = (station: string) => {
     const stationInfo = {
       title: 'Live Broadcast',
@@ -172,17 +158,25 @@ const Radio = () => {
     setIsLoadingSong(false);
   };
 
-  // Set up auto-refresh for song info every 30 seconds for supported stations
+  const changeStation = (station: 'web3' | 'Prambors' | 'iradio' | 'female' | 'delta') => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    setCurrentStation(station);
+    setIsPlaying(false);
+    setCurrentSong(null);
+    setLastUpdated(null);
+  };
+
   useEffect(() => {
     if (!isPlaying) return;
     
-    // Only set up auto-refresh for stations that support it
     if (!['female', 'delta', 'iradio'].includes(currentStation)) return;
     
     const refreshInterval = setInterval(() => {
       console.log(`Auto-refreshing song info for ${currentStation}`);
       fetchOnlineRadioBoxInfo(currentStation);
-    }, 30000); // Refresh every 30 seconds
+    }, 30000);
     
     return () => clearInterval(refreshInterval);
   }, [isPlaying, currentStation]);
@@ -192,9 +186,7 @@ const Radio = () => {
     audioRef.current = audio;
     audio.volume = volume / 100;
     
-    // Setup metadata tracking
     audio.addEventListener('play', () => {
-      // Fetch song info when audio starts playing
       fetchOnlineRadioBoxInfo(currentStation);
     });
     
@@ -256,21 +248,11 @@ const Radio = () => {
     }
   };
 
-  const changeStation = (station: 'web3' | 'Prambors' | 'iradio' | 'female' | 'delta') => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-    }
-    setCurrentStation(station);
-    setIsPlaying(false);
-    setCurrentSong(null);
-    setLastUpdated(null);
-  };
-
   useEffect(() => {
     const fetchPrices = async () => {
       try {
         const response = await fetch(
-        "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,binancecoin,cardano,polkadot&vs_currencies=usd"
+          "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,binancecoin,cardano,polkadot&vs_currencies=usd"
         );
         const data = await response.json();
         const prices = [
@@ -310,7 +292,7 @@ const Radio = () => {
 
     return () => clearInterval(interval);
   }, []);
-  
+
   const upcomingPrograms = [
     "10:00 - Crypto Talk with Kotarominami",
     "12:00 - Web3 News Update",
@@ -321,7 +303,6 @@ const Radio = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      {/* Logo */}
       <div className="mb-8 flex justify-center">
         <img 
           src="/web3radio-logo.png" 
@@ -335,7 +316,6 @@ const Radio = () => {
         onStationChange={changeStation}
       />
       
-      {/* Song Information Display */}
       <SongInfo 
         currentSong={currentSong}
         isLoading={isLoadingSong}
@@ -345,9 +325,7 @@ const Radio = () => {
         playlist={playlist[currentStation]}
       />
 
-      {/* Winamp-style container */}
       <div className="bg-[#232323] rounded-lg shadow-xl border border-[#444] select-none">
-        {/* Title bar */}
         <div className="bg-gradient-to-r from-[#1a1a1a] to-[#333] p-1 flex justify-between items-center">
           <div className="text-[#00ff00] text-xs font-bold">
             {currentStation === 'web3' ? 'Web3 Radio' : 
@@ -362,9 +340,7 @@ const Radio = () => {
           </div>
         </div>
 
-        {/* Main display */}
         <div className="bg-[#000] p-4">
-          {/* Program Schedule - adjust height on mobile */}
           <div className={`h-${isMobile ? '12' : '8'} bg-[#0a0a0a] border border-[#333] mb-2 overflow-hidden`}>
             <div className="animate-marquee whitespace-nowrap">
               {upcomingPrograms.map((program, index) => (
@@ -375,7 +351,6 @@ const Radio = () => {
             </div>
           </div>
 
-          {/* Crypto Prices - adjust height on mobile */}
           <div className={`h-${isMobile ? '12' : '8'} bg-[#0a0a0a] border border-[#333] mb-2 overflow-hidden`}>
             <div className="animate-marquee whitespace-nowrap">
               {cryptoPrices.map((price, index) => (
@@ -386,7 +361,6 @@ const Radio = () => {
             </div>
           </div>
 
-          {/* Visualizer */}
           <div className="h-16 bg-[#000] border border-[#333] mb-2">
             <div className="h-full flex items-end justify-around px-1">
               {[...Array(20)].map((_, i) => (
@@ -413,10 +387,8 @@ const Radio = () => {
         <WalletConnection isPlaying={isPlaying} />
       </div>
 
-      {/* Social Share Buttons */}
       <SocialShare />
 
-      {/* CryptoPanic News Section */}
       <CryptoPanicNews />
     </div>
   );
