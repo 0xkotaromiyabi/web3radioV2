@@ -43,7 +43,7 @@ const Radio = () => {
 
   const stations = {
     web3: 'https://web3radio.cloud/stream',
-    venus: 'https://rust.mrngroup.co:8040/stream',
+    Prambors: 'https://rust.mrngroup.co:8040/stream',
     iradio: 'https://n04.radiojar.com/4ywdgup3bnzuv?1744076195=&rj-tok=AAABlhMxTIcARnjabAV4uyOIpA&rj-ttl=5',
     female: 'https://s1.cloudmu.id/listen/female_radio/radio.mp3',
     delta: 'https://s1.cloudmu.id/listen/delta_fm/radio.mp3'
