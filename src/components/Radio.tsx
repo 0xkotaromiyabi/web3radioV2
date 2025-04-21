@@ -34,7 +34,7 @@ const Radio = () => {
     delta: [],
     iradio: [],
     web3: [],
-    venus: []
+    prambors: []
   });
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [cryptoPrices, setCryptoPrices] = useState<string[]>([]);
@@ -161,7 +161,7 @@ const Radio = () => {
     const stationInfo = {
       title: 'Live Broadcast',
       artist: station === 'web3' ? 'Web3 Radio' :
-              station === 'venus' ? 'Venus Radio' :
+              station === 'Prambors' ? 'Prambors Radio' :
               station === 'iradio' ? 'i-Radio' :
               station === 'female' ? 'Female Radio' : 'Delta FM',
       album: 'Live Stream'
@@ -215,7 +215,7 @@ const Radio = () => {
       title: "Refreshing song info",
       description: `Updating current song information for ${
         currentStation === 'web3' ? 'Web3 Radio' :
-        currentStation === 'venus' ? 'Venus Radio' :
+        currentStation === 'Prambors' ? 'Prambors Radio' :
         currentStation === 'iradio' ? 'i-Radio' :
         currentStation === 'female' ? 'Female Radio' : 'Delta FM'
       }`,
@@ -237,7 +237,7 @@ const Radio = () => {
               title: "Radio playing",
               description: `Now playing ${
                 currentStation === 'web3' ? 'Web3 Radio' :
-                currentStation === 'venus' ? 'Venus Radio' :
+                currentStation === 'Prambors' ? 'Prambors Radio' :
                 currentStation === 'iradio' ? 'i-Radio' :
                 currentStation === 'female' ? 'Female Radio' : 'Delta FM'
               }`,
@@ -256,7 +256,7 @@ const Radio = () => {
     }
   };
 
-  const changeStation = (station: 'web3' | 'venus' | 'iradio' | 'female' | 'delta') => {
+  const changeStation = (station: 'web3' | 'Prambors' | 'iradio' | 'female' | 'delta') => {
     if (audioRef.current) {
       audioRef.current.pause();
     }
@@ -351,7 +351,7 @@ const Radio = () => {
         <div className="bg-gradient-to-r from-[#1a1a1a] to-[#333] p-1 flex justify-between items-center">
           <div className="text-[#00ff00] text-xs font-bold">
             {currentStation === 'web3' ? 'Web3 Radio' : 
-             currentStation === 'venus' ? 'Venus Radio' : 
+             currentStation === 'Prambors' ? 'Prambors Radio' : 
              currentStation === 'iradio' ? 'i-Radio' : 
              currentStation === 'female' ? 'Female Radio' : 'Delta FM'}
           </div>
