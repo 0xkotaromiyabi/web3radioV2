@@ -1,6 +1,7 @@
 
 import Radio from '@/components/Radio';
 import NavBar from '@/components/navigation/NavBar';
+import RunningText from '@/components/RunningText';
 import { WagmiConfig, createConfig, http } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
@@ -87,6 +88,7 @@ const Index = () => {
           />
           <div className="relative z-10 flex flex-col">
             <NavBar />
+            <RunningText />
             <div className="container py-12">
               <Radio />
             </div>
