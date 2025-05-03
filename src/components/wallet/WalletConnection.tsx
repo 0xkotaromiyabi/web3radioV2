@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Smartphone, Shield, Wallet, Link, RefreshCw, ArrowRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { ethers } from 'ethers';
 import * as web3 from '@solana/web3.js';
 import { Card } from "@/components/ui/card";
 import TransferDialog from './TransferDialog';
