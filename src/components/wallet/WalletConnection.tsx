@@ -18,6 +18,7 @@ import { Connection, PublicKey } from '@solana/web3.js';
 import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 import { Card } from "@/components/ui/card";
 import TransferDialog from './TransferDialog';
+import SmartAccountConnector from './SmartAccountConnector';
 
 interface WalletConnectionProps {
   isPlaying: boolean;
@@ -85,6 +86,7 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
   const { toast } = useToast();
   const [showConnectors, setShowConnectors] = useState(false);
   const [solanaWallet, setSolanaWallet] = useState<string | null>(null);
+  const [smartAccountAddress, setSmartAccountAddress] = useState<string | null>(null);
   const [idrxBalances, setIdrxBalances] = useState({
     base: "0",
     solana: "0"
@@ -329,17 +331,23 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
     }
   };
 
+  // Handle smart account connection
+  const handleSmartAccountConnected = (accountAddress: string) => {
+    setSmartAccountAddress(accountAddress);
+    setShowConnectors(false);
+  };
+
   return (
     <div className="border-t border-[#444] p-4 space-y-4">
       {/* Ethereum Wallet */}
-      {address ? (
+      {address || smartAccountAddress ? (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <p className="text-xs text-gray-400 font-mono">
-              Connected: {address.slice(0, 6)}...{address.slice(-4)}
+              Connected: {(smartAccountAddress || address)?.slice(0, 6)}...{(smartAccountAddress || address)?.slice(-4)}
             </p>
             <Badge variant="outline" className="bg-[#111] text-[#00ff00] border-[#333]">
-              {mainnet.name}
+              {smartAccountAddress ? "Polygon Mumbai" : mainnet.name}
             </Badge>
           </div>
           
@@ -398,6 +406,9 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
                 <Shield size={16} />
                 <span>Smart Account (Safe)</span>
               </button>
+              
+              {/* Add our new Smart Account Connector */}
+              <SmartAccountConnector onConnected={handleSmartAccountConnected} />
             </div>
           )}
           
@@ -457,7 +468,7 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
       </div>
 
       {/* IDRX Token Balances */}
-      {(address || solanaWallet) && (
+      {(address || solanaWallet || smartAccountAddress) && (
         <Card className="p-3 bg-[#222] border-[#444]">
           <div className="flex justify-between items-center mb-2">
             <h3 className="text-sm font-bold text-white">IDRX Balances</h3>
