@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useConnect, useAccount, useDisconnect } from 'wagmi';
 import { mainnet, base } from 'wagmi/chains';
@@ -15,6 +14,8 @@ import { Smartphone, Shield, Wallet, Link, RefreshCw, ArrowRight } from 'lucide-
 import { Button } from "@/components/ui/button";
 import { ethers } from 'ethers';
 import * as web3 from '@solana/web3.js';
+import { Connection, PublicKey } from '@solana/web3.js';
+import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 import { Card } from "@/components/ui/card";
 import TransferDialog from './TransferDialog';
 
@@ -75,6 +76,8 @@ const IDRX_TOKENS = {
   solana: "idrxTdNftk6tYedPv2M7tCFHBVCpk5rkiNRd8yUArhr"
 };
 
+const SOLANA_RPC = 'https://api.mainnet-beta.solana.com'; // Atau RPC Solana lain yang cepat
+
 const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
   const { connect, connectors, error, isPending } = useConnect();
   const { address } = useAccount();
@@ -131,24 +134,20 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
   const fetchSolanaIdrxBalance = async (solAddress: string) => {
     try {
       setLoadingBalances(prev => ({ ...prev, solana: true }));
+
+      const connection = new Connection(SOLANA_RPC, 'confirmed');
+      const owner = new PublicKey(solAddress);
+      const mint = new PublicKey(IDRX_TOKENS.solana);
+
+      const ata = await getAssociatedTokenAddress(mint, owner);
+      const accountInfo = await getAccount(connection, ata);
       
-      // In a real implementation, you would use @solana/spl-token to query the token account
-      // This is a mock implementation for demonstration
-      console.log(`Fetching Solana IDRX balance for address: ${solAddress}`);
-      
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Generate a consistent random balance based on the address
-      // This ensures the same address always shows the same balance during the session
-      const addressSum = solAddress.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
-      const randomSeed = addressSum / 1000;
-      const balance = (100 + (randomSeed * 900) % 900).toFixed(2);
-      
+      const rawBalance = Number(accountInfo.amount);
+      const decimals = 6; // Ganti sesuai desimal token IDRX di Solana
+
+      const formattedBalance = (rawBalance / Math.pow(10, decimals)).toFixed(2);
       setLoadingBalances(prev => ({ ...prev, solana: false }));
-      
-      console.log(`Solana IDRX balance for ${solAddress}: ${balance}`);
-      return balance;
+      return formattedBalance;
     } catch (error) {
       console.error('Error fetching Solana IDRX balance:', error);
       setLoadingBalances(prev => ({ ...prev, solana: false }));
