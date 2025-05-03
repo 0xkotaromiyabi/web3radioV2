@@ -1,6 +1,6 @@
 
 import { createSmartAccountClient } from "@alchemy/aa-core";
-import { mnemonicToAccountSigner } from "@alchemy/aa-ethers/accounts";
+import { mnemonicToAccountSigner } from "@alchemy/aa-ethers";
 import { polygonMumbai } from "@alchemy/aa-ethers/chains";
 
 // Function to initialize a smart account with a given mnemonic
