@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useConnect, useAccount, useDisconnect } from 'wagmi';
 import { mainnet, base } from 'wagmi/chains';
@@ -20,6 +21,53 @@ import TransferDialog from './TransferDialog';
 interface WalletConnectionProps {
   isPlaying: boolean;
 }
+
+// Minimal ABI for ERC20 token interactions
+const ERC20_ABI = [
+  // balanceOf
+  {
+    constant: true,
+    inputs: [{ name: "_owner", type: "address" }],
+    name: "balanceOf",
+    outputs: [{ name: "balance", type: "uint256" }],
+    type: "function",
+  },
+  // decimals
+  {
+    constant: true,
+    inputs: [],
+    name: "decimals",
+    outputs: [{ name: "", type: "uint8" }],
+    type: "function",
+  },
+  // symbol
+  {
+    constant: true,
+    inputs: [],
+    name: "symbol",
+    outputs: [{ name: "", type: "string" }],
+    type: "function",
+  },
+  // name
+  {
+    constant: true,
+    inputs: [],
+    name: "name",
+    outputs: [{ name: "", type: "string" }],
+    type: "function",
+  },
+  // transfer
+  {
+    constant: false,
+    inputs: [
+      { name: "_to", type: "address" },
+      { name: "_value", type: "uint256" }
+    ],
+    name: "transfer",
+    outputs: [{ name: "", type: "bool" }],
+    type: "function",
+  }
+];
 
 // IDRX token addresses on different networks
 const IDRX_TOKENS = {
@@ -50,28 +98,23 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
     network: 'base'
   });
 
-  // Function to fetch IDRX balance on Base network
+  // Function to fetch IDRX balance on Base network using ethers.js
   const fetchBaseIdrxBalance = async (ethAddress: string) => {
     try {
       setLoadingBalances(prev => ({ ...prev, base: true }));
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const contract = new ethers.Contract(IDRX_TOKENS.base, ERC20_ABI, provider);
       
-      // In a real implementation, you would use ethers or viem to query the ERC20 contract
-      // This is a mock implementation for demonstration
-      console.log(`Fetching Base IDRX balance for address: ${ethAddress}`);
+      const [rawBalance, decimals] = await Promise.all([
+        contract.balanceOf(ethAddress),
+        contract.decimals()
+      ]);
       
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Generate a consistent random balance based on the address
-      // This ensures the same address always shows the same balance during the session
-      const addressSum = ethAddress.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
-      const randomSeed = addressSum / 1000;
-      const balance = (100 + (randomSeed * 900) % 900).toFixed(2);
+      const formattedBalance = ethers.utils.formatUnits(rawBalance, decimals);
       
       setLoadingBalances(prev => ({ ...prev, base: false }));
-      
-      console.log(`Base IDRX balance for ${ethAddress}: ${balance}`);
-      return balance;
+      return parseFloat(formattedBalance).toFixed(2);
     } catch (error) {
       console.error('Error fetching Base IDRX balance:', error);
       setLoadingBalances(prev => ({ ...prev, base: false }));
