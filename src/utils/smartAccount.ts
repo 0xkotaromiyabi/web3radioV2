@@ -1,16 +1,17 @@
 
 import { createSmartAccountClient } from "@alchemy/aa-core";
-import { LocalAccountSigner, polygonMumbai } from "@alchemy/aa-ethers";
+import { mnemonicToAccountSigner } from "@alchemy/aa-ethers/accounts";
+import { polygonMumbai } from "@alchemy/aa-ethers/chains";
 
 // Function to initialize a smart account with a given mnemonic
 export const initializeSmartAccount = async (mnemonic?: string) => {
   try {
     // Use provided mnemonic or generate a random one
     const signer = mnemonic 
-      ? LocalAccountSigner.mnemonicToAccountSigner(mnemonic)
-      : LocalAccountSigner.privateKeyToAccountSigner(
-          // Random private key for demo purposes, should be securely stored in production
-          "0x" + Math.random().toString(16).substring(2, 66)
+      ? mnemonicToAccountSigner(mnemonic)
+      : mnemonicToAccountSigner(
+          // Random mnemonic for demo purposes, should be securely stored in production
+          `test ${Math.random().toString(16).substring(2, 10)} test test test test test test test test test test junk`
         );
 
     const smartAccount = await createSmartAccountClient({
