@@ -1,272 +1,270 @@
 
 import React, { useState } from 'react';
 import NavBar from '@/components/navigation/NavBar';
-import { WagmiConfig, createConfig, http } from 'wagmi';
-import { mainnet } from 'wagmi/chains';
-import { TonConnectUIProvider } from '@tonconnect/ui-react';
-import { Toaster } from '@/components/ui/toaster';
-import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Vote, Wallet, Donate, Ethereum, ArrowUp, ArrowDown } from 'lucide-react';
-import { useCallback } from 'react';
-import Particles from 'react-particles';
-import type { Container, Engine } from 'tsparticles-engine';
-import { loadFull } from 'tsparticles';
-
-const config = createConfig({
-  chains: [mainnet],
-  transports: {
-    [mainnet.id]: http(),
-  },
-});
-
-// Mock proposals data
-const proposalsMock = [
-  {
-    id: 1,
-    title: 'Add new radio station genres',
-    description: 'Add hip-hop, classical, and jazz genres to our station lineup',
-    votesFor: 342,
-    votesAgainst: 103,
-    status: 'active',
-  },
-  {
-    id: 2,
-    title: 'Integrate with Lens Protocol',
-    description: 'Integrate Web3Radio with Lens Protocol for enhanced social features',
-    votesFor: 523,
-    votesAgainst: 48,
-    status: 'active',
-  },
-  {
-    id: 3,
-    title: 'Launch Web3Radio token',
-    description: 'Launch a governance token for the Web3Radio DAO with initial distribution to active users',
-    votesFor: 621,
-    votesAgainst: 217,
-    status: 'active',
-  }
-];
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import { Avatar } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Heart, ArrowRight, CreditCard, Wallet, Sparkles, HelpCircle, Check, X, LineChart } from "lucide-react";
+import { toast } from "sonner";
 
 const DAO = () => {
-  const { toast } = useToast();
-  const [proposals, setProposals] = useState(proposalsMock);
+  const [selectedDonationNetwork, setSelectedDonationNetwork] = useState<'eth' | 'arbitrum'>('eth');
+  const [donationAmount, setDonationAmount] = useState('0.1');
+  
+  // Mock proposals data
+  const proposals = [
+    {
+      id: 1,
+      title: "Sponsor a web3 development bootcamp",
+      description: "Fund a 10-week bootcamp to teach web3 development to underprivileged students.",
+      votesFor: 1254,
+      votesAgainst: 340,
+      status: "active",
+      endDate: "2025-06-01",
+      creator: "0x9B65...F832",
+      creatorAvatar: "/placeholder.svg"
+    },
+    {
+      id: 2,
+      title: "Add new radio station: Crypto Trading News",
+      description: "Launch a new station focused on trading strategies and market analysis.",
+      votesFor: 987,
+      votesAgainst: 654,
+      status: "active",
+      endDate: "2025-05-25",
+      creator: "0x7C43...A291",
+      creatorAvatar: "/placeholder.svg"
+    },
+    {
+      id: 3,
+      title: "Integrate with Lens Protocol for social features",
+      description: "Add social features powered by Lens Protocol to increase user engagement.",
+      votesFor: 1823,
+      votesAgainst: 219,
+      status: "passed",
+      endDate: "2025-05-10",
+      creator: "0x3F12...B456",
+      creatorAvatar: "/placeholder.svg"
+    }
+  ];
 
-  const handleDonate = (network: string) => {
-    // In a real application, this would trigger a web3 wallet connection
-    const walletAddress = "0x53dfe235484465b723D81E56988263b50BafEA33";
-    
-    // Copy wallet address to clipboard
-    navigator.clipboard.writeText(walletAddress).then(
-      () => {
-        toast({
-          title: `${network} wallet address copied to clipboard`,
-          description: "0x53dfe235484465b723D81E56988263b50BafEA33",
-        });
-      },
-      () => {
-        toast({
-          title: "Failed to copy wallet address",
-          description: "Please try again",
-          variant: "destructive",
-        });
-      }
-    );
+  // Calculate vote percentages
+  const getVotePercentage = (votesFor: number, votesAgainst: number) => {
+    const total = votesFor + votesAgainst;
+    return total > 0 ? Math.round((votesFor / total) * 100) : 0;
   };
 
-  const handleVote = (proposalId: number, support: boolean) => {
-    // In a real application, this would interact with a blockchain 
-    setProposals(proposals.map(proposal => {
-      if (proposal.id === proposalId) {
-        if (support) {
-          return { ...proposal, votesFor: proposal.votesFor + 1 };
-        } else {
-          return { ...proposal, votesAgainst: proposal.votesAgainst + 1 };
-        }
-      }
-      return proposal;
-    }));
+  const handleDonate = () => {
+    const network = selectedDonationNetwork === 'eth' ? 'Ethereum' : 'Arbitrum';
+    const address = '0x53dfe235484465b723D81E56988263b50BafEA33';
     
-    toast({
-      title: `Vote cast successfully!`,
-      description: `You voted ${support ? 'FOR' : 'AGAINST'} proposal #${proposalId}`,
+    toast.success(`Thank you for your donation of ${donationAmount} ${selectedDonationNetwork.toUpperCase()} to ${address.slice(0, 6)}...${address.slice(-4)}`, {
+      description: "Your support helps us build a better platform!",
+      duration: 5000,
     });
   };
 
-  const particlesInit = useCallback(async (engine: Engine) => {
-    await loadFull(engine);
-  }, []);
-
-  const particlesLoaded = useCallback(async (container: Container | undefined) => {
-    console.log('Particles loaded:', container);
-  }, []);
+  const handleVote = (proposalId: number, vote: 'for' | 'against') => {
+    toast.success(`Vote submitted: ${vote === 'for' ? 'Supporting' : 'Against'} proposal #${proposalId}`, {
+      description: "Your vote has been recorded on-chain",
+      duration: 3000,
+    });
+  };
 
   return (
-    <WagmiConfig config={config}>
-      <TonConnectUIProvider manifestUrl="https://ton.org/app-manifest.json">
-        <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 relative">
-          <Particles
-            id="tsparticles"
-            init={particlesInit}
-            loaded={particlesLoaded}
-            options={{
-              background: {
-                color: {
-                  value: "transparent",
-                },
-              },
-              fpsLimit: 60,
-              particles: {
-                color: {
-                  value: "#ffffff",
-                },
-                links: {
-                  color: "#ffffff",
-                  distance: 150,
-                  enable: true,
-                  opacity: 0.2,
-                  width: 1,
-                },
-                move: {
-                  enable: true,
-                  outModes: {
-                    default: "bounce",
-                  },
-                  random: false,
-                  speed: 2,
-                  straight: false,
-                },
-                number: {
-                  density: {
-                    enable: true,
-                    area: 800,
-                  },
-                  value: 80,
-                },
-                opacity: {
-                  value: 0.3,
-                },
-                shape: {
-                  type: "circle",
-                },
-                size: {
-                  value: { min: 1, max: 3 },
-                },
-              },
-              detectRetina: true,
-            }}
-            className="absolute inset-0"
-          />
-          <div className="relative z-10">
-            <NavBar />
-            
-            {/* Donation Card */}
-            <div className="container py-8">
-              <Card className="bg-gradient-to-r from-purple-800/90 to-blue-900/90 border-purple-500">
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <Donate className="h-6 w-6" />
-                    Support Web3Radio DAO
-                  </CardTitle>
-                  <CardDescription className="text-gray-200">
-                    Your donations help us build the future of decentralized radio
-                  </CardDescription>
+    <div className="min-h-screen bg-black text-white">
+      <NavBar />
+      
+      <main className="container mx-auto px-4 py-8">
+        {/* Support/Donation Section */}
+        <section className="mb-10">
+          <div className="bg-gradient-to-r from-blue-900/40 to-purple-900/40 rounded-lg p-6 border border-blue-500/20">
+            <div className="flex flex-col md:flex-row gap-6 items-center">
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold flex items-center">
+                  <Heart className="mr-2 text-red-500" /> Support Web3 Radio DAO
+                </h2>
+                <p className="mt-2 text-gray-300">
+                  Your donation helps us maintain the platform, add new features, and support the community.
+                  Donations are made directly to our treasury wallet on ETH or Arbitrum.
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Badge variant="secondary" className="bg-blue-900/30 text-blue-300">Community Owned</Badge>
+                  <Badge variant="secondary" className="bg-green-900/30 text-green-300">Non-profit</Badge>
+                  <Badge variant="secondary" className="bg-purple-900/30 text-purple-300">Transparent</Badge>
+                </div>
+              </div>
+              
+              <Card className="bg-gray-900 border-gray-700 w-full md:w-auto min-w-[320px]">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">Donate to Treasury</CardTitle>
+                  <CardDescription>Support with ETH or tokens</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-white mb-4">
-                    Help fund development, hosting, and community initiatives by donating to our treasury. All funds are managed transparently through the DAO.
-                  </p>
-                  <p className="text-sm text-purple-200 mb-2">Send donations to:</p>
-                  <code className="bg-gray-800 p-2 rounded block text-gray-100 mb-4 overflow-auto">
-                    0x53dfe235484465b723D81E56988263b50BafEA33
-                  </code>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button 
+                        variant={selectedDonationNetwork === 'eth' ? "default" : "outline"}
+                        onClick={() => setSelectedDonationNetwork('eth')}
+                        className="flex items-center justify-center gap-2"
+                      >
+                        <div className="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center">
+                          <span className="text-[8px] font-bold">Ξ</span>
+                        </div>
+                        Ethereum
+                      </Button>
+                      <Button 
+                        variant={selectedDonationNetwork === 'arbitrum' ? "default" : "outline"}
+                        onClick={() => setSelectedDonationNetwork('arbitrum')}
+                        className="flex items-center justify-center gap-2"
+                      >
+                        <div className="w-4 h-4 rounded-full bg-blue-700 flex items-center justify-center">
+                          <span className="text-[8px] font-bold">A</span>
+                        </div>
+                        Arbitrum
+                      </Button>
+                    </div>
+                    
+                    <div>
+                      <p className="text-sm text-gray-400 mb-1">Amount</p>
+                      <div className="flex">
+                        <Input 
+                          type="number" 
+                          value={donationAmount} 
+                          onChange={(e) => setDonationAmount(e.target.value)}
+                          className="bg-gray-800 border-gray-700"
+                        />
+                        <Button variant="ghost" className="ml-2">Max</Button>
+                      </div>
+                    </div>
+                    
+                    <div className="text-sm space-y-1">
+                      <p className="text-gray-400">Recipient Address:</p>
+                      <p className="font-mono text-xs bg-gray-800 p-2 rounded truncate">
+                        0x53dfe235484465b723D81E56988263b50BafEA33
+                      </p>
+                    </div>
+                  </div>
                 </CardContent>
-                <CardFooter className="flex gap-4">
+                <CardFooter>
                   <Button 
-                    onClick={() => handleDonate("Ethereum")}
-                    className="bg-blue-600 hover:bg-blue-700 flex-1"
+                    onClick={handleDonate} 
+                    className="w-full"
                   >
-                    <Ethereum className="h-4 w-4 mr-2" />
-                    Donate with ETH
-                  </Button>
-                  <Button 
-                    onClick={() => handleDonate("Arbitrum")}
-                    className="bg-blue-800 hover:bg-blue-900 flex-1"
-                  >
-                    <Ethereum className="h-4 w-4 mr-2" />
-                    Donate with Arbitrum
+                    <CreditCard className="mr-2 h-4 w-4" /> Donate
                   </Button>
                 </CardFooter>
               </Card>
             </div>
-            
-            {/* DAO Proposals */}
-            <div className="container pb-12">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-3xl font-bold text-white flex items-center gap-2">
-                  <Vote className="h-6 w-6" /> 
-                  Active Proposals
-                </h2>
-                <Button className="bg-purple-600 hover:bg-purple-700">
-                  <Vote className="h-4 w-4 mr-2" />
-                  Create Proposal
-                </Button>
-              </div>
-
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {proposals.map((proposal) => (
-                  <Card key={proposal.id} className="bg-gray-800/90 border-gray-700">
-                    <CardHeader>
-                      <CardTitle className="text-white">{proposal.title}</CardTitle>
-                      <CardDescription className="text-gray-300">
-                        Proposal #{proposal.id}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-gray-300 mb-4">{proposal.description}</p>
-                      
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-green-400">For: {proposal.votesFor}</span>
-                          <span className="text-red-400">Against: {proposal.votesAgainst}</span>
+          </div>
+        </section>
+        
+        {/* DAO Governance Section */}
+        <section>
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="text-2xl font-bold flex items-center">
+              <Sparkles className="mr-2 text-yellow-500" /> Governance Proposals
+            </h2>
+            <Button>
+              New Proposal <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+          
+          <div className="space-y-6">
+            {proposals.map(proposal => {
+              const percentage = getVotePercentage(proposal.votesFor, proposal.votesAgainst);
+              return (
+                <Card key={proposal.id} className="bg-gray-900 border-gray-700">
+                  <CardHeader className="pb-2">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle className="text-lg">{proposal.title}</CardTitle>
+                        <CardDescription>{proposal.description}</CardDescription>
+                      </div>
+                      <Badge 
+                        variant={proposal.status === 'passed' ? 'default' : 'secondary'}
+                        className={proposal.status === 'passed' ? 'bg-green-700' : 'bg-blue-700'}
+                      >
+                        {proposal.status === 'passed' ? 'Passed' : 'Active'}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span>Support: {percentage}%</span>
+                          <span>Ends: {proposal.endDate}</span>
                         </div>
-                        
-                        <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-gradient-to-r from-green-500 to-green-400" 
-                            style={{ 
-                              width: `${(proposal.votesFor / (proposal.votesFor + proposal.votesAgainst)) * 100}%` 
-                            }} 
-                          />
+                        <Progress value={percentage} className="h-2" />
+                      </div>
+                      
+                      <div className="flex justify-between text-sm">
+                        <div className="flex items-center">
+                          <Check className="h-4 w-4 text-green-500 mr-1" />
+                          <span>{proposal.votesFor.toLocaleString()} For</span>
+                        </div>
+                        <div className="flex items-center">
+                          <X className="h-4 w-4 text-red-500 mr-1" />
+                          <span>{proposal.votesAgainst.toLocaleString()} Against</span>
+                        </div>
+                        <div className="flex items-center">
+                          <LineChart className="h-4 w-4 text-blue-500 mr-1" />
+                          <span>{(proposal.votesFor + proposal.votesAgainst).toLocaleString()} Total</span>
                         </div>
                       </div>
-                    </CardContent>
-                    <CardFooter className="flex gap-3">
-                      <Button 
-                        onClick={() => handleVote(proposal.id, true)} 
-                        className="flex-1 bg-green-600 hover:bg-green-700"
-                      >
-                        <ArrowUp className="h-4 w-4 mr-2" />
-                        Vote For
-                      </Button>
-                      <Button 
-                        onClick={() => handleVote(proposal.id, false)} 
-                        className="flex-1 bg-red-600 hover:bg-red-700"
-                      >
-                        <ArrowDown className="h-4 w-4 mr-2" />
-                        Vote Against
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                ))}
-              </div>
-            </div>
+                      
+                      <Separator className="bg-gray-700" />
+                      
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-6 w-6">
+                            <img src={proposal.creatorAvatar} alt="Creator" />
+                          </Avatar>
+                          <span className="text-xs text-gray-400">Created by {proposal.creator}</span>
+                        </div>
+                        
+                        {proposal.status === 'active' && (
+                          <div className="flex gap-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="border-green-600 text-green-400 hover:bg-green-900/20"
+                              onClick={() => handleVote(proposal.id, 'for')}
+                            >
+                              <Check className="mr-1 h-4 w-4" /> For
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="border-red-600 text-red-400 hover:bg-red-900/20"
+                              onClick={() => handleVote(proposal.id, 'against')}
+                            >
+                              <X className="mr-1 h-4 w-4" /> Against
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
-          <Toaster />
-        </div>
-      </TonConnectUIProvider>
-    </WagmiConfig>
+          
+          <div className="mt-6 bg-gray-800/50 rounded-lg p-4 border border-gray-700/50 flex items-center gap-3">
+            <HelpCircle className="text-blue-400 h-6 w-6" />
+            <p className="text-sm text-gray-300">
+              Voting requires at least 100 RADIO tokens in your wallet. <a href="#" className="text-blue-400 underline">Learn more about governance</a>
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
   );
 };
 

@@ -1,27 +1,33 @@
 
 import { createSmartAccountClient } from "@alchemy/aa-core";
-import { mnemonicToAccountSigner } from "@alchemy/aa-ethers";
+import { AlchemyProvider } from "@alchemy/aa-alchemy";
 import { sepolia } from "viem/chains";
+import { mnemonicToAccount } from "viem/accounts";
 
 // Function to initialize a smart account with a given mnemonic
 export const initializeSmartAccount = async (mnemonic?: string) => {
   try {
     // Use provided mnemonic or generate a random one
-    const signer = mnemonic 
-      ? mnemonicToAccountSigner(mnemonic)
-      : mnemonicToAccountSigner(
-          // Random mnemonic for demo purposes, should be securely stored in production
-          `test ${Math.random().toString(16).substring(2, 10)} test test test test test test test test test test junk`
-        );
+    const randomMnemonic = `test ${Math.random().toString(16).substring(2, 10)} test test test test test test test test test test junk`;
+    const account = mnemonic 
+      ? mnemonicToAccount(mnemonic)
+      : mnemonicToAccount(randomMnemonic); // Random mnemonic for demo purposes
 
-    const smartAccount = await createSmartAccountClient({
+    // Create provider first
+    const provider = new AlchemyProvider({
+      apiKey: "demo", // This is a placeholder - in production use a real API key
       chain: sepolia,
-      owner: signer,
+    });
+
+    // Then create the smart account client
+    const smartAccount = createSmartAccountClient({
+      provider,
+      account,
     });
 
     return {
       smartAccount,
-      signer,
+      account,
       address: await smartAccount.getAddress(),
       success: true
     };
@@ -29,7 +35,7 @@ export const initializeSmartAccount = async (mnemonic?: string) => {
     console.error("Error initializing smart account:", error);
     return {
       smartAccount: null,
-      signer: null,
+      account: null,
       address: "",
       success: false,
       error
