@@ -1,5 +1,5 @@
 
-import { SmartAccountClient } from "@alchemy/aa-core";
+import { createSmartAccountClient } from "@alchemy/aa-core";
 import { alchemyProvider } from "@alchemy/aa-alchemy";
 import { sepolia } from "viem/chains";
 import { mnemonicToAccount } from "viem/accounts";
@@ -20,7 +20,7 @@ export const initializeSmartAccount = async (mnemonic?: string) => {
     });
 
     // Then create the smart account client
-    const smartAccount = new SmartAccountClient({
+    const smartAccount = createSmartAccountClient({
       provider,
       account,
     });
