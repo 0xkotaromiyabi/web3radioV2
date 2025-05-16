@@ -3,79 +3,91 @@ import { useState } from 'react';
 import { ethers } from 'ethers';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
-import { IDRX_TOKENS, SOLANA_RPC, ERC20_ABI } from '../constants/TokenConstants';
+import { IDRX_TOKENS, ERC20_ABI, SOLANA_RPC } from '../constants/TokenConstants';
+import { ToastAction } from '@/components/ui/toast';
 
-interface UseTokenBalancesProps {
-  setLoadingBalances: React.Dispatch<React.SetStateAction<{
-    base: boolean;
-    solana: boolean;
-  }>>;
+export const useTokenBalances = ({
+  setLoadingBalances,
+  toast
+}: {
+  setLoadingBalances: React.Dispatch<React.SetStateAction<{ base: boolean; solana: boolean }>>;
   toast: any;
-}
-
-// Hook for handling token balance fetching
-export const useTokenBalances = ({ setLoadingBalances, toast }: UseTokenBalancesProps) => {
-  
-  // Function to fetch IDRX balance on Base network using ethers.js
-  const fetchBaseIdrxBalance = async (ethAddress: string) => {
+}) => {
+  const fetchBaseIdrxBalance = async (address: string) => {
     try {
       setLoadingBalances(prev => ({ ...prev, base: true }));
-
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const contract = new ethers.Contract(IDRX_TOKENS.base, ERC20_ABI, provider);
       
-      const [rawBalance, decimals] = await Promise.all([
-        contract.balanceOf(ethAddress),
-        contract.decimals()
-      ]);
+      // Connect to Base network
+      const provider = new ethers.providers.JsonRpcProvider("https://mainnet.base.org");
+      const tokenContract = new ethers.Contract(IDRX_TOKENS.base, ERC20_ABI, provider);
       
-      const formattedBalance = ethers.utils.formatUnits(rawBalance, decimals);
+      // Get balance and decimals
+      const balance = await tokenContract.balanceOf(address);
+      const decimals = await tokenContract.decimals();
+      
+      // Format balance with proper decimals
+      const formattedBalance = ethers.utils.formatUnits(balance, decimals);
+      console.log(`Base IDRX Balance: ${formattedBalance}`);
       
       setLoadingBalances(prev => ({ ...prev, base: false }));
-      return parseFloat(formattedBalance).toFixed(2);
-    } catch (error) {
-      console.error('Error fetching Base IDRX balance:', error);
-      setLoadingBalances(prev => ({ ...prev, base: false }));
-      toast({
-        title: "Error fetching Base IDRX balance",
-        description: "Could not retrieve your IDRX balance from Base network",
-        variant: "destructive",
-      });
-      return "0";
-    }
-  };
-
-  // Function to fetch IDRX balance on Solana
-  const fetchSolanaIdrxBalance = async (solAddress: string) => {
-    try {
-      setLoadingBalances(prev => ({ ...prev, solana: true }));
-
-      const connection = new Connection(SOLANA_RPC, 'confirmed');
-      const owner = new PublicKey(solAddress);
-      const mint = new PublicKey(IDRX_TOKENS.solana);
-
-      const ata = await getAssociatedTokenAddress(mint, owner);
-      const accountInfo = await getAccount(connection, ata);
-      
-      const rawBalance = Number(accountInfo.amount);
-      const decimals = 6; // Ganti sesuai desimal token IDRX di Solana
-
-      const formattedBalance = (rawBalance / Math.pow(10, decimals)).toFixed(2);
-      setLoadingBalances(prev => ({ ...prev, solana: false }));
       return formattedBalance;
     } catch (error) {
-      console.error('Error fetching Solana IDRX balance:', error);
-      setLoadingBalances(prev => ({ ...prev, solana: false }));
+      setLoadingBalances(prev => ({ ...prev, base: false }));
+      console.error("Error fetching Base IDRX balance:", error);
       toast({
-        title: "Error fetching Solana IDRX balance",
-        description: "Could not retrieve your IDRX balance from Solana network",
+        title: "Error fetching IDRX balance",
+        description: "Could not retrieve your Base IDRX balance",
         variant: "destructive",
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
       });
       return "0";
     }
   };
   
-  return { fetchBaseIdrxBalance, fetchSolanaIdrxBalance };
+  const fetchSolanaIdrxBalance = async (walletAddress: string) => {
+    try {
+      setLoadingBalances(prev => ({ ...prev, solana: true }));
+      
+      // Connect to Solana network
+      const connection = new Connection(SOLANA_RPC);
+      const walletPublicKey = new PublicKey(walletAddress);
+      const tokenMintAddress = new PublicKey(IDRX_TOKENS.solana);
+      
+      // Get the associated token account
+      const associatedTokenAddress = await getAssociatedTokenAddress(
+        tokenMintAddress,
+        walletPublicKey
+      );
+      
+      try {
+        // Get account info
+        const tokenAccount = await getAccount(connection, associatedTokenAddress);
+        const balance = Number(tokenAccount.amount) / Math.pow(10, 9); // Assuming 9 decimals for SPL tokens
+        
+        setLoadingBalances(prev => ({ ...prev, solana: false }));
+        return balance.toString();
+      } catch (e) {
+        console.log("Token account not found, balance is 0");
+        setLoadingBalances(prev => ({ ...prev, solana: false }));
+        return "0";
+      }
+    } catch (error) {
+      setLoadingBalances(prev => ({ ...prev, solana: false }));
+      console.error("Error fetching Solana IDRX balance:", error);
+      toast({
+        title: "Error fetching IDRX balance",
+        description: "Could not retrieve your Solana IDRX balance",
+        variant: "destructive", 
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
+      });
+      return "0";
+    }
+  };
+  
+  return {
+    fetchBaseIdrxBalance,
+    fetchSolanaIdrxBalance
+  };
 };
 
 export default useTokenBalances;

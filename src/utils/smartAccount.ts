@@ -1,62 +1,28 @@
 
-import { createSmartAccountClient } from "@alchemy/aa-core";
-import { alchemyProvider } from "@alchemy/aa-alchemy";
-import { sepolia } from "viem/chains";
-import { mnemonicToAccount } from "viem/accounts";
+import { createMultiOwnerModularAccount } from "@alchemy/aa-accounts";
+import { http } from "viem";
+import { polygonMumbai } from "viem/chains";
 
-// Function to initialize a smart account with a given mnemonic
-export const initializeSmartAccount = async (mnemonic?: string) => {
+// Smart account creation function
+export const createAlchemySmartAccount = async (ownerAddress) => {
   try {
-    // Use provided mnemonic or generate a random one
-    const randomMnemonic = `test ${Math.random().toString(16).substring(2, 10)} test test test test test test test test test test junk`;
-    const account = mnemonic 
-      ? mnemonicToAccount(mnemonic)
-      : mnemonicToAccount(randomMnemonic); // Random mnemonic for demo purposes
-
-    // Create provider first
-    const provider = alchemyProvider({
-      apiKey: "demo", // This is a placeholder - in production use a real API key
-      chain: sepolia,
+    console.log("Creating smart account with owner:", ownerAddress);
+    
+    // Using the correct imports based on latest version of @alchemy/aa packages
+    const smartAccount = await createMultiOwnerModularAccount({
+      transport: http("https://polygon-mumbai.g.alchemy.com/v2/YOUR_API_KEY"),
+      chain: polygonMumbai,
+      signer: { type: "local", privateKey: process.env.PRIVATE_KEY || "" },
+      owners: [ownerAddress]
     });
-
-    // Then create the smart account client
-    const smartAccount = createSmartAccountClient({
-      provider,
-      account,
-    });
-
+    
     return {
-      smartAccount,
-      account,
-      address: await smartAccount.getAddress(),
-      success: true
+      address: smartAccount.address,
+      isDeployed: await smartAccount.isDeployed(),
+      chain: "Polygon Mumbai"
     };
   } catch (error) {
-    console.error("Error initializing smart account:", error);
-    return {
-      smartAccount: null,
-      account: null,
-      address: "",
-      success: false,
-      error
-    };
+    console.error("Failed to create smart account:", error);
+    return null;
   }
-};
-
-// Function to get the current smart account from storage or create a new one
-export const getOrCreateSmartAccount = async () => {
-  // Check if we have a stored mnemonic in local storage
-  const storedMnemonic = localStorage.getItem('walletMnemonic');
-  
-  return await initializeSmartAccount(storedMnemonic || undefined);
-};
-
-// Function to store the mnemonic securely
-export const storeWalletMnemonic = (mnemonic: string) => {
-  localStorage.setItem('walletMnemonic', mnemonic);
-};
-
-// Function to check if a wallet is already setup
-export const hasStoredWallet = () => {
-  return !!localStorage.getItem('walletMnemonic');
 };
