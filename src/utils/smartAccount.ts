@@ -1,33 +1,27 @@
 
-import { SmartAccountClient } from "@alchemy/aa-core";
-import { alchemyProvider } from "@alchemy/aa-alchemy";
-import { sepolia } from "viem/chains";
-import { mnemonicToAccount } from "viem/accounts";
+import { createSmartAccountClient } from "@alchemy/aa-core";
+import { mnemonicToAccountSigner } from "@alchemy/aa-ethers/accounts";
+import { polygonMumbai } from "@alchemy/aa-ethers/chains";
 
 // Function to initialize a smart account with a given mnemonic
 export const initializeSmartAccount = async (mnemonic?: string) => {
   try {
     // Use provided mnemonic or generate a random one
-    const randomMnemonic = `test ${Math.random().toString(16).substring(2, 10)} test test test test test test test test test test junk`;
-    const account = mnemonic 
-      ? mnemonicToAccount(mnemonic)
-      : mnemonicToAccount(randomMnemonic); // Random mnemonic for demo purposes
+    const signer = mnemonic 
+      ? mnemonicToAccountSigner(mnemonic)
+      : mnemonicToAccountSigner(
+          // Random mnemonic for demo purposes, should be securely stored in production
+          `test ${Math.random().toString(16).substring(2, 10)} test test test test test test test test test test junk`
+        );
 
-    // Create provider first
-    const provider = alchemyProvider({
-      apiKey: "demo", // This is a placeholder - in production use a real API key
-      chain: sepolia,
-    });
-
-    // Then create the smart account client
-    const smartAccount = new SmartAccountClient({
-      provider,
-      account,
+    const smartAccount = await createSmartAccountClient({
+      chain: polygonMumbai,
+      owner: signer,
     });
 
     return {
       smartAccount,
-      account,
+      signer,
       address: await smartAccount.getAddress(),
       success: true
     };
@@ -35,7 +29,7 @@ export const initializeSmartAccount = async (mnemonic?: string) => {
     console.error("Error initializing smart account:", error);
     return {
       smartAccount: null,
-      account: null,
+      signer: null,
       address: "",
       success: false,
       error

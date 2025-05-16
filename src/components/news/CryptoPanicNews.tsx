@@ -1,8 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { XCircle } from "lucide-react";
 
 interface NewsItem {
   id: number;
@@ -20,15 +18,26 @@ interface NewsResponse {
 }
 
 const CryptoNews = () => {
-  // Force the query to fail
   const { data, isLoading, error } = useQuery<NewsResponse>({
     queryKey: ["cryptoNews"],
     queryFn: async () => {
-      // Simulate a network failure
-      throw new Error("Failed to fetch");
+      try {
+        const response = await fetch(
+          "https://cryptopanic.com/api/v1/posts/?auth_token=a9cc9331ec61b387eb8f535f71426215675b55ec&public=true"
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch news");
+        }
+        return response.json();
+      } catch (error) {
+        console.error("Error fetching crypto news:", error);
+        throw error;
+      }
     },
-    retry: false, // Don't retry the request
-    refetchOnWindowFocus: false,
+    refetchInterval: 3600000, // Refetch every 1 hour (3600000 ms)
+    staleTime: 3600000, // Consider data stale after 1 hour
+    retry: 3, // Retry failed requests 3 times
+    refetchOnWindowFocus: false, // Don't refetch when window regains focus
   });
 
   if (isLoading) {
@@ -45,14 +54,9 @@ const CryptoNews = () => {
 
   if (error) {
     return (
-      <div className="mt-8 text-center">
-        <Alert variant="destructive" className="border-red-600 bg-red-950/50">
-          <XCircle className="h-5 w-5" />
-          <AlertTitle className="text-red-400 font-bold">Error loading news. Please try again later.</AlertTitle>
-          <AlertDescription className="text-red-300">
-            {error instanceof Error ? error.message : 'Unknown error occurred'}
-          </AlertDescription>
-        </Alert>
+      <div className="mt-8 text-center text-red-400">
+        <p>Error loading news. Please try again later.</p>
+        <p className="text-sm mt-2">{error instanceof Error ? error.message : 'Unknown error occurred'}</p>
       </div>
     );
   }
