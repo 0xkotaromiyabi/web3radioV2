@@ -1,7 +1,7 @@
 
 import { createSmartAccountClient } from "@alchemy/aa-core";
 import { mnemonicToAccountSigner } from "@alchemy/aa-ethers";
-import { polygonMumbai } from "@alchemy/aa-ethers/chains";
+import { sepolia } from "viem/chains";
 
 // Function to initialize a smart account with a given mnemonic
 export const initializeSmartAccount = async (mnemonic?: string) => {
@@ -15,7 +15,7 @@ export const initializeSmartAccount = async (mnemonic?: string) => {
         );
 
     const smartAccount = await createSmartAccountClient({
-      chain: polygonMumbai,
+      chain: sepolia,
       owner: signer,
     });
 

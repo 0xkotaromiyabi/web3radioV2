@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Home, Newspaper, Calendar, Radio, Mic, Menu, X } from 'lucide-react';
+import { Home, Calendar, Radio, Mic, Menu, X, Vote } from 'lucide-react';
 import { 
   NavigationMenu,
   NavigationMenuList,
@@ -44,10 +44,10 @@ const NavBar = () => {
                 </Link>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <Link to="/news">
+                <Link to="/dao">
                   <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1")}>
-                    <Newspaper className="h-4 w-4" />
-                    <span>News</span>
+                    <Vote className="h-4 w-4" />
+                    <span>DAO</span>
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
@@ -102,12 +102,12 @@ const NavBar = () => {
               <span>Home</span>
             </Link>
             <Link 
-              to="/news" 
+              to="/dao" 
               className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800"
               onClick={() => setMobileMenuOpen(false)}
             >
-              <Newspaper className="h-4 w-4" />
-              <span>News</span>
+              <Vote className="h-4 w-4" />
+              <span>DAO</span>
             </Link>
             <Link 
               to="/events" 
