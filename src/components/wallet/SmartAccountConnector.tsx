@@ -1,39 +1,34 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Wallet } from 'lucide-react';
+import { Shield, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { createAlchemySmartAccount } from "@/utils/smartAccount";
+import { getOrCreateSmartAccount, hasStoredWallet } from '@/utils/smartAccount';
 
 interface SmartAccountConnectorProps {
-  onSmartAccountConnected: (address: string) => void;
+  onConnected: (address: string) => void;
 }
 
-const SmartAccountConnector: React.FC<SmartAccountConnectorProps> = ({ onSmartAccountConnected }) => {
-  const [connecting, setConnecting] = useState(false);
+const SmartAccountConnector = ({ onConnected }: SmartAccountConnectorProps) => {
+  const [isConnecting, setIsConnecting] = useState(false);
   const { toast } = useToast();
-
+  
   const connectSmartAccount = async () => {
-    setConnecting(true);
-
     try {
-      // In a real implementation we'd use the user's connected address
-      // For demo purposes we'll use a mock address
-      const mockOwnerAddress = "0x1234567890123456789012345678901234567890";
+      setIsConnecting(true);
       
-      // Create smart account
-      const smartAccount = await createAlchemySmartAccount(mockOwnerAddress);
+      const result = await getOrCreateSmartAccount();
       
-      if (!smartAccount || !smartAccount.address) {
-        throw new Error("Failed to create smart account");
+      if (result.success && result.address) {
+        toast({
+          title: "Smart Account Connected",
+          description: `Connected to address: ${result.address.slice(0, 6)}...${result.address.slice(-4)}`,
+        });
+        
+        onConnected(result.address);
+      } else {
+        throw new Error("Failed to connect smart account");
       }
-      
-      onSmartAccountConnected(smartAccount.address);
-      
-      toast({
-        title: "Smart Account Connected",
-        description: `Connected to ${smartAccount.address.slice(0, 6)}...${smartAccount.address.slice(-4)} on ${smartAccount.chain}`,
-      });
     } catch (error) {
       console.error("Smart account connection error:", error);
       toast({
@@ -42,19 +37,28 @@ const SmartAccountConnector: React.FC<SmartAccountConnectorProps> = ({ onSmartAc
         variant: "destructive",
       });
     } finally {
-      setConnecting(false);
+      setIsConnecting(false);
     }
   };
-
+  
   return (
-    <Button 
-      variant="outline" 
-      className="w-full flex items-center justify-center gap-2 bg-purple-900/30 border-purple-700/50 hover:bg-purple-900/50 text-purple-200"
+    <Button
       onClick={connectSmartAccount}
-      disabled={connecting}
+      size="sm"
+      className="w-full px-3 py-2 bg-[#333] text-white text-xs rounded hover:bg-[#444] transition-colors flex items-center justify-center gap-2"
+      disabled={isConnecting}
     >
-      <Wallet className="h-4 w-4" />
-      {connecting ? "Connecting..." : "Smart Account"}
+      {isConnecting ? (
+        <>
+          <Loader2 size={16} className="animate-spin" />
+          <span>Connecting...</span>
+        </>
+      ) : (
+        <>
+          <Shield size={16} />
+          <span>Smart Account (AA)</span>
+        </>
+      )}
     </Button>
   );
 };
