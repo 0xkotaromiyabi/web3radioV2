@@ -1,6 +1,6 @@
 
-import { SmartAccountClient } from "@alchemy/aa-core";
-import { alchemyProvider } from "@alchemy/aa-alchemy";
+import { createSmartAccountClient } from "@alchemy/aa-core";
+import { AlchemyProvider } from "@alchemy/aa-alchemy";
 import { sepolia } from "viem/chains";
 import { mnemonicToAccount } from "viem/accounts";
 
@@ -14,13 +14,13 @@ export const initializeSmartAccount = async (mnemonic?: string) => {
       : mnemonicToAccount(randomMnemonic); // Random mnemonic for demo purposes
 
     // Create provider first
-    const provider = alchemyProvider({
+    const provider = new AlchemyProvider({
       apiKey: "demo", // This is a placeholder - in production use a real API key
       chain: sepolia,
     });
 
     // Then create the smart account client
-    const smartAccount = new SmartAccountClient({
+    const smartAccount = createSmartAccountClient({
       provider,
       account,
     });
