@@ -71,7 +71,7 @@ const NavBar = () => {
                 <Link to="/cms">
                   <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1")}>
                     <Settings className="h-4 w-4" />
-                    <span>CMS</span>
+                    <span>Dashboard</span>
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
