@@ -26,7 +26,7 @@ const CMS = () => {
       setLoggedIn(true);
       toast({
         title: "Login successful",
-        description: "Welcome to the CMS dashboard",
+        description: "Web3radio dashboard",
       });
     } else {
       toast({
