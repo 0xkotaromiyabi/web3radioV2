@@ -1,35 +1,20 @@
 
-import { createSmartAccountClient } from "@alchemy/aa-core";
-import { LocalAccountSigner } from "@alchemy/aa-core/signer";
-import { polygonMumbai } from "viem/chains";
+// Simplified mock wallet functionality
+// This removes all Alchemy dependencies
 
-// Function to initialize a smart account with a given mnemonic
+// Function to initialize a wallet with a given mnemonic
 export const initializeSmartAccount = async (mnemonic?: string) => {
   try {
-    // Use provided mnemonic or generate a random one
-    const randomMnemonic = `test ${Math.random().toString(16).substring(2, 10)} test test test test test test test test test test junk`;
+    // Generate a mock address that looks like an Ethereum address
+    const mockAddress = `0x${Math.random().toString(16).substring(2, 42).padEnd(40, '0')}`;
     
-    // Use LocalAccountSigner which is available in @alchemy/aa-core
-    const signer = mnemonic
-      ? LocalAccountSigner.mnemonicToAccountSigner(mnemonic)
-      : LocalAccountSigner.mnemonicToAccountSigner(randomMnemonic);
-
-    const smartAccount = await createSmartAccountClient({
-      chain: polygonMumbai,
-      owner: signer,
-    });
-
     return {
-      smartAccount,
-      signer,
-      address: await smartAccount.getAddress(),
+      address: mockAddress,
       success: true
     };
   } catch (error) {
-    console.error("Error initializing smart account:", error);
+    console.error("Error initializing account:", error);
     return {
-      smartAccount: null,
-      signer: null,
       address: "",
       success: false,
       error
@@ -37,7 +22,7 @@ export const initializeSmartAccount = async (mnemonic?: string) => {
   }
 };
 
-// Function to get the current smart account from storage or create a new one
+// Function to get the current wallet from storage or create a new one
 export const getOrCreateSmartAccount = async () => {
   // Check if we have a stored mnemonic in local storage
   const storedMnemonic = localStorage.getItem('walletMnemonic');
