@@ -5,7 +5,7 @@ import { WagmiConfig, createConfig, http } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import Particles from 'react-particles';
-import { Container, Engine } from 'tsparticles-engine';
+import type { Container, Engine } from 'tsparticles-engine';
 import { loadFull } from 'tsparticles';
 import StationSelector from '@/components/radio/StationSelector';
 import { Play, Pause, Volume2 } from 'lucide-react';
