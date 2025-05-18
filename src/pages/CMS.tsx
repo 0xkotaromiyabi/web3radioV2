@@ -99,37 +99,39 @@ const CMS = () => {
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
         <NavBar />
         <div className="flex justify-center items-center h-[calc(100vh-4rem)]">
-          <Card className="w-[350px]">
+          <Card className="w-[350px] bg-gray-800 border-green-500 text-white">
             <CardHeader>
-              <CardTitle>CMS Login</CardTitle>
-              <CardDescription>Enter your credentials to access the dashboard.</CardDescription>
+              <CardTitle className="text-green-400">CMS Login</CardTitle>
+              <CardDescription className="text-gray-300">Enter your credentials to access the dashboard.</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleLogin}>
                 <div className="grid w-full items-center gap-4">
                   <div className="flex flex-col space-y-1.5">
-                    <Label htmlFor="username">Username</Label>
+                    <Label htmlFor="username" className="text-white">Username</Label>
                     <Input 
                       id="username" 
                       placeholder="Username" 
                       value={username} 
                       onChange={(e) => setUsername(e.target.value)} 
+                      className="bg-gray-700 text-white border-gray-600 focus:border-green-500"
                     />
                   </div>
                   <div className="flex flex-col space-y-1.5">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password" className="text-white">Password</Label>
                     <Input 
                       id="password" 
                       type="password" 
                       placeholder="Password" 
                       value={password} 
                       onChange={(e) => setPassword(e.target.value)} 
+                      className="bg-gray-700 text-white border-gray-600 focus:border-green-500"
                     />
                   </div>
                 </div>
-                <Button className="w-full mt-4" type="submit">Login</Button>
+                <Button className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white" type="submit">Login</Button>
               </form>
-              <div className="mt-4 text-sm text-center text-muted-foreground">
+              <div className="mt-4 text-sm text-center text-gray-300">
                 <p>Default credentials: admin / admin123</p>
               </div>
             </CardContent>
@@ -145,21 +147,21 @@ const CMS = () => {
       <NavBar />
       <div className="container py-8">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-white">CMS Dashboard</h1>
-          <Button variant="outline" onClick={() => setLoggedIn(false)}>Logout</Button>
+          <h1 className="text-3xl font-bold text-green-400">CMS Dashboard</h1>
+          <Button variant="outline" onClick={() => setLoggedIn(false)} className="border-green-500 text-green-400 hover:bg-green-900 hover:text-white">Logout</Button>
         </div>
 
         <Tabs defaultValue="news" className="w-full">
-          <TabsList className="mb-4 bg-gray-800">
-            <TabsTrigger value="news" className="flex gap-2 items-center">
+          <TabsList className="mb-4 bg-gray-800 border-green-500 border">
+            <TabsTrigger value="news" className="flex gap-2 items-center text-white data-[state=active]:bg-green-700 data-[state=active]:text-white">
               <Newspaper className="h-4 w-4" />
               News
             </TabsTrigger>
-            <TabsTrigger value="events" className="flex gap-2 items-center">
+            <TabsTrigger value="events" className="flex gap-2 items-center text-white data-[state=active]:bg-green-700 data-[state=active]:text-white">
               <Calendar className="h-4 w-4" />
               Events
             </TabsTrigger>
-            <TabsTrigger value="stations" className="flex gap-2 items-center">
+            <TabsTrigger value="stations" className="flex gap-2 items-center text-white data-[state=active]:bg-green-700 data-[state=active]:text-white">
               <Radio className="h-4 w-4" />
               Radio Stations
             </TabsTrigger>
@@ -167,72 +169,74 @@ const CMS = () => {
 
           {/* News Content Management */}
           <TabsContent value="news">
-            <Card>
+            <Card className="bg-gray-800 border-green-500 text-white">
               <CardHeader>
-                <CardTitle>Manage News Items</CardTitle>
-                <CardDescription>Add, edit or remove news items.</CardDescription>
+                <CardTitle className="text-green-400">Manage News Items</CardTitle>
+                <CardDescription className="text-gray-300">Add, edit or remove news items.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-8">
                   {/* Add News Form */}
-                  <div className="border rounded-lg p-4 bg-gray-800">
-                    <h3 className="text-lg font-medium mb-4">Add News Item</h3>
+                  <div className="border border-green-700 rounded-lg p-4 bg-gray-800">
+                    <h3 className="text-lg font-medium mb-4 text-green-400">Add News Item</h3>
                     <div className="grid gap-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <Label htmlFor="news-title">Title</Label>
+                          <Label htmlFor="news-title" className="text-white">Title</Label>
                           <Input 
                             id="news-title" 
                             placeholder="News Title" 
                             value={newNewsItem.title}
                             onChange={(e) => setNewNewsItem({...newNewsItem, title: e.target.value})}
+                            className="bg-gray-700 text-white border-gray-600 focus:border-green-500"
                           />
                         </div>
                         <div>
-                          <Label htmlFor="news-date">Date</Label>
+                          <Label htmlFor="news-date" className="text-white">Date</Label>
                           <Input 
                             id="news-date" 
                             type="date" 
                             value={newNewsItem.date}
                             onChange={(e) => setNewNewsItem({...newNewsItem, date: e.target.value})}
+                            className="bg-gray-700 text-white border-gray-600 focus:border-green-500"
                           />
                         </div>
                       </div>
                       <div>
-                        <Label htmlFor="news-content">Content</Label>
+                        <Label htmlFor="news-content" className="text-white">Content</Label>
                         <Textarea 
                           id="news-content" 
                           placeholder="News content..." 
-                          className="min-h-[100px]"
+                          className="min-h-[100px] bg-gray-700 text-white border-gray-600 focus:border-green-500"
                           value={newNewsItem.content}
                           onChange={(e) => setNewNewsItem({...newNewsItem, content: e.target.value})}
                         />
                       </div>
-                      <Button onClick={addNewsItem}>Add News Item</Button>
+                      <Button onClick={addNewsItem} className="bg-green-600 hover:bg-green-700 text-white">Add News Item</Button>
                     </div>
                   </div>
                   
                   {/* News List */}
                   <div>
-                    <h3 className="text-lg font-medium mb-4">News Items</h3>
+                    <h3 className="text-lg font-medium mb-4 text-green-400">News Items</h3>
                     <Table>
                       <TableHeader>
-                        <TableRow>
-                          <TableHead>ID</TableHead>
-                          <TableHead>Title</TableHead>
-                          <TableHead>Date</TableHead>
-                          <TableHead>Actions</TableHead>
+                        <TableRow className="border-green-700">
+                          <TableHead className="text-green-300">ID</TableHead>
+                          <TableHead className="text-green-300">Title</TableHead>
+                          <TableHead className="text-green-300">Date</TableHead>
+                          <TableHead className="text-green-300">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {newsItems.map((item) => (
-                          <TableRow key={item.id}>
-                            <TableCell>{item.id}</TableCell>
-                            <TableCell>{item.title}</TableCell>
-                            <TableCell>{item.date}</TableCell>
+                          <TableRow key={item.id} className="border-green-900/30">
+                            <TableCell className="text-gray-300">{item.id}</TableCell>
+                            <TableCell className="text-white">{item.title}</TableCell>
+                            <TableCell className="text-gray-300">{item.date}</TableCell>
                             <TableCell>
                               <div className="flex gap-2">
-                                <Button variant="outline" size="sm" onClick={() => {
+                                <Button variant="outline" size="sm" className="border-green-500 text-green-400 hover:bg-green-900 hover:text-white" onClick={() => {
                                   toast({
                                     title: "Edit functionality",
                                     description: "Edit functionality would be implemented here",
@@ -259,83 +263,86 @@ const CMS = () => {
 
           {/* Events Content Management */}
           <TabsContent value="events">
-            <Card>
+            <Card className="bg-gray-800 border-green-500 text-white">
               <CardHeader>
-                <CardTitle>Manage Events</CardTitle>
-                <CardDescription>Add, edit or remove events.</CardDescription>
+                <CardTitle className="text-green-400">Manage Events</CardTitle>
+                <CardDescription className="text-gray-300">Add, edit or remove events.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-8">
                   {/* Add Event Form */}
-                  <div className="border rounded-lg p-4 bg-gray-800">
-                    <h3 className="text-lg font-medium mb-4">Add Event</h3>
+                  <div className="border border-green-700 rounded-lg p-4 bg-gray-800">
+                    <h3 className="text-lg font-medium mb-4 text-green-400">Add Event</h3>
                     <div className="grid gap-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <Label htmlFor="event-title">Title</Label>
+                          <Label htmlFor="event-title" className="text-white">Title</Label>
                           <Input 
                             id="event-title" 
                             placeholder="Event Title" 
                             value={newEvent.title}
                             onChange={(e) => setNewEvent({...newEvent, title: e.target.value})}
+                            className="bg-gray-700 text-white border-gray-600 focus:border-green-500"
                           />
                         </div>
                         <div>
-                          <Label htmlFor="event-date">Date</Label>
+                          <Label htmlFor="event-date" className="text-white">Date</Label>
                           <Input 
                             id="event-date" 
                             type="date" 
                             value={newEvent.date}
                             onChange={(e) => setNewEvent({...newEvent, date: e.target.value})}
+                            className="bg-gray-700 text-white border-gray-600 focus:border-green-500"
                           />
                         </div>
                       </div>
                       <div>
-                        <Label htmlFor="event-location">Location</Label>
+                        <Label htmlFor="event-location" className="text-white">Location</Label>
                         <Input 
                           id="event-location" 
                           placeholder="Event Location" 
                           value={newEvent.location}
                           onChange={(e) => setNewEvent({...newEvent, location: e.target.value})}
+                          className="bg-gray-700 text-white border-gray-600 focus:border-green-500"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="event-description">Description</Label>
+                        <Label htmlFor="event-description" className="text-white">Description</Label>
                         <Textarea 
                           id="event-description" 
                           placeholder="Event description..." 
-                          className="min-h-[100px]"
+                          className="min-h-[100px] bg-gray-700 text-white border-gray-600 focus:border-green-500"
                           value={newEvent.description}
                           onChange={(e) => setNewEvent({...newEvent, description: e.target.value})}
                         />
                       </div>
-                      <Button onClick={addEvent}>Add Event</Button>
+                      <Button onClick={addEvent} className="bg-green-600 hover:bg-green-700 text-white">Add Event</Button>
                     </div>
                   </div>
                   
                   {/* Events List */}
                   <div>
-                    <h3 className="text-lg font-medium mb-4">Events</h3>
+                    <h3 className="text-lg font-medium mb-4 text-green-400">Events</h3>
                     <Table>
                       <TableHeader>
-                        <TableRow>
-                          <TableHead>ID</TableHead>
-                          <TableHead>Title</TableHead>
-                          <TableHead>Date</TableHead>
-                          <TableHead>Location</TableHead>
-                          <TableHead>Actions</TableHead>
+                        <TableRow className="border-green-700">
+                          <TableHead className="text-green-300">ID</TableHead>
+                          <TableHead className="text-green-300">Title</TableHead>
+                          <TableHead className="text-green-300">Date</TableHead>
+                          <TableHead className="text-green-300">Location</TableHead>
+                          <TableHead className="text-green-300">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {events.map((event) => (
-                          <TableRow key={event.id}>
-                            <TableCell>{event.id}</TableCell>
-                            <TableCell>{event.title}</TableCell>
-                            <TableCell>{event.date}</TableCell>
-                            <TableCell>{event.location}</TableCell>
+                          <TableRow key={event.id} className="border-green-900/30">
+                            <TableCell className="text-gray-300">{event.id}</TableCell>
+                            <TableCell className="text-white">{event.title}</TableCell>
+                            <TableCell className="text-gray-300">{event.date}</TableCell>
+                            <TableCell className="text-white">{event.location}</TableCell>
                             <TableCell>
                               <div className="flex gap-2">
-                                <Button variant="outline" size="sm" onClick={() => {
+                                <Button variant="outline" size="sm" className="border-green-500 text-green-400 hover:bg-green-900 hover:text-white" onClick={() => {
                                   toast({
                                     title: "Edit functionality",
                                     description: "Edit functionality would be implemented here",
@@ -362,34 +369,36 @@ const CMS = () => {
 
           {/* Radio Stations Content Management */}
           <TabsContent value="stations">
-            <Card>
+            <Card className="bg-gray-800 border-green-500 text-white">
               <CardHeader>
-                <CardTitle>Manage Radio Stations</CardTitle>
-                <CardDescription>Add, edit or remove radio stations.</CardDescription>
+                <CardTitle className="text-green-400">Manage Radio Stations</CardTitle>
+                <CardDescription className="text-gray-300">Add, edit or remove radio stations.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-8">
                   {/* Add Station Form */}
-                  <div className="border rounded-lg p-4 bg-gray-800">
-                    <h3 className="text-lg font-medium mb-4">Add Radio Station</h3>
+                  <div className="border border-green-700 rounded-lg p-4 bg-gray-800">
+                    <h3 className="text-lg font-medium mb-4 text-green-400">Add Radio Station</h3>
                     <div className="grid gap-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <Label htmlFor="station-name">Name</Label>
+                          <Label htmlFor="station-name" className="text-white">Name</Label>
                           <Input 
                             id="station-name" 
                             placeholder="Station Name" 
                             value={newStation.name}
                             onChange={(e) => setNewStation({...newStation, name: e.target.value})}
+                            className="bg-gray-700 text-white border-gray-600 focus:border-green-500"
                           />
                         </div>
                         <div>
-                          <Label htmlFor="station-genre">Genre</Label>
+                          <Label htmlFor="station-genre" className="text-white">Genre</Label>
                           <Input 
                             id="station-genre" 
                             placeholder="Music Genre" 
                             value={newStation.genre}
                             onChange={(e) => setNewStation({...newStation, genre: e.target.value})}
+                            className="bg-gray-700 text-white border-gray-600 focus:border-green-500"
                           />
                         </div>
                       </div>
@@ -399,47 +408,47 @@ const CMS = () => {
                           id="streaming"
                           checked={newStation.streaming}
                           onChange={(e) => setNewStation({...newStation, streaming: e.target.checked})}
-                          className="h-4 w-4 rounded border-gray-300"
+                          className="h-4 w-4 rounded border-gray-300 accent-green-500"
                         />
-                        <Label htmlFor="streaming">Currently Streaming</Label>
+                        <Label htmlFor="streaming" className="text-white">Currently Streaming</Label>
                       </div>
                       <div>
-                        <Label htmlFor="station-description">Description</Label>
+                        <Label htmlFor="station-description" className="text-white">Description</Label>
                         <Textarea 
                           id="station-description" 
                           placeholder="Station description..." 
-                          className="min-h-[100px]"
+                          className="min-h-[100px] bg-gray-700 text-white border-gray-600 focus:border-green-500"
                           value={newStation.description}
                           onChange={(e) => setNewStation({...newStation, description: e.target.value})}
                         />
                       </div>
-                      <Button onClick={addStation}>Add Radio Station</Button>
+                      <Button onClick={addStation} className="bg-green-600 hover:bg-green-700 text-white">Add Radio Station</Button>
                     </div>
                   </div>
                   
                   {/* Stations List */}
                   <div>
-                    <h3 className="text-lg font-medium mb-4">Radio Stations</h3>
+                    <h3 className="text-lg font-medium mb-4 text-green-400">Radio Stations</h3>
                     <Table>
                       <TableHeader>
-                        <TableRow>
-                          <TableHead>ID</TableHead>
-                          <TableHead>Name</TableHead>
-                          <TableHead>Genre</TableHead>
-                          <TableHead>Streaming</TableHead>
-                          <TableHead>Actions</TableHead>
+                        <TableRow className="border-green-700">
+                          <TableHead className="text-green-300">ID</TableHead>
+                          <TableHead className="text-green-300">Name</TableHead>
+                          <TableHead className="text-green-300">Genre</TableHead>
+                          <TableHead className="text-green-300">Streaming</TableHead>
+                          <TableHead className="text-green-300">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {stations.map((station) => (
-                          <TableRow key={station.id}>
-                            <TableCell>{station.id}</TableCell>
-                            <TableCell>{station.name}</TableCell>
-                            <TableCell>{station.genre}</TableCell>
-                            <TableCell>{station.streaming ? "Yes" : "No"}</TableCell>
+                          <TableRow key={station.id} className="border-green-900/30">
+                            <TableCell className="text-gray-300">{station.id}</TableCell>
+                            <TableCell className="text-white">{station.name}</TableCell>
+                            <TableCell className="text-gray-300">{station.genre}</TableCell>
+                            <TableCell className="text-white">{station.streaming ? "Yes" : "No"}</TableCell>
                             <TableCell>
                               <div className="flex gap-2">
-                                <Button variant="outline" size="sm" onClick={() => {
+                                <Button variant="outline" size="sm" className="border-green-500 text-green-400 hover:bg-green-900 hover:text-white" onClick={() => {
                                   toast({
                                     title: "Edit functionality",
                                     description: "Edit functionality would be implemented here",
