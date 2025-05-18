@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Home, Newspaper, Calendar, Radio, Mic, Menu, X } from 'lucide-react';
+import { Home, Newspaper, Calendar, Radio, Mic, Menu, X, Settings } from 'lucide-react';
 import { 
   NavigationMenu,
   NavigationMenuList,
@@ -67,6 +67,14 @@ const NavBar = () => {
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link to="/cms">
+                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1")}>
+                    <Settings className="h-4 w-4" />
+                    <span>CMS</span>
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
         </div>
@@ -124,6 +132,14 @@ const NavBar = () => {
             >
               <Radio className="h-4 w-4" />
               <span>Radio Stations</span>
+            </Link>
+            <Link 
+              to="/cms" 
+              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Settings className="h-4 w-4" />
+              <span>CMS</span>
             </Link>
             <div className="pt-2 border-t border-gray-800">
               <Button 

@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import News from "./pages/News";
 import Events from "./pages/Events";
 import Stations from "./pages/Stations";
+import CMS from "./pages/CMS";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,7 @@ const App = () => (
           <Route path="/news" element={<News />} />
           <Route path="/events" element={<Events />} />
           <Route path="/stations" element={<Stations />} />
+          <Route path="/cms" element={<CMS />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
