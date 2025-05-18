@@ -101,7 +101,7 @@ const CMS = () => {
         <div className="flex justify-center items-center h-[calc(100vh-4rem)]">
           <Card className="w-[350px] bg-gray-800 border-green-500 text-white">
             <CardHeader>
-              <CardTitle className="text-green-400">CMS Login</CardTitle>
+              <CardTitle className="text-green-400">Web3radio Login</CardTitle>
               <CardDescription className="text-gray-300">Enter your credentials to access the dashboard.</CardDescription>
             </CardHeader>
             <CardContent>
