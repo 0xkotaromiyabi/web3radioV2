@@ -132,7 +132,7 @@ const CMS = () => {
                 <Button className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white" type="submit">Login</Button>
               </form>
               <div className="mt-4 text-sm text-center text-gray-300">
-                <p>Default credentials: admin / admin123</p>
+                <p>Contact Admin For Login</p>
               </div>
             </CardContent>
           </Card>
