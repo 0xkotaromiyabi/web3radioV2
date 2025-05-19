@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = 'https://apdpgmmlcwjxgwaqsmqu.supabase.co';
@@ -8,108 +7,91 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Initialize database tables
 export const initializeTables = async () => {
-  const { error: newsTableError } = await supabase.rpc('create_table_if_not_exists', {
-    table_name: 'news',
-    columns_query: `
-      id serial primary key,
-      title text not null,
-      content text not null,
-      date text not null,
-      created_at timestamp with time zone default now()
-    `
-  }).single();
-
-  const { error: eventsTableError } = await supabase.rpc('create_table_if_not_exists', {
-    table_name: 'events',
-    columns_query: `
-      id serial primary key,
-      title text not null,
-      date text not null,
-      location text not null,
-      description text not null,
-      created_at timestamp with time zone default now()
-    `
-  }).single();
-
-  const { error: stationsTableError } = await supabase.rpc('create_table_if_not_exists', {
-    table_name: 'stations',
-    columns_query: `
-      id serial primary key,
-      name text not null,
-      genre text not null,
-      description text not null,
-      streaming boolean not null default true,
-      created_at timestamp with time zone default now()
-    `
-  }).single();
-
-  // For debugging, log any errors
-  if (newsTableError || eventsTableError || stationsTableError) {
-    console.error("Table creation errors:", { newsTableError, eventsTableError, stationsTableError });
-    
-    // Fallback to use SQL directly if RPC failed
-    if (newsTableError) {
-      await createTablesWithSQL();
-    }
+  try {
+    // Create tables using SQL
+    await createTablesWithSQL();
+    return { newsTableError: null, eventsTableError: null, stationsTableError: null };
+  } catch (error) {
+    console.error("Table creation errors:", error);
+    return { 
+      newsTableError: error, 
+      eventsTableError: error, 
+      stationsTableError: error 
+    };
   }
-
-  return { newsTableError, eventsTableError, stationsTableError };
 };
 
 // Fallback function to create tables using direct SQL
 const createTablesWithSQL = async () => {
-  // Create news table
-  await supabase.from('news')
-    .select('id')
-    .limit(1)
-    .catch(async () => {
-      // If error (table doesn't exist), create it
-      await supabase.query(`
-        CREATE TABLE IF NOT EXISTS news (
-          id serial primary key,
-          title text not null,
-          content text not null,
-          date text not null,
-          created_at timestamp with time zone default now()
-        )
-      `);
-    });
+  try {
+    // Check if news table exists
+    const { error: checkNewsError } = await supabase
+      .from('news')
+      .select('id')
+      .limit(1);
+    
+    // If error (table doesn't exist), create it
+    if (checkNewsError) {
+      await supabase.rpc('exec', {
+        query: `
+          CREATE TABLE IF NOT EXISTS news (
+            id serial primary key,
+            title text not null,
+            content text not null,
+            date text not null,
+            created_at timestamp with time zone default now()
+          )
+        `
+      });
+    }
 
-  // Create events table
-  await supabase.from('events')
-    .select('id')
-    .limit(1)
-    .catch(async () => {
-      // If error (table doesn't exist), create it
-      await supabase.query(`
-        CREATE TABLE IF NOT EXISTS events (
-          id serial primary key,
-          title text not null,
-          date text not null,
-          location text not null,
-          description text not null,
-          created_at timestamp with time zone default now()
-        )
-      `);
-    });
+    // Check if events table exists
+    const { error: checkEventsError } = await supabase
+      .from('events')
+      .select('id')
+      .limit(1);
+    
+    // If error (table doesn't exist), create it
+    if (checkEventsError) {
+      await supabase.rpc('exec', {
+        query: `
+          CREATE TABLE IF NOT EXISTS events (
+            id serial primary key,
+            title text not null,
+            date text not null,
+            location text not null,
+            description text not null,
+            created_at timestamp with time zone default now()
+          )
+        `
+      });
+    }
 
-  // Create stations table
-  await supabase.from('stations')
-    .select('id')
-    .limit(1)
-    .catch(async () => {
-      // If error (table doesn't exist), create it
-      await supabase.query(`
-        CREATE TABLE IF NOT EXISTS stations (
-          id serial primary key,
-          name text not null,
-          genre text not null,
-          description text not null,
-          streaming boolean not null default true,
-          created_at timestamp with time zone default now()
-        )
-      `);
-    });
+    // Check if stations table exists
+    const { error: checkStationsError } = await supabase
+      .from('stations')
+      .select('id')
+      .limit(1);
+    
+    // If error (table doesn't exist), create it
+    if (checkStationsError) {
+      await supabase.rpc('exec', {
+        query: `
+          CREATE TABLE IF NOT EXISTS stations (
+            id serial primary key,
+            name text not null,
+            genre text not null,
+            description text not null,
+            streaming boolean not null default true,
+            created_at timestamp with time zone default now()
+          )
+        `
+      });
+    }
+  } catch (error) {
+    console.error("Error in createTablesWithSQL:", error);
+    throw error;
+  }
 };
 
 // Auth helper functions
@@ -173,7 +155,7 @@ export const fetchNews = async () => {
     .select('*')
     .order('created_at', { ascending: false });
   
-  return { data, error };
+  return { data: data || [], error };
 };
 
 export const addNewsItem = async (newsItem: { title: string; content: string; date: string }) => {
@@ -214,7 +196,7 @@ export const fetchEvents = async () => {
     .select('*')
     .order('date', { ascending: true });
   
-  return { data, error };
+  return { data: data || [], error };
 };
 
 export const addEvent = async (event: { title: string; date: string; location: string; description: string }) => {
@@ -254,7 +236,7 @@ export const fetchStations = async () => {
     .from('stations')
     .select('*');
   
-  return { data, error };
+  return { data: data || [], error };
 };
 
 export const addStation = async (station: { name: string; genre: string; description: string; streaming: boolean }) => {
