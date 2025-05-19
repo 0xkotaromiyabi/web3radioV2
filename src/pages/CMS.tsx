@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from '@/components/navigation/NavBar';
@@ -11,7 +10,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { Calendar, Newspaper, Radio, Loader } from "lucide-react";
-import { signIn, signOut, getCurrentUser, fetchNews, addNewsItem, deleteNewsItem, fetchEvents, addEvent, deleteEvent, fetchStations, addStation, deleteStation, subscribeToTable } from '@/lib/supabase';
+import { 
+  signIn, 
+  signOut, 
+  getCurrentUser, 
+  fetchNews, 
+  addNewsItem, 
+  deleteNewsItem, 
+  fetchEvents, 
+  addEvent, 
+  deleteEvent, 
+  fetchStations, 
+  addStation, 
+  deleteStation, 
+  subscribeToTable,
+  initializeTables 
+} from '@/lib/supabase';
 
 // Type definitions for our data
 type NewsItem = {
@@ -87,6 +101,17 @@ const CMS = () => {
     };
     
     checkUser();
+
+    // Initialize database tables
+    const setupDatabase = async () => {
+      try {
+        await initializeTables();
+      } catch (error) {
+        console.error('Error initializing database tables:', error);
+      }
+    };
+    
+    setupDatabase();
   }, []);
 
   // Fetch data when user is authenticated
@@ -196,20 +221,25 @@ const CMS = () => {
   // Data manipulation handlers
   const handleAddNewsItem = async () => {
     if (newNewsItem.title && newNewsItem.date && newNewsItem.content) {
-      const { error } = await addNewsItem(newNewsItem);
+      const { error, data } = await addNewsItem(newNewsItem);
       
       if (error) {
+        console.error("Error adding news item:", error);
         toast({
           title: "Error adding news item",
           description: error.message,
           variant: "destructive",
         });
       } else {
+        console.log("News item added successfully:", data);
         setNewNewsItem({ title: "", date: new Date().toISOString().split('T')[0], content: "" });
         toast({
           title: "News item added",
           description: "The news item has been added successfully",
         });
+        
+        // Reload news items
+        loadNews();
       }
     }
   };
@@ -233,20 +263,25 @@ const CMS = () => {
 
   const handleAddEvent = async () => {
     if (newEvent.title && newEvent.date && newEvent.location && newEvent.description) {
-      const { error } = await addEvent(newEvent);
+      const { error, data } = await addEvent(newEvent);
       
       if (error) {
+        console.error("Error adding event:", error);
         toast({
           title: "Error adding event",
           description: error.message,
           variant: "destructive",
         });
       } else {
+        console.log("Event added successfully:", data);
         setNewEvent({ title: "", date: new Date().toISOString().split('T')[0], location: "", description: "" });
         toast({
           title: "Event added",
           description: "The event has been added successfully",
         });
+        
+        // Reload events
+        loadEvents();
       }
     }
   };
@@ -270,20 +305,25 @@ const CMS = () => {
 
   const handleAddStation = async () => {
     if (newStation.name && newStation.genre && newStation.description) {
-      const { error } = await addStation(newStation);
+      const { error, data } = await addStation(newStation);
       
       if (error) {
+        console.error("Error adding radio station:", error);
         toast({
           title: "Error adding radio station",
           description: error.message,
           variant: "destructive",
         });
       } else {
+        console.log("Radio station added successfully:", data);
         setNewStation({ name: "", genre: "", streaming: true, description: "" });
         toast({
           title: "Radio station added",
           description: "The radio station has been added successfully",
         });
+        
+        // Reload stations
+        loadStations();
       }
     }
   };

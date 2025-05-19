@@ -6,6 +6,112 @@ const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+// Initialize database tables
+export const initializeTables = async () => {
+  const { error: newsTableError } = await supabase.rpc('create_table_if_not_exists', {
+    table_name: 'news',
+    columns_query: `
+      id serial primary key,
+      title text not null,
+      content text not null,
+      date text not null,
+      created_at timestamp with time zone default now()
+    `
+  }).single();
+
+  const { error: eventsTableError } = await supabase.rpc('create_table_if_not_exists', {
+    table_name: 'events',
+    columns_query: `
+      id serial primary key,
+      title text not null,
+      date text not null,
+      location text not null,
+      description text not null,
+      created_at timestamp with time zone default now()
+    `
+  }).single();
+
+  const { error: stationsTableError } = await supabase.rpc('create_table_if_not_exists', {
+    table_name: 'stations',
+    columns_query: `
+      id serial primary key,
+      name text not null,
+      genre text not null,
+      description text not null,
+      streaming boolean not null default true,
+      created_at timestamp with time zone default now()
+    `
+  }).single();
+
+  // For debugging, log any errors
+  if (newsTableError || eventsTableError || stationsTableError) {
+    console.error("Table creation errors:", { newsTableError, eventsTableError, stationsTableError });
+    
+    // Fallback to use SQL directly if RPC failed
+    if (newsTableError) {
+      await createTablesWithSQL();
+    }
+  }
+
+  return { newsTableError, eventsTableError, stationsTableError };
+};
+
+// Fallback function to create tables using direct SQL
+const createTablesWithSQL = async () => {
+  // Create news table
+  await supabase.from('news')
+    .select('id')
+    .limit(1)
+    .catch(async () => {
+      // If error (table doesn't exist), create it
+      await supabase.query(`
+        CREATE TABLE IF NOT EXISTS news (
+          id serial primary key,
+          title text not null,
+          content text not null,
+          date text not null,
+          created_at timestamp with time zone default now()
+        )
+      `);
+    });
+
+  // Create events table
+  await supabase.from('events')
+    .select('id')
+    .limit(1)
+    .catch(async () => {
+      // If error (table doesn't exist), create it
+      await supabase.query(`
+        CREATE TABLE IF NOT EXISTS events (
+          id serial primary key,
+          title text not null,
+          date text not null,
+          location text not null,
+          description text not null,
+          created_at timestamp with time zone default now()
+        )
+      `);
+    });
+
+  // Create stations table
+  await supabase.from('stations')
+    .select('id')
+    .limit(1)
+    .catch(async () => {
+      // If error (table doesn't exist), create it
+      await supabase.query(`
+        CREATE TABLE IF NOT EXISTS stations (
+          id serial primary key,
+          name text not null,
+          genre text not null,
+          description text not null,
+          streaming boolean not null default true,
+          created_at timestamp with time zone default now()
+        )
+      `);
+    });
+};
+
 // Auth helper functions
 export const signUp = async (email: string, password: string) => {
   const { data, error } = await supabase.auth.signUp({
@@ -55,6 +161,13 @@ export const getCurrentUser = async () => {
 
 // Database helper functions
 export const fetchNews = async () => {
+  // Try to initialize tables first
+  try {
+    await initializeTables();
+  } catch (error) {
+    console.error("Error initializing tables:", error);
+  }
+
   const { data, error } = await supabase
     .from('news')
     .select('*')
@@ -64,6 +177,13 @@ export const fetchNews = async () => {
 };
 
 export const addNewsItem = async (newsItem: { title: string; content: string; date: string }) => {
+  // Try to initialize tables first
+  try {
+    await initializeTables();
+  } catch (error) {
+    console.error("Error initializing tables:", error);
+  }
+
   const { data, error } = await supabase
     .from('news')
     .insert([newsItem])
@@ -82,6 +202,13 @@ export const deleteNewsItem = async (id: number) => {
 };
 
 export const fetchEvents = async () => {
+  // Try to initialize tables first
+  try {
+    await initializeTables();
+  } catch (error) {
+    console.error("Error initializing tables:", error);
+  }
+
   const { data, error } = await supabase
     .from('events')
     .select('*')
@@ -91,6 +218,13 @@ export const fetchEvents = async () => {
 };
 
 export const addEvent = async (event: { title: string; date: string; location: string; description: string }) => {
+  // Try to initialize tables first
+  try {
+    await initializeTables();
+  } catch (error) {
+    console.error("Error initializing tables:", error);
+  }
+
   const { data, error } = await supabase
     .from('events')
     .insert([event])
@@ -109,6 +243,13 @@ export const deleteEvent = async (id: number) => {
 };
 
 export const fetchStations = async () => {
+  // Try to initialize tables first
+  try {
+    await initializeTables();
+  } catch (error) {
+    console.error("Error initializing tables:", error);
+  }
+
   const { data, error } = await supabase
     .from('stations')
     .select('*');
@@ -117,6 +258,13 @@ export const fetchStations = async () => {
 };
 
 export const addStation = async (station: { name: string; genre: string; description: string; streaming: boolean }) => {
+  // Try to initialize tables first
+  try {
+    await initializeTables();
+  } catch (error) {
+    console.error("Error initializing tables:", error);
+  }
+
   const { data, error } = await supabase
     .from('stations')
     .insert([station])
