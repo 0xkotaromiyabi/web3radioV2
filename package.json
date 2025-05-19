@@ -42,6 +42,7 @@
     "@radix-ui/react-tooltip": "^1.1.4",
     "@solana/spl-token": "^0.4.13",
     "@solana/web3.js": "^1.98.0",
+    "@supabase/supabase-js": "^2.49.4",
     "@tanstack/react-query": "^5.62.15",
     "@tonconnect/ui-react": "^2.0.9",
     "@walletconnect/ethereum-provider": "^2.10.6",

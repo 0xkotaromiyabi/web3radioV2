@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from '@/components/navigation/NavBar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,91 +10,315 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, Newspaper, Radio } from "lucide-react";
+import { Calendar, Newspaper, Radio, Loader } from "lucide-react";
+import { signIn, signOut, getCurrentUser, fetchNews, addNewsItem, deleteNewsItem, fetchEvents, addEvent, deleteEvent, fetchStations, addStation, deleteStation, subscribeToTable } from '@/lib/supabase';
+
+// Type definitions for our data
+type NewsItem = {
+  id: number;
+  title: string;
+  date: string;
+  content: string;
+  created_at?: string;
+};
+
+type Event = {
+  id: number;
+  title: string;
+  date: string;
+  location: string;
+  description: string;
+  created_at?: string;
+};
+
+type Station = {
+  id: number;
+  name: string;
+  genre: string;
+  streaming: boolean;
+  description: string;
+  created_at?: string;
+};
 
 const CMS = () => {
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [username, setUsername] = useState("");
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Mock login functionality
-  const handleLogin = (e: React.FormEvent) => {
+  // Data states
+  const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [stations, setStations] = useState<Station[]>([]);
+  
+  const [newNewsItem, setNewNewsItem] = useState<Omit<NewsItem, 'id'>>({ 
+    title: "", 
+    date: new Date().toISOString().split('T')[0], 
+    content: "" 
+  });
+  
+  const [newEvent, setNewEvent] = useState<Omit<Event, 'id'>>({ 
+    title: "", 
+    date: new Date().toISOString().split('T')[0], 
+    location: "", 
+    description: "" 
+  });
+  
+  const [newStation, setNewStation] = useState<Omit<Station, 'id'>>({ 
+    name: "", 
+    genre: "", 
+    streaming: true, 
+    description: "" 
+  });
+
+  // Fetch current user on component mount
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const currentUser = await getCurrentUser();
+        setUser(currentUser || null);
+      } catch (error) {
+        console.error('Error checking authentication:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    checkUser();
+  }, []);
+
+  // Fetch data when user is authenticated
+  useEffect(() => {
+    if (user) {
+      loadAllData();
+      setupRealtimeSubscriptions();
+    }
+  }, [user]);
+
+  const loadAllData = async () => {
+    await loadNews();
+    await loadEvents();
+    await loadStations();
+  };
+
+  const setupRealtimeSubscriptions = () => {
+    // Set up real-time subscriptions for all tables
+    const newsSubscription = subscribeToTable('news', () => loadNews());
+    const eventsSubscription = subscribeToTable('events', () => loadEvents());
+    const stationsSubscription = subscribeToTable('stations', () => loadStations());
+    
+    // Clean up subscriptions on component unmount
+    return () => {
+      newsSubscription.unsubscribe();
+      eventsSubscription.unsubscribe();
+      stationsSubscription.unsubscribe();
+    };
+  };
+
+  const loadNews = async () => {
+    const { data, error } = await fetchNews();
+    if (error) {
+      toast({
+        title: "Error loading news",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      setNewsItems(data || []);
+    }
+  };
+
+  const loadEvents = async () => {
+    const { data, error } = await fetchEvents();
+    if (error) {
+      toast({
+        title: "Error loading events",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      setEvents(data || []);
+    }
+  };
+
+  const loadStations = async () => {
+    const { data, error } = await fetchStations();
+    if (error) {
+      toast({
+        title: "Error loading stations",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      setStations(data || []);
+    }
+  };
+
+  // Auth handlers
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (username === "admin" && password === "admin123") {
-      setLoggedIn(true);
+    setLoading(true);
+    
+    try {
+      const { data, error } = await signIn(email, password);
+      
+      if (error) throw error;
+      
+      setUser(data.user);
       toast({
         title: "Login successful",
-        description: "Web3radio dashboard",
+        description: "Welcome to Web3radio dashboard",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Login failed",
+        description: error.message || "Invalid email or password",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    const { error } = await signOut();
+    if (!error) {
+      setUser(null);
+      toast({
+        title: "Logged out",
+        description: "You have been logged out successfully",
+      });
+    }
+  };
+
+  // Data manipulation handlers
+  const handleAddNewsItem = async () => {
+    if (newNewsItem.title && newNewsItem.date && newNewsItem.content) {
+      const { error } = await addNewsItem(newNewsItem);
+      
+      if (error) {
+        toast({
+          title: "Error adding news item",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        setNewNewsItem({ title: "", date: new Date().toISOString().split('T')[0], content: "" });
+        toast({
+          title: "News item added",
+          description: "The news item has been added successfully",
+        });
+      }
+    }
+  };
+
+  const handleDeleteNewsItem = async (id: number) => {
+    const { error } = await deleteNewsItem(id);
+    
+    if (error) {
+      toast({
+        title: "Error deleting news item",
+        description: error.message,
+        variant: "destructive",
       });
     } else {
       toast({
-        title: "Login failed",
-        description: "Invalid username or password",
+        title: "News item deleted",
+        description: "The news item has been deleted successfully",
+      });
+    }
+  };
+
+  const handleAddEvent = async () => {
+    if (newEvent.title && newEvent.date && newEvent.location && newEvent.description) {
+      const { error } = await addEvent(newEvent);
+      
+      if (error) {
+        toast({
+          title: "Error adding event",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        setNewEvent({ title: "", date: new Date().toISOString().split('T')[0], location: "", description: "" });
+        toast({
+          title: "Event added",
+          description: "The event has been added successfully",
+        });
+      }
+    }
+  };
+
+  const handleDeleteEvent = async (id: number) => {
+    const { error } = await deleteEvent(id);
+    
+    if (error) {
+      toast({
+        title: "Error deleting event",
+        description: error.message,
         variant: "destructive",
       });
-    }
-  };
-
-  // Mock news data
-  const [newsItems, setNewsItems] = useState([
-    { id: 1, title: "Web3 Conference Announced", date: "2025-06-10", content: "The biggest Web3 conference of the year will be held in San Francisco." },
-    { id: 2, title: "New Blockchain Partnership", date: "2025-06-05", content: "Leading blockchain companies announce strategic partnership." },
-  ]);
-
-  // Mock events data
-  const [events, setEvents] = useState([
-    { id: 1, title: "ETH Meetup", date: "2025-06-20", location: "New York", description: "Monthly Ethereum developer meetup" },
-    { id: 2, title: "Crypto Art Exhibition", date: "2025-07-15", location: "London", description: "NFT art showcase featuring leading digital artists" },
-  ]);
-
-  // Mock radio stations data
-  const [stations, setStations] = useState([
-    { id: 1, name: "BlockBeats FM", genre: "Electronic", streaming: true, description: "24/7 electronic music for crypto enthusiasts" },
-    { id: 2, name: "Chain Radio", genre: "Talk Show", streaming: true, description: "Latest crypto news and interviews" },
-  ]);
-
-  // Form states for adding new content
-  const [newNewsItem, setNewNewsItem] = useState({ title: "", date: "", content: "" });
-  const [newEvent, setNewEvent] = useState({ title: "", date: "", location: "", description: "" });
-  const [newStation, setNewStation] = useState({ name: "", genre: "", streaming: true, description: "" });
-
-  const addNewsItem = () => {
-    if (newNewsItem.title && newNewsItem.date && newNewsItem.content) {
-      setNewsItems([...newsItems, { id: newsItems.length + 1, ...newNewsItem }]);
-      setNewNewsItem({ title: "", date: "", content: "" });
+    } else {
       toast({
-        title: "News item added",
-        description: "The news item has been added successfully",
+        title: "Event deleted",
+        description: "The event has been deleted successfully",
       });
     }
   };
 
-  const addEvent = () => {
-    if (newEvent.title && newEvent.date && newEvent.location && newEvent.description) {
-      setEvents([...events, { id: events.length + 1, ...newEvent }]);
-      setNewEvent({ title: "", date: "", location: "", description: "" });
-      toast({
-        title: "Event added",
-        description: "The event has been added successfully",
-      });
-    }
-  };
-
-  const addStation = () => {
+  const handleAddStation = async () => {
     if (newStation.name && newStation.genre && newStation.description) {
-      setStations([...stations, { id: stations.length + 1, ...newStation }]);
-      setNewStation({ name: "", genre: "", streaming: true, description: "" });
+      const { error } = await addStation(newStation);
+      
+      if (error) {
+        toast({
+          title: "Error adding radio station",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        setNewStation({ name: "", genre: "", streaming: true, description: "" });
+        toast({
+          title: "Radio station added",
+          description: "The radio station has been added successfully",
+        });
+      }
+    }
+  };
+
+  const handleDeleteStation = async (id: number) => {
+    const { error } = await deleteStation(id);
+    
+    if (error) {
       toast({
-        title: "Radio station added",
-        description: "The radio station has been added successfully",
+        title: "Error deleting radio station",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Station deleted",
+        description: "The radio station has been deleted successfully",
       });
     }
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader className="h-8 w-8 animate-spin text-green-500" />
+          <p className="text-green-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Login page
-  if (!loggedIn) {
+  if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
         <NavBar />
@@ -108,12 +332,13 @@ const CMS = () => {
               <form onSubmit={handleLogin}>
                 <div className="grid w-full items-center gap-4">
                   <div className="flex flex-col space-y-1.5">
-                    <Label htmlFor="username" className="text-white">Username</Label>
+                    <Label htmlFor="email" className="text-white">Email</Label>
                     <Input 
-                      id="username" 
-                      placeholder="Username" 
-                      value={username} 
-                      onChange={(e) => setUsername(e.target.value)} 
+                      id="email" 
+                      type="email"
+                      placeholder="your@email.com" 
+                      value={email} 
+                      onChange={(e) => setEmail(e.target.value)} 
                       className="bg-gray-700 text-white border-gray-600 focus:border-green-500"
                     />
                   </div>
@@ -132,7 +357,7 @@ const CMS = () => {
                 <Button className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white" type="submit">Login</Button>
               </form>
               <div className="mt-4 text-sm text-center text-gray-300">
-                <p>Contact Admin For Login</p>
+                <p>Contact Admin For Login Access</p>
               </div>
             </CardContent>
           </Card>
@@ -148,7 +373,7 @@ const CMS = () => {
       <div className="container py-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-green-400">CMS Dashboard</h1>
-          <Button variant="outline" onClick={() => setLoggedIn(false)} className="border-green-500 text-green-400 hover:bg-green-900 hover:text-white">Logout</Button>
+          <Button variant="outline" onClick={handleLogout} className="border-green-500 text-green-400 hover:bg-green-900 hover:text-white">Logout</Button>
         </div>
 
         <Tabs defaultValue="news" className="w-full">
@@ -212,7 +437,7 @@ const CMS = () => {
                           onChange={(e) => setNewNewsItem({...newNewsItem, content: e.target.value})}
                         />
                       </div>
-                      <Button onClick={addNewsItem} className="bg-green-600 hover:bg-green-700 text-white">Add News Item</Button>
+                      <Button onClick={handleAddNewsItem} className="bg-green-600 hover:bg-green-700 text-white">Add News Item</Button>
                     </div>
                   </div>
                   
@@ -229,30 +454,24 @@ const CMS = () => {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {newsItems.map((item) => (
-                          <TableRow key={item.id} className="border-green-900/30">
-                            <TableCell className="text-gray-300">{item.id}</TableCell>
-                            <TableCell className="text-white">{item.title}</TableCell>
-                            <TableCell className="text-gray-300">{item.date}</TableCell>
-                            <TableCell>
-                              <div className="flex gap-2">
-                                <Button variant="outline" size="sm" className="border-green-500 text-green-400 hover:bg-green-900 hover:text-white" onClick={() => {
-                                  toast({
-                                    title: "Edit functionality",
-                                    description: "Edit functionality would be implemented here",
-                                  });
-                                }}>Edit</Button>
-                                <Button variant="destructive" size="sm" onClick={() => {
-                                  setNewsItems(newsItems.filter(n => n.id !== item.id));
-                                  toast({
-                                    title: "News item deleted",
-                                    description: "The news item has been deleted successfully",
-                                  });
-                                }}>Delete</Button>
-                              </div>
-                            </TableCell>
+                        {newsItems.length > 0 ? (
+                          newsItems.map((item) => (
+                            <TableRow key={item.id} className="border-green-900/30">
+                              <TableCell className="text-gray-300">{item.id}</TableCell>
+                              <TableCell className="text-white">{item.title}</TableCell>
+                              <TableCell className="text-gray-300">{item.date}</TableCell>
+                              <TableCell>
+                                <div className="flex gap-2">
+                                  <Button variant="destructive" size="sm" onClick={() => handleDeleteNewsItem(item.id)}>Delete</Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={4} className="text-center text-gray-400 py-4">No news items found</TableCell>
                           </TableRow>
-                        ))}
+                        )}
                       </TableBody>
                     </Table>
                   </div>
@@ -316,7 +535,7 @@ const CMS = () => {
                           onChange={(e) => setNewEvent({...newEvent, description: e.target.value})}
                         />
                       </div>
-                      <Button onClick={addEvent} className="bg-green-600 hover:bg-green-700 text-white">Add Event</Button>
+                      <Button onClick={handleAddEvent} className="bg-green-600 hover:bg-green-700 text-white">Add Event</Button>
                     </div>
                   </div>
                   
@@ -334,31 +553,25 @@ const CMS = () => {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {events.map((event) => (
-                          <TableRow key={event.id} className="border-green-900/30">
-                            <TableCell className="text-gray-300">{event.id}</TableCell>
-                            <TableCell className="text-white">{event.title}</TableCell>
-                            <TableCell className="text-gray-300">{event.date}</TableCell>
-                            <TableCell className="text-white">{event.location}</TableCell>
-                            <TableCell>
-                              <div className="flex gap-2">
-                                <Button variant="outline" size="sm" className="border-green-500 text-green-400 hover:bg-green-900 hover:text-white" onClick={() => {
-                                  toast({
-                                    title: "Edit functionality",
-                                    description: "Edit functionality would be implemented here",
-                                  });
-                                }}>Edit</Button>
-                                <Button variant="destructive" size="sm" onClick={() => {
-                                  setEvents(events.filter(e => e.id !== event.id));
-                                  toast({
-                                    title: "Event deleted",
-                                    description: "The event has been deleted successfully",
-                                  });
-                                }}>Delete</Button>
-                              </div>
-                            </TableCell>
+                        {events.length > 0 ? (
+                          events.map((event) => (
+                            <TableRow key={event.id} className="border-green-900/30">
+                              <TableCell className="text-gray-300">{event.id}</TableCell>
+                              <TableCell className="text-white">{event.title}</TableCell>
+                              <TableCell className="text-gray-300">{event.date}</TableCell>
+                              <TableCell className="text-white">{event.location}</TableCell>
+                              <TableCell>
+                                <div className="flex gap-2">
+                                  <Button variant="destructive" size="sm" onClick={() => handleDeleteEvent(event.id)}>Delete</Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={5} className="text-center text-gray-400 py-4">No events found</TableCell>
                           </TableRow>
-                        ))}
+                        )}
                       </TableBody>
                     </Table>
                   </div>
@@ -422,7 +635,7 @@ const CMS = () => {
                           onChange={(e) => setNewStation({...newStation, description: e.target.value})}
                         />
                       </div>
-                      <Button onClick={addStation} className="bg-green-600 hover:bg-green-700 text-white">Add Radio Station</Button>
+                      <Button onClick={handleAddStation} className="bg-green-600 hover:bg-green-700 text-white">Add Radio Station</Button>
                     </div>
                   </div>
                   
@@ -440,31 +653,25 @@ const CMS = () => {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {stations.map((station) => (
-                          <TableRow key={station.id} className="border-green-900/30">
-                            <TableCell className="text-gray-300">{station.id}</TableCell>
-                            <TableCell className="text-white">{station.name}</TableCell>
-                            <TableCell className="text-gray-300">{station.genre}</TableCell>
-                            <TableCell className="text-white">{station.streaming ? "Yes" : "No"}</TableCell>
-                            <TableCell>
-                              <div className="flex gap-2">
-                                <Button variant="outline" size="sm" className="border-green-500 text-green-400 hover:bg-green-900 hover:text-white" onClick={() => {
-                                  toast({
-                                    title: "Edit functionality",
-                                    description: "Edit functionality would be implemented here",
-                                  });
-                                }}>Edit</Button>
-                                <Button variant="destructive" size="sm" onClick={() => {
-                                  setStations(stations.filter(s => s.id !== station.id));
-                                  toast({
-                                    title: "Station deleted",
-                                    description: "The radio station has been deleted successfully",
-                                  });
-                                }}>Delete</Button>
-                              </div>
-                            </TableCell>
+                        {stations.length > 0 ? (
+                          stations.map((station) => (
+                            <TableRow key={station.id} className="border-green-900/30">
+                              <TableCell className="text-gray-300">{station.id}</TableCell>
+                              <TableCell className="text-white">{station.name}</TableCell>
+                              <TableCell className="text-gray-300">{station.genre}</TableCell>
+                              <TableCell className="text-white">{station.streaming ? "Yes" : "No"}</TableCell>
+                              <TableCell>
+                                <div className="flex gap-2">
+                                  <Button variant="destructive" size="sm" onClick={() => handleDeleteStation(station.id)}>Delete</Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={5} className="text-center text-gray-400 py-4">No radio stations found</TableCell>
                           </TableRow>
-                        ))}
+                        )}
                       </TableBody>
                     </Table>
                   </div>

@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Home, Newspaper, Calendar, Radio, Mic, Menu, X, Settings } from 'lucide-react';
 import { 
   NavigationMenu,
@@ -11,9 +11,21 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { getCurrentUser } from '@/lib/supabase';
 
 const NavBar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const user = await getCurrentUser();
+      setIsAdmin(!!user);
+    };
+    
+    checkAdmin();
+  }, [location]);
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -69,9 +81,10 @@ const NavBar = () => {
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <Link to="/cms">
-                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1")}>
+                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1", isAdmin ? "border-green-500" : "")}>
                     <Settings className="h-4 w-4" />
                     <span>Dashboard</span>
+                    {isAdmin && <span className="ml-1 h-2 w-2 rounded-full bg-green-500"></span>}
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
@@ -139,7 +152,8 @@ const NavBar = () => {
               onClick={() => setMobileMenuOpen(false)}
             >
               <Settings className="h-4 w-4" />
-              <span>CMS</span>
+              <span>Dashboard</span>
+              {isAdmin && <span className="ml-1 h-2 w-2 rounded-full bg-green-500"></span>}
             </Link>
             <div className="pt-2 border-t border-gray-800">
               <Button 
