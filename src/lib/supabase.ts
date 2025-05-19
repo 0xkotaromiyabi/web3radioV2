@@ -16,26 +16,6 @@ export const signUp = async (email: string, password: string) => {
 };
 
 export const signIn = async (email: string, password: string) => {
-  // For development/testing purposes
-  if (email === 'admin@example.com' && password === 'admin123') {
-    // Mock successful login for testing
-    return { 
-      data: { 
-        user: { 
-          id: '1', 
-          email: 'admin@example.com',
-          role: 'admin' 
-        }, 
-        session: { 
-          access_token: 'mock_token',
-          refresh_token: 'mock_refresh_token'
-        } 
-      }, 
-      error: null 
-    };
-  }
-  
-  // Real Supabase authentication
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
