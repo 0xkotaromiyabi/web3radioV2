@@ -1,10 +1,28 @@
 {
+  "accountAssociation": {
+    "header": "eyJmaWQiOjM1NjM4MiwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweGM2MzBjYTMzMDBlYzA3QTU3MmQ3MjU2QUQ0RENkODMxN2M1NTc2ODgifQ",
+    "payload": "eyJkb21haW4iOiJ3ZWIzcmFkaW8ueHl6In0",
+    "signature": "MHhlMjA2YzllYWRlZGY0ZDcxMmI5ZmNlNDc4ZTIzOWIyZGU3YjA1M2FiZGU1MDM1NjU2OTBkZGEzMWYxZWE3MGQ4N2JkYTdhYWExZTJkNjdhMGE2NTAxYTk1MDFjMmEwN2RlODliYmMyNTA1Y2M3NjNkZjZiOGZmYmZlYzMwNWM4YjFi"
+  },
   "frame": {
     "version": "1",
     "name": "Web3Radio",
-    "iconUrl": "https://web3radio.xyz/icon.png",
-    "homeUrl": "https://web3radio.xyz",
+    "iconUrl": "https://web3radio.xyz/logo.png",
     "splashImageUrl": "https://web3radio.xyz/logo.png",
-    "splashBackgroundColor": "#000000"
+    "splashBackgroundColor": "#000000",
+    "homeUrl": "https://web3radio.xyz",
+    "subtitle": "Streaming web3 news",
+    "description": "Live stations, curated news, and upcoming events for the on-chain world.",
+    "primaryCategory": "news-media",
+    "tags": [
+      "radio",
+      "web3",
+      "farcaster",
+      "events"
+    ],
+    "heroImageUrl": "https://web3radio.xyz/og.png",
+    "ogTitle": "Web3Radio",
+    "ogDescription": "Explore the sound of on-chain culture with Web3Radio.",
+    "ogImageUrl": "https://web3radio.xyz/og.png"
   }
 }
