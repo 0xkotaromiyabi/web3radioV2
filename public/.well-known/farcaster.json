@@ -1,0 +1,10 @@
+{
+  "frame": {
+    "version": "1",
+    "name": "Web3Radio",
+    "iconUrl": "https://web3radio.xyz/icon.png",
+    "homeUrl": "https://web3radio.xyz",
+    "splashImageUrl": "https://web3radio.xyz/logo.png",
+    "splashBackgroundColor": "#000000"
+  }
+}
