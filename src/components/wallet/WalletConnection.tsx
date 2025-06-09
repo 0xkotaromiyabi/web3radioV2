@@ -13,7 +13,7 @@ interface WalletConnectionProps {
 }
 
 const client = createThirdwebClient({
-  clientId: "YOUR_THIRDWEB_CLIENT_ID", // Replace with your actual client ID
+  clientId: "ac0e7bf99e676e48fa3a2d9f4c33089c",
 });
 
 const wallets = [
