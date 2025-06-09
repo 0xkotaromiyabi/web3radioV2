@@ -4,6 +4,7 @@ import { createThirdwebClient } from "thirdweb";
 import { ConnectButton } from "thirdweb/react";
 import { inAppWallet, createWallet } from "thirdweb/wallets";
 import ListeningTimeTracker from './ListeningTimeTracker';
+import NFTCollection from './NFTCollection';
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
@@ -53,8 +54,11 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
         />
       </div>
 
-      {/* Listening Time Tracker - Note: This will need to be updated to work with Thirdweb */}
+      {/* Listening Time Tracker */}
       <ListeningTimeTracker isPlaying={isPlaying} />
+
+      {/* NFT Collection Display */}
+      <NFTCollection client={client} />
 
       {/* Info Card */}
       <Card className="p-3 bg-[#222] border-[#444]">
