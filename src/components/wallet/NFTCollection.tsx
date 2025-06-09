@@ -5,6 +5,7 @@ import { getContract } from "thirdweb";
 import { useActiveAccount } from "thirdweb/react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ethereum } from "thirdweb/chains";
 
 interface NFTCollectionProps {
   client: any;
@@ -13,12 +14,9 @@ interface NFTCollectionProps {
 const NFTCollection: React.FC<NFTCollectionProps> = ({ client }) => {
   const account = useActiveAccount();
 
-  // Example NFT contract - you'll need to replace with actual contract addresses
-  const nftContract = getContract({
-    client,
-    chain: { id: 1 }, // Ethereum mainnet
-    address: "0x..." // Replace with actual NFT contract address
-  });
+  // Example NFT contract address - using a valid format but placeholder
+  // Replace with your actual NFT contract address
+  const contractAddress = "0x0000000000000000000000000000000000000000";
 
   if (!account) {
     return (
@@ -28,6 +26,20 @@ const NFTCollection: React.FC<NFTCollectionProps> = ({ client }) => {
         </p>
       </Card>
     );
+  }
+
+  // Only create contract if we have a valid non-zero address
+  let nftContract = null;
+  try {
+    if (contractAddress !== "0x0000000000000000000000000000000000000000") {
+      nftContract = getContract({
+        client,
+        chain: ethereum, // Use the proper ethereum chain from thirdweb
+        address: contractAddress
+      });
+    }
+  } catch (error) {
+    console.log("Error creating contract:", error);
   }
 
   return (
@@ -40,33 +52,40 @@ const NFTCollection: React.FC<NFTCollectionProps> = ({ client }) => {
           </Badge>
         </div>
         
-        {/* Example NFT Display */}
-        <div className="grid grid-cols-2 gap-2">
-          <NFTProvider tokenId={0n} contract={nftContract}>
-            <NFTMedia
-              className="rounded-md w-full h-20 object-cover"
-              loadingComponent={
-                <div className="w-full h-20 bg-[#333] rounded-md flex items-center justify-center">
-                  <span className="text-xs text-gray-400">Loading...</span>
-                </div>
-              }
-            />
-          </NFTProvider>
-          
-          <NFTProvider tokenId={1n} contract={nftContract}>
-            <NFTMedia
-              className="rounded-md w-full h-20 object-cover"
-              loadingComponent={
-                <div className="w-full h-20 bg-[#333] rounded-md flex items-center justify-center">
-                  <span className="text-xs text-gray-400">Loading...</span>
-                </div>
-              }
-            />
-          </NFTProvider>
-        </div>
+        {nftContract ? (
+          <div className="grid grid-cols-2 gap-2">
+            <NFTProvider tokenId={0n} contract={nftContract}>
+              <NFTMedia
+                className="rounded-md w-full h-20 object-cover"
+                loadingComponent={
+                  <div className="w-full h-20 bg-[#333] rounded-md flex items-center justify-center">
+                    <span className="text-xs text-gray-400">Loading...</span>
+                  </div>
+                }
+              />
+            </NFTProvider>
+            
+            <NFTProvider tokenId={1n} contract={nftContract}>
+              <NFTMedia
+                className="rounded-md w-full h-20 object-cover"
+                loadingComponent={
+                  <div className="w-full h-20 bg-[#333] rounded-md flex items-center justify-center">
+                    <span className="text-xs text-gray-400">Loading...</span>
+                  </div>
+                }
+              />
+            </NFTProvider>
+          </div>
+        ) : (
+          <div className="text-center py-4">
+            <div className="w-full h-20 bg-[#333] rounded-md flex items-center justify-center mb-2">
+              <span className="text-xs text-gray-400">No NFT Contract</span>
+            </div>
+          </div>
+        )}
         
         <p className="text-xs text-gray-400 text-center">
-          Replace contract address with your NFT collection
+          Add your NFT contract address to display your collection
         </p>
       </div>
     </Card>
