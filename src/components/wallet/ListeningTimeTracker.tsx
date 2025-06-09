@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useAccount } from 'wagmi';
+import { useActiveAccount } from "thirdweb/react";
 import { Badge } from "@/components/ui/badge";
 import { Clock } from 'lucide-react';
 
@@ -9,7 +9,8 @@ interface ListeningTimeTrackerProps {
 }
 
 const ListeningTimeTracker: React.FC<ListeningTimeTrackerProps> = ({ isPlaying }) => {
-  const { address } = useAccount();
+  const account = useActiveAccount();
+  const address = account?.address;
   const [listeningTime, setListeningTime] = React.useState<number>(0);
   const [timer, setTimer] = React.useState<NodeJS.Timeout | null>(null);
 

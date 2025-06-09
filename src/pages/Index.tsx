@@ -1,24 +1,12 @@
 
 import Radio from '@/components/Radio';
 import NavBar from '@/components/navigation/NavBar';
-import { WagmiConfig, createConfig, http } from 'wagmi';
-import { mainnet } from 'wagmi/chains';
+import { ThirdwebProvider } from "thirdweb/react";
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import { useCallback } from 'react';
 import Particles from 'react-particles';
 import type { Container, Engine } from 'tsparticles-engine';
 import { loadFull } from 'tsparticles';
-
-// Configure wagmi with more options for account abstraction
-const config = createConfig({
-  chains: [mainnet],
-  transports: {
-    [mainnet.id]: http(),
-  },
-  // Enhanced options for better mobile support
-  ssr: false,
-  syncConnectedChain: true,
-});
 
 const Index = () => {
   const particlesInit = useCallback(async (engine: Engine) => {
@@ -30,7 +18,7 @@ const Index = () => {
   }, []);
 
   return (
-    <WagmiConfig config={config}>
+    <ThirdwebProvider>
       <TonConnectUIProvider manifestUrl="https://ton.org/app-manifest.json">
         <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 py-0 relative">
           <Particles
@@ -93,7 +81,7 @@ const Index = () => {
           </div>
         </div>
       </TonConnectUIProvider>
-    </WagmiConfig>
+    </ThirdwebProvider>
   );
 };
 
