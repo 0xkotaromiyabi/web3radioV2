@@ -18,7 +18,7 @@ const client = createThirdwebClient({
 const contract = getContract({
   client,
   chain: defineChain(8453),
-  address: "0x5bEC03639DB23964fF5721FAD6a00142BC4684aC",
+  address: "0xc609f8aAB523a786aBf792C01E575C9F7ccfa4b9",
 });
 
 const NFTMarketplace = () => {
@@ -63,7 +63,7 @@ const NFTMarketplace = () => {
                       token: {
                         name: "web3radio T-shirt",
                         symbol: "W3R",
-                        address: "0x5bEC03639DB23964fF5721FAD6a00142BC4684aC",
+                        address: "0xc609f8aAB523a786aBf792C01E575C9F7ccfa4b9",
                       },
                     },
                   }}
