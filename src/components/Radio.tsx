@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import WalletConnection from './wallet/WalletConnection';
 import RadioControls from './radio/RadioControls';
@@ -5,13 +6,12 @@ import StationSelector from './radio/StationSelector';
 import SongInfo from './radio/SongInfo';
 import CryptoPanicNews from './news/CryptoPanicNews';
 import SocialShare from './social/SocialShare';
+import NFTMarketplace from './marketplace/NFTMarketplace';
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useToast } from '@/components/ui/use-toast';
-import { webhookDispatcher } from '@/utils/webhookEvents';
-import { useActiveAccount } from "thirdweb/react";
 
 interface Song {
   title: string;
@@ -41,7 +41,6 @@ const Radio = () => {
   const [cryptoPrices, setCryptoPrices] = useState<string[]>([]);
   const isMobile = useIsMobile();
   const { toast } = useToast();
-  const account = useActiveAccount();
 
   const stations = {
     web3: 'https://web3radio.cloud/stream',
@@ -228,11 +227,6 @@ const Radio = () => {
         audioRef.current.play()
           .then(() => {
             fetchOnlineRadioBoxInfo(currentStation);
-            
-            // Trigger webhook event when radio starts playing
-            console.log('Radio started playing, triggering webhook');
-            webhookDispatcher.triggerRadioPlayed(currentStation, account?.address);
-            
             toast({
               title: "Radio playing",
               description: `Now playing ${
@@ -240,7 +234,7 @@ const Radio = () => {
                 currentStation === 'Prambors' ? 'Prambors Radio' :
                 currentStation === 'iradio' ? 'i-Radio' :
                 currentStation === 'female' ? 'Female Radio' : 'Delta FM'
-              } - Webhook event sent`,
+              }`,
             });
           })
           .catch((error) => {
@@ -398,6 +392,8 @@ const Radio = () => {
       <SocialShare />
 
       <CryptoPanicNews />
+
+      <NFTMarketplace />
     </div>
   );
 };
