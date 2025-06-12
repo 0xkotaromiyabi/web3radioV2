@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { sdk } from "@farcaster/frame-sdk";
 import { Toaster } from "@/components/ui/toaster";
@@ -11,6 +12,7 @@ import News from "./pages/News";
 import Events from "./pages/Events";
 import Stations from "./pages/Stations";
 import CMS from "./pages/CMS";
+import Marketplace from "./pages/Marketplace";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +32,7 @@ export default function App() {
             <Route path="/news" element={<News />} />
             <Route path="/events" element={<Events />} />
             <Route path="/stations" element={<Stations />} />
+            <Route path="/marketplace" element={<Marketplace />} />
             <Route path="/cms" element={<CMS />} />
           </Routes>
         </BrowserRouter>
