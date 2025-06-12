@@ -1,51 +1,174 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Radio, Newspaper, Calendar, Music, ShoppingBag } from 'lucide-react';
+import { Home, Newspaper, Calendar, Radio, Mic, Menu, X, Settings } from 'lucide-react';
+import { 
+  NavigationMenu,
+  NavigationMenuList,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  navigationMenuTriggerStyle
+} from "@/components/ui/navigation-menu";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { getCurrentUser } from '@/lib/supabase';
 
 const NavBar = () => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
-  
-  const navItems = [
-    { path: '/', label: 'Radio', icon: Radio },
-    { path: '/news', label: 'News', icon: Newspaper },
-    { path: '/events', label: 'Events', icon: Calendar },
-    { path: '/stations', label: 'Stations', icon: Music },
-    { path: '/marketplace', label: 'Marketplace', icon: ShoppingBag },
-  ];
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const user = await getCurrentUser();
+      setIsAdmin(!!user);
+    };
+    
+    checkAdmin();
+  }, [location]);
+
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
 
   return (
-    <nav className="bg-gray-900 border-b border-gray-700">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center space-x-2">
+    <header className="sticky top-0 z-40 w-full border-b border-[#444] bg-gray-900/95 backdrop-blur">
+      <div className="container flex h-16 items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link to="/" className="flex items-center gap-2">
             <img 
               src="/web3radio-logo.png" 
-              alt="Web3 Radio" 
-              className="w-8 h-8 rounded-full"
+              alt="Web3Radio" 
+              className="h-8 w-8" 
             />
-            <span className="text-xl font-bold text-green-400">Web3 Radio</span>
+            <span className="font-bold text-white sm:inline-block">Web3Radio</span>
           </Link>
           
-          <div className="flex space-x-8">
-            {navItems.map(({ path, label, icon: Icon }) => (
-              <Link
-                key={path}
-                to={path}
-                className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  location.pathname === path
-                    ? 'text-green-400 bg-gray-800'
-                    : 'text-gray-300 hover:text-green-400 hover:bg-gray-800'
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                <span>{label}</span>
-              </Link>
-            ))}
-          </div>
+          {/* Desktop Navigation */}
+          <NavigationMenu className="hidden md:flex">
+            <NavigationMenuList className="gap-1">
+              <NavigationMenuItem>
+                <Link to="/">
+                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1")}>
+                    <Home className="h-4 w-4" />
+                    <span>Home</span>
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link to="/news">
+                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1")}>
+                    <Newspaper className="h-4 w-4" />
+                    <span>News</span>
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link to="/events">
+                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1")}>
+                    <Calendar className="h-4 w-4" />
+                    <span>Events</span>
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link to="/stations">
+                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1")}>
+                    <Radio className="h-4 w-4" />
+                    <span>Radio Stations</span>
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link to="/cms">
+                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1", isAdmin ? "border-green-500" : "")}>
+                    <Settings className="h-4 w-4" />
+                    <span>Dashboard</span>
+                    {isAdmin && <span className="ml-1 h-2 w-2 rounded-full bg-green-500"></span>}
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
         </div>
+
+        {/* Broadcaster Button - Desktop */}
+        <Button 
+          variant="outline" 
+          className="hidden md:flex gap-1 bg-gradient-to-r from-purple-600 to-blue-500 border-none text-white hover:from-purple-700 hover:to-blue-600"
+        >
+          <Mic className="h-4 w-4" />
+          <span>Become a Broadcaster</span>
+        </Button>
+
+        {/* Mobile Menu Toggle */}
+        <button
+          className="flex md:hidden items-center justify-center rounded-md p-2 text-white"
+          onClick={toggleMobileMenu}
+        >
+          {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
       </div>
-    </nav>
+
+      {/* Mobile Navigation */}
+      {mobileMenuOpen && (
+        <div className="md:hidden px-4 pb-3 pt-2 bg-gray-900 border-b border-[#444]">
+          <nav className="flex flex-col space-y-3">
+            <Link 
+              to="/" 
+              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Home className="h-4 w-4" />
+              <span>Home</span>
+            </Link>
+            <Link 
+              to="/news" 
+              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Newspaper className="h-4 w-4" />
+              <span>News</span>
+            </Link>
+            <Link 
+              to="/events" 
+              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Calendar className="h-4 w-4" />
+              <span>Events</span>
+            </Link>
+            <Link 
+              to="/stations" 
+              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Radio className="h-4 w-4" />
+              <span>Radio Stations</span>
+            </Link>
+            <Link 
+              to="/cms" 
+              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Settings className="h-4 w-4" />
+              <span>Dashboard</span>
+              {isAdmin && <span className="ml-1 h-2 w-2 rounded-full bg-green-500"></span>}
+            </Link>
+            <div className="pt-2 border-t border-gray-800">
+              <Button 
+                variant="outline" 
+                className="w-full flex gap-1 justify-center bg-gradient-to-r from-purple-600 to-blue-500 border-none text-white hover:from-purple-700 hover:to-blue-600"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Mic className="h-4 w-4" />
+                <span>Become a Broadcaster</span>
+              </Button>
+            </div>
+          </nav>
+        </div>
+      )}
+    </header>
   );
 };
 
