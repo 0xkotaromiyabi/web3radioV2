@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Tag } from "lucide-react";
+import { Loader2, Tag, AlertTriangle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface NFTData {
   id: string;
@@ -43,15 +44,21 @@ const ListNFTDialog = ({ nft, isOpen, onClose, contract }: ListNFTDialogProps) =
     try {
       setIsListing(true);
       
-      // TODO: Implement actual listing logic with thirdweb
-      // This would involve calling marketplace contract functions
+      // TODO: Implement actual listing logic with thirdweb marketplace contracts
+      // This would involve:
+      // 1. Approving the marketplace contract to transfer the NFT
+      // 2. Creating a listing on the marketplace
+      // Example: await approve({ contract: nftContract, to: marketplaceAddress, tokenId: nft.tokenId })
+      // Example: await createListing({ contract: marketplaceContract, assetContract, tokenId, price })
       
-      // Mock success for now
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log(`Listing NFT ${nft.name} for ${price} ETH on Base network`);
+      
+      // Simulate transaction time
+      await new Promise(resolve => setTimeout(resolve, 3000));
       
       toast({
         title: "NFT Listed Successfully",
-        description: `${nft.name} has been listed for ${price} ETH`,
+        description: `${nft.name} has been listed for ${price} ETH on Base network`,
       });
       
       setPrice('');
@@ -60,7 +67,7 @@ const ListNFTDialog = ({ nft, isOpen, onClose, contract }: ListNFTDialogProps) =
       console.error('Listing error:', error);
       toast({
         title: "Listing failed",
-        description: "There was an error listing your NFT. Please try again.",
+        description: "There was an error listing your NFT. Please check your wallet connection and try again.",
         variant: "destructive",
       });
     } finally {
@@ -77,11 +84,18 @@ const ListNFTDialog = ({ nft, isOpen, onClose, contract }: ListNFTDialogProps) =
             List NFT for Sale
           </DialogTitle>
           <DialogDescription className="text-gray-400">
-            Set a price for {nft.name} to list it on the marketplace
+            Set a price for {nft.name} to list it on the Base network marketplace
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
+          {/* Network Badge */}
+          <div className="flex justify-center">
+            <Badge className="bg-blue-600 text-white">
+              Base Network (Chain ID: 8453)
+            </Badge>
+          </div>
+
           {/* NFT Preview */}
           <div className="flex items-center gap-3 p-3 bg-[#333] rounded-lg">
             <img
@@ -114,8 +128,19 @@ const ListNFTDialog = ({ nft, isOpen, onClose, contract }: ListNFTDialogProps) =
               step="0.001"
             />
             <p className="text-xs text-gray-400">
-              You'll receive the full amount minus marketplace fees
+              Marketplace fee (2.5%) will be deducted from sale proceeds
             </p>
+          </div>
+
+          {/* Warning */}
+          <div className="flex items-start gap-2 p-3 bg-yellow-900/20 border border-yellow-600/30 rounded-lg">
+            <AlertTriangle className="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" />
+            <div className="text-sm">
+              <p className="text-yellow-200 font-medium">Base Network Transaction</p>
+              <p className="text-yellow-300/80">
+                Make sure you have enough ETH on Base network for gas fees
+              </p>
+            </div>
           </div>
         </div>
 
@@ -136,7 +161,7 @@ const ListNFTDialog = ({ nft, isOpen, onClose, contract }: ListNFTDialogProps) =
             {isListing ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Listing...
+                Listing on Base...
               </>
             ) : (
               <>

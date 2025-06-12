@@ -34,15 +34,18 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, contract }: BuyNFTDialogProps) => 
     try {
       setIsBuying(true);
       
-      // TODO: Implement actual buying logic with thirdweb
-      // This would involve calling marketplace contract functions
+      // TODO: Implement actual buying logic with thirdweb marketplace
+      // This would involve calling the marketplace contract's buy function
+      // Example: await buyFromListing({ contract: marketplaceContract, listingId, quantity, recipient })
       
-      // Mock success for now
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      console.log(`Buying NFT ${nft.name} for ${nft.price} ETH on Base network`);
+      
+      // Simulate transaction time
+      await new Promise(resolve => setTimeout(resolve, 4000));
       
       toast({
         title: "NFT Purchased Successfully",
-        description: `You've successfully purchased ${nft.name} for ${nft.price} ETH`,
+        description: `You've successfully purchased ${nft.name} for ${nft.price} ETH on Base network`,
       });
       
       onClose();
@@ -50,7 +53,7 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, contract }: BuyNFTDialogProps) => 
       console.error('Purchase error:', error);
       toast({
         title: "Purchase failed",
-        description: "There was an error purchasing this NFT. Please try again.",
+        description: "There was an error purchasing this NFT. Please check your wallet balance and connection.",
         variant: "destructive",
       });
     } finally {
@@ -67,11 +70,18 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, contract }: BuyNFTDialogProps) => 
             Purchase NFT
           </DialogTitle>
           <DialogDescription className="text-gray-400">
-            Confirm your purchase of {nft.name}
+            Confirm your purchase of {nft.name} on Base network
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
+          {/* Network Badge */}
+          <div className="flex justify-center">
+            <Badge className="bg-blue-600 text-white">
+              Base Network (Chain ID: 8453)
+            </Badge>
+          </div>
+
           {/* NFT Preview */}
           <div className="flex items-center gap-3 p-3 bg-[#333] rounded-lg">
             <img
@@ -101,11 +111,15 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, contract }: BuyNFTDialogProps) => 
                 {nft.price ? (parseFloat(nft.price) * 0.025).toFixed(4) : '0'} ETH
               </span>
             </div>
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-gray-400">Base network gas fee</span>
+              <span className="text-gray-400">~0.001 ETH</span>
+            </div>
             <hr className="border-[#333]" />
             <div className="flex justify-between items-center font-bold">
-              <span className="text-white">Total</span>
+              <span className="text-white">Total (approx.)</span>
               <span className="text-[#00ff00] text-lg">
-                {nft.price ? (parseFloat(nft.price) * 1.025).toFixed(4) : '0'} ETH
+                {nft.price ? (parseFloat(nft.price) * 1.025 + 0.001).toFixed(4) : '0'} ETH
               </span>
             </div>
           </div>
@@ -114,9 +128,9 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, contract }: BuyNFTDialogProps) => 
           <div className="flex items-start gap-2 p-3 bg-yellow-900/20 border border-yellow-600/30 rounded-lg">
             <AlertTriangle className="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" />
             <div className="text-sm">
-              <p className="text-yellow-200 font-medium">Important</p>
+              <p className="text-yellow-200 font-medium">Base Network Transaction</p>
               <p className="text-yellow-300/80">
-                This transaction is irreversible. Make sure you want to purchase this NFT.
+                This transaction is irreversible. Ensure you have enough ETH on Base network.
               </p>
             </div>
           </div>
@@ -147,7 +161,7 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, contract }: BuyNFTDialogProps) => 
             {isBuying ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Processing...
+                Processing on Base...
               </>
             ) : (
               <>
