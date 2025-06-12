@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { createThirdwebClient, getContract } from "thirdweb";
 import { defineChain } from "thirdweb/chains";
@@ -8,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ShoppingCart, Tag, Eye, Wallet } from "lucide-react";
+import { Loader2, ShoppingCart, Tag, Eye } from "lucide-react";
 import NFTCard from './NFTCard';
 import ListNFTDialog from './ListNFTDialog';
 import BuyNFTDialog from './BuyNFTDialog';
@@ -18,7 +19,7 @@ const client = createThirdwebClient({
   clientId: "ac0e7bf99e676e48fa3a2d9f4c33089c",
 });
 
-// Connect to your contract on Base chain
+// Connect to your contract
 const contract = getContract({
   client,
   chain: defineChain(8453), // Base chain
@@ -61,53 +62,24 @@ const NFTMarketplace = () => {
     count: totalNFTs ? Number(totalNFTs) : 100,
   });
 
-  // Mock NFT data with your IPFS image
-  const mockNFTs: NFTData[] = [
-    {
-      id: "1",
-      name: "ChatGPT AI Art #001",
-      description: "Unique AI-generated artwork from ChatGPT featuring futuristic digital aesthetics",
-      image: "https://ipfs.io/ipfs/QmNssUivg1dVsM6bPQF5PGFAzR4Ct6MrwdXvZeYVCRVnAY/ChatGPT%20Image%20Jun%2011%2C%202025%2C%2001_01_11%20PM.png",
-      owner: account?.address || "0x1234567890123456789012345678901234567890",
-      tokenId: BigInt(1),
-      isListed: true,
-      price: "0.05",
-    },
-    {
-      id: "2", 
-      name: "Web3 Radio Genesis",
-      description: "First edition NFT from Web3 Radio platform",
-      image: "/web3radio-logo.png",
-      owner: "0x9876543210987654321098765432109876543210",
-      tokenId: BigInt(2),
-      isListed: true,
-      price: "0.1",
-    }
-  ];
-
   useEffect(() => {
-    // Use contract NFTs if available, otherwise use mock data for demonstration
-    if (contractNFTs && contractNFTs.length > 0) {
+    if (contractNFTs) {
       const formattedNfts: NFTData[] = contractNFTs.map((nft) => ({
         id: nft.id.toString(),
         name: nft.metadata.name || `NFT #${nft.id}`,
         description: nft.metadata.description || 'No description available',
         image: nft.metadata.image || '/placeholder.svg',
-        owner: nft.owner || '',
+        owner: nft.owner,
         tokenId: nft.id,
-        isListed: Math.random() > 0.6,
+        isListed: Math.random() > 0.6, // Mock listing status
         price: Math.random() > 0.6 ? (Math.random() * 2 + 0.1).toFixed(3) : undefined,
       }));
       
       setNfts(formattedNfts);
       setFilteredNfts(formattedNfts);
-    } else {
-      // Use mock data with your IPFS image
-      setNfts(mockNFTs);
-      setFilteredNfts(mockNFTs);
+      setLoading(false);
     }
-    setLoading(false);
-  }, [contractNFTs, account]);
+  }, [contractNFTs]);
 
   useEffect(() => {
     let filtered = nfts;
@@ -131,27 +103,11 @@ const NFTMarketplace = () => {
   }, [searchTerm, filter, nfts]);
 
   const handleListNFT = (nft: NFTData) => {
-    if (!account) {
-      toast({
-        title: "Wallet Not Connected",
-        description: "Please connect your wallet to list NFTs",
-        variant: "destructive",
-      });
-      return;
-    }
     setSelectedNft(nft);
     setShowListDialog(true);
   };
 
   const handleBuyNFT = (nft: NFTData) => {
-    if (!account) {
-      toast({
-        title: "Wallet Not Connected", 
-        description: "Please connect your wallet to buy NFTs",
-        variant: "destructive",
-      });
-      return;
-    }
     setSelectedNft(nft);
     setShowBuyDialog(true);
   };
@@ -159,7 +115,7 @@ const NFTMarketplace = () => {
   const handleViewNFT = (nft: NFTData) => {
     toast({
       title: "NFT Details",
-      description: `Viewing ${nft.name} owned by ${nft.owner ? nft.owner.slice(0, 6) + '...' + nft.owner.slice(-4) : 'Unknown'}`,
+      description: `Viewing ${nft.name} owned by ${nft.owner.slice(0, 6)}...${nft.owner.slice(-4)}`,
     });
   };
 
@@ -179,7 +135,7 @@ const NFTMarketplace = () => {
       {/* Header */}
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold text-white">NFT Marketplace</h1>
-        <p className="text-gray-300">Discover, collect, and trade unique digital assets on Base Network</p>
+        <p className="text-gray-300">Discover, collect, and trade unique digital assets</p>
         <div className="flex flex-wrap gap-2 justify-center">
           <Badge variant="outline" className="bg-[#111] text-[#00ff00] border-[#333]">
             Base Network
@@ -190,11 +146,6 @@ const NFTMarketplace = () => {
           <Badge variant="outline" className="bg-[#111] text-[#00ff00] border-[#333]">
             {filteredNfts.filter(nft => nft.isListed).length} Listed
           </Badge>
-          {account && (
-            <Badge variant="outline" className="bg-[#111] text-[#00ff00] border-[#333]">
-              Connected: {account.address.slice(0, 6)}...{account.address.slice(-4)}
-            </Badge>
-          )}
         </div>
       </div>
 
@@ -243,14 +194,9 @@ const NFTMarketplace = () => {
       {/* Connection Status */}
       {!account && (
         <Card className="bg-[#222] border-[#444]">
-          <CardContent className="p-6 text-center">
-            <Wallet className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-3">Connect Your Wallet</h3>
-            <p className="text-gray-300 mb-4">Connect your wallet to buy, sell, and list NFTs on Base Network</p>
-            <div className="space-y-2">
-              <p className="text-sm text-gray-400">Supported wallets: MetaMask, Coinbase Wallet, WalletConnect</p>
-              <p className="text-sm text-gray-400">Network: Base (Chain ID: 8453)</p>
-            </div>
+          <CardContent className="p-4 text-center">
+            <p className="text-gray-300 mb-3">Connect your wallet to interact with NFTs</p>
+            <p className="text-sm text-gray-400">You'll be able to buy, sell, and list NFTs once connected</p>
           </CardContent>
         </Card>
       )}

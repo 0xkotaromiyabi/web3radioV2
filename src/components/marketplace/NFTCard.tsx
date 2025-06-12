@@ -26,13 +26,6 @@ interface NFTCardProps {
 }
 
 const NFTCard = ({ nft, onList, onBuy, onView, isOwner, isConnected }: NFTCardProps) => {
-  // Helper function to safely format owner address
-  const formatOwnerAddress = (owner: string | null | undefined) => {
-    if (!owner) return 'Unknown';
-    if (isOwner) return 'You';
-    return `${owner.slice(0, 6)}...${owner.slice(-4)}`;
-  };
-
   return (
     <Card className="bg-[#222] border-[#444] hover:border-[#00ff00] transition-colors group">
       <CardContent className="p-0">
@@ -67,7 +60,9 @@ const NFTCard = ({ nft, onList, onBuy, onView, isOwner, isConnected }: NFTCardPr
           {/* Owner Info */}
           <div className="flex items-center gap-2 text-sm text-gray-400">
             <User className="w-4 h-4" />
-            <span>{formatOwnerAddress(nft.owner)}</span>
+            <span>
+              {isOwner ? 'You' : `${nft.owner.slice(0, 6)}...${nft.owner.slice(-4)}`}
+            </span>
           </div>
 
           {/* Price */}
