@@ -145,7 +145,7 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, contract }: BuyNFTDialogProps) => 
                 <>
                   <ShoppingCart className="w-4 h-4 mr-2" />
                   Mint NFT
-                </ShoppingCart>
+                </>
               )}
             </Button>
           </div>
