@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, ShoppingCart, AlertTriangle } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 
 interface NFTData {
   id: string;
@@ -14,7 +13,6 @@ interface NFTData {
   description: string;
   image: string;
   tokenId: bigint;
-  supply: bigint;
   price?: string;
   isListed?: boolean;
   listingId?: bigint;
@@ -39,15 +37,6 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, client }: BuyNFTDialogProps) => {
       setIsBuying(true);
       
       // TODO: Implement actual buying with thirdweb marketplace
-      // Example:
-      // import { buyFromListing } from "thirdweb/extensions/marketplace";
-      // const transaction = buyFromListing({
-      //   contract: marketplaceContract,
-      //   listingId: nft.listingId!,
-      //   quantity: BigInt(quantity),
-      //   recipient: account.address,
-      // });
-      
       // Mock success for now
       await new Promise(resolve => setTimeout(resolve, 3000));
       

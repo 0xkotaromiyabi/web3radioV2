@@ -11,7 +11,6 @@ interface NFTData {
   description: string;
   image: string;
   tokenId: bigint;
-  supply: bigint;
   price?: string;
   isListed?: boolean;
   listingId?: bigint;
@@ -19,13 +18,12 @@ interface NFTData {
 
 interface NFTCardProps {
   nft: NFTData;
-  onList: () => void;
   onBuy: () => void;
   isConnected: boolean;
   client: any;
 }
 
-const NFTCard = ({ nft, onList, onBuy, isConnected }: NFTCardProps) => {
+const NFTCard = ({ nft, onBuy, isConnected }: NFTCardProps) => {
   return (
     <Card className="bg-gray-800 border-gray-600 hover:border-green-500 transition-colors group">
       <CardContent className="p-0">
@@ -40,13 +38,7 @@ const NFTCard = ({ nft, onList, onBuy, isConnected }: NFTCardProps) => {
             }}
           />
           <div className="absolute top-2 right-2">
-            {nft.isListed ? (
-              <Badge className="bg-green-600 text-white">Listed</Badge>
-            ) : (
-              <Badge variant="outline" className="bg-gray-700 text-white border-gray-500">
-                Not Listed
-              </Badge>
-            )}
+            <Badge className="bg-green-600 text-white">For Sale</Badge>
           </div>
         </div>
 
@@ -57,11 +49,6 @@ const NFTCard = ({ nft, onList, onBuy, isConnected }: NFTCardProps) => {
             <p className="text-sm text-gray-400 line-clamp-2">{nft.description}</p>
           </div>
 
-          {/* Supply Info */}
-          <div className="text-sm text-gray-400">
-            Supply: {nft.supply.toString()}
-          </div>
-
           {/* Price */}
           {nft.price && (
             <div className="text-lg font-bold text-green-400">
@@ -69,31 +56,17 @@ const NFTCard = ({ nft, onList, onBuy, isConnected }: NFTCardProps) => {
             </div>
           )}
 
-          {/* Action Buttons */}
+          {/* Buy Button */}
           <div className="flex gap-2">
             {isConnected ? (
-              <>
-                {!nft.isListed && (
-                  <Button
-                    onClick={onList}
-                    size="sm"
-                    className="flex-1 bg-green-600 text-white hover:bg-green-700"
-                  >
-                    List for Sale
-                  </Button>
-                )}
-
-                {nft.isListed && nft.price && (
-                  <Button
-                    onClick={onBuy}
-                    size="sm"
-                    className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
-                  >
-                    <ShoppingCart className="w-4 h-4 mr-1" />
-                    Buy Now
-                  </Button>
-                )}
-              </>
+              <Button
+                onClick={onBuy}
+                size="sm"
+                className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
+              >
+                <ShoppingCart className="w-4 h-4 mr-1" />
+                Buy Now
+              </Button>
             ) : (
               <Button
                 disabled
