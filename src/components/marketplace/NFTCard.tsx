@@ -3,31 +3,31 @@ import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Eye, ShoppingCart, Tag, User } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 
 interface NFTData {
   id: string;
   name: string;
   description: string;
   image: string;
-  owner: string;
+  tokenId: bigint;
+  supply: bigint;
   price?: string;
   isListed?: boolean;
-  tokenId: bigint;
+  listingId?: bigint;
 }
 
 interface NFTCardProps {
   nft: NFTData;
   onList: () => void;
   onBuy: () => void;
-  onView: () => void;
-  isOwner: boolean;
   isConnected: boolean;
+  client: any;
 }
 
-const NFTCard = ({ nft, onList, onBuy, onView, isOwner, isConnected }: NFTCardProps) => {
+const NFTCard = ({ nft, onList, onBuy, isConnected }: NFTCardProps) => {
   return (
-    <Card className="bg-[#222] border-[#444] hover:border-[#00ff00] transition-colors group">
+    <Card className="bg-gray-800 border-gray-600 hover:border-green-500 transition-colors group">
       <CardContent className="p-0">
         {/* NFT Image */}
         <div className="relative aspect-square overflow-hidden rounded-t-lg">
@@ -41,9 +41,9 @@ const NFTCard = ({ nft, onList, onBuy, onView, isOwner, isConnected }: NFTCardPr
           />
           <div className="absolute top-2 right-2">
             {nft.isListed ? (
-              <Badge className="bg-[#00ff00] text-black">Listed</Badge>
+              <Badge className="bg-green-600 text-white">Listed</Badge>
             ) : (
-              <Badge variant="outline" className="bg-[#111] text-white border-[#333]">
+              <Badge variant="outline" className="bg-gray-700 text-white border-gray-500">
                 Not Listed
               </Badge>
             )}
@@ -57,57 +57,51 @@ const NFTCard = ({ nft, onList, onBuy, onView, isOwner, isConnected }: NFTCardPr
             <p className="text-sm text-gray-400 line-clamp-2">{nft.description}</p>
           </div>
 
-          {/* Owner Info */}
-          <div className="flex items-center gap-2 text-sm text-gray-400">
-            <User className="w-4 h-4" />
-            <span>
-              {isOwner ? 'You' : `${nft.owner.slice(0, 6)}...${nft.owner.slice(-4)}`}
-            </span>
+          {/* Supply Info */}
+          <div className="text-sm text-gray-400">
+            Supply: {nft.supply.toString()}
           </div>
 
           {/* Price */}
           {nft.price && (
-            <div className="text-lg font-bold text-[#00ff00]">
+            <div className="text-lg font-bold text-green-400">
               {nft.price} ETH
             </div>
           )}
 
           {/* Action Buttons */}
           <div className="flex gap-2">
-            <Button
-              onClick={onView}
-              variant="outline"
-              size="sm"
-              className="flex-1 bg-[#333] text-white border-[#555] hover:bg-[#444]"
-            >
-              <Eye className="w-4 h-4 mr-1" />
-              View
-            </Button>
-
-            {isConnected && (
+            {isConnected ? (
               <>
-                {isOwner && !nft.isListed && (
+                {!nft.isListed && (
                   <Button
                     onClick={onList}
                     size="sm"
-                    className="flex-1 bg-[#00ff00] text-black hover:bg-[#00cc00]"
+                    className="flex-1 bg-green-600 text-white hover:bg-green-700"
                   >
-                    <Tag className="w-4 h-4 mr-1" />
-                    List
+                    List for Sale
                   </Button>
                 )}
 
-                {!isOwner && nft.isListed && nft.price && (
+                {nft.isListed && nft.price && (
                   <Button
                     onClick={onBuy}
                     size="sm"
-                    className="flex-1 bg-[#00ff00] text-black hover:bg-[#00cc00]"
+                    className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
                   >
                     <ShoppingCart className="w-4 h-4 mr-1" />
-                    Buy
+                    Buy Now
                   </Button>
                 )}
               </>
+            ) : (
+              <Button
+                disabled
+                size="sm"
+                className="flex-1 bg-gray-600 text-gray-400 cursor-not-allowed"
+              >
+                Connect Wallet
+              </Button>
             )}
           </div>
         </div>

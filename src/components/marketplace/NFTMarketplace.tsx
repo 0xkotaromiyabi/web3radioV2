@@ -1,43 +1,42 @@
 
 import React, { useState, useEffect } from 'react';
-import { createThirdwebClient, getContract } from "thirdweb";
-import { defineChain } from "thirdweb/chains";
+import { getContract } from "thirdweb";
+import { base } from "thirdweb/chains";
 import { useActiveAccount, useReadContract } from "thirdweb/react";
-import { getNFTs, totalSupply } from "thirdweb/extensions/erc721";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getNFTs, totalSupply } from "thirdweb/extensions/erc1155";
+import { getAllListings } from "thirdweb/extensions/marketplace";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ShoppingCart, Tag, Eye } from "lucide-react";
+import { Loader2, ShoppingCart, Wallet } from "lucide-react";
 import NFTCard from './NFTCard';
 import ListNFTDialog from './ListNFTDialog';
 import BuyNFTDialog from './BuyNFTDialog';
-
-// Initialize thirdweb client
-const client = createThirdwebClient({
-  clientId: "ac0e7bf99e676e48fa3a2d9f4c33089c",
-});
-
-// Connect to your contract
-const contract = getContract({
-  client,
-  chain: defineChain(8453), // Base chain
-  address: "0x49FBd93023FB44fefa81351271fb703cab0f2EE4",
-});
+import WalletConnectButton from './WalletConnectButton';
 
 interface NFTData {
   id: string;
   name: string;
   description: string;
   image: string;
-  owner: string;
+  tokenId: bigint;
+  supply: bigint;
   price?: string;
   isListed?: boolean;
-  tokenId: bigint;
+  listingId?: bigint;
 }
 
-const NFTMarketplace = () => {
+interface NFTMarketplaceProps {
+  client: any;
+}
+
+// Contract addresses
+const NFT_CONTRACT_ADDRESS = "0x49FBd93023FB44fefa81351271fb703cab0f2EE4";
+const MARKETPLACE_CONTRACT_ADDRESS = "0x..."; // Deploy marketplace contract first
+
+const NFTMarketplace = ({ client }: NFTMarketplaceProps) => {
   const [nfts, setNfts] = useState<NFTData[]>([]);
   const [filteredNfts, setFilteredNfts] = useState<NFTData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,17 +49,36 @@ const NFTMarketplace = () => {
   const account = useActiveAccount();
   const { toast } = useToast();
 
+  // NFT Contract
+  const nftContract = getContract({
+    client,
+    chain: base,
+    address: NFT_CONTRACT_ADDRESS,
+  });
+
+  // Marketplace Contract (uncomment when deployed)
+  // const marketplaceContract = getContract({
+  //   client,
+  //   chain: base,
+  //   address: MARKETPLACE_CONTRACT_ADDRESS,
+  // });
+
   // Get total supply of NFTs
   const { data: totalNFTs } = useReadContract(totalSupply, {
-    contract,
+    contract: nftContract,
   });
 
   // Fetch NFTs from the contract
   const { data: contractNFTs, isLoading: nftsLoading } = useReadContract(getNFTs, {
-    contract,
+    contract: nftContract,
     start: 0,
     count: totalNFTs ? Number(totalNFTs) : 100,
   });
+
+  // Fetch marketplace listings (uncomment when marketplace is deployed)
+  // const { data: listings } = useReadContract(getAllListings, {
+  //   contract: marketplaceContract,
+  // });
 
   useEffect(() => {
     if (contractNFTs) {
@@ -69,10 +87,11 @@ const NFTMarketplace = () => {
         name: nft.metadata.name || `NFT #${nft.id}`,
         description: nft.metadata.description || 'No description available',
         image: nft.metadata.image || '/placeholder.svg',
-        owner: nft.owner,
         tokenId: nft.id,
-        isListed: Math.random() > 0.6, // Mock listing status
-        price: Math.random() > 0.6 ? (Math.random() * 2 + 0.1).toFixed(3) : undefined,
+        supply: nft.supply,
+        // Mock data for now - replace with actual marketplace data
+        isListed: Math.random() > 0.6,
+        price: Math.random() > 0.6 ? (Math.random() * 0.5 + 0.01).toFixed(4) : undefined,
       }));
       
       setNfts(formattedNfts);
@@ -103,27 +122,36 @@ const NFTMarketplace = () => {
   }, [searchTerm, filter, nfts]);
 
   const handleListNFT = (nft: NFTData) => {
+    if (!account) {
+      toast({
+        title: "Wallet not connected",
+        description: "Please connect your wallet to list NFTs",
+        variant: "destructive",
+      });
+      return;
+    }
     setSelectedNft(nft);
     setShowListDialog(true);
   };
 
   const handleBuyNFT = (nft: NFTData) => {
+    if (!account) {
+      toast({
+        title: "Wallet not connected",
+        description: "Please connect your wallet to buy NFTs",
+        variant: "destructive",
+      });
+      return;
+    }
     setSelectedNft(nft);
     setShowBuyDialog(true);
-  };
-
-  const handleViewNFT = (nft: NFTData) => {
-    toast({
-      title: "NFT Details",
-      description: `Viewing ${nft.name} owned by ${nft.owner.slice(0, 6)}...${nft.owner.slice(-4)}`,
-    });
   };
 
   if (loading || nftsLoading) {
     return (
       <div className="max-w-7xl mx-auto p-6">
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="w-8 h-8 animate-spin text-[#00ff00]" />
+          <Loader2 className="w-8 h-8 animate-spin text-green-500" />
           <span className="ml-2 text-white">Loading NFT marketplace...</span>
         </div>
       </div>
@@ -135,22 +163,36 @@ const NFTMarketplace = () => {
       {/* Header */}
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold text-white">NFT Marketplace</h1>
-        <p className="text-gray-300">Discover, collect, and trade unique digital assets</p>
+        <p className="text-gray-300">
+          Discover and trade NFTs from contract {NFT_CONTRACT_ADDRESS.slice(0, 6)}...{NFT_CONTRACT_ADDRESS.slice(-4)}
+        </p>
         <div className="flex flex-wrap gap-2 justify-center">
-          <Badge variant="outline" className="bg-[#111] text-[#00ff00] border-[#333]">
+          <Badge variant="outline" className="bg-gray-800 text-blue-400 border-gray-600">
             Base Network
           </Badge>
-          <Badge variant="outline" className="bg-[#111] text-[#00ff00] border-[#333]">
+          <Badge variant="outline" className="bg-gray-800 text-green-400 border-gray-600">
             {nfts.length} NFTs Available
           </Badge>
-          <Badge variant="outline" className="bg-[#111] text-[#00ff00] border-[#333]">
+          <Badge variant="outline" className="bg-gray-800 text-yellow-400 border-gray-600">
             {filteredNfts.filter(nft => nft.isListed).length} Listed
           </Badge>
         </div>
       </div>
 
+      {/* Wallet Connection */}
+      {!account && (
+        <Card className="bg-gray-800 border-gray-600">
+          <CardContent className="p-6 text-center">
+            <Wallet className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-white mb-2">Connect Your Wallet</h3>
+            <p className="text-gray-300 mb-4">Connect your wallet to buy, sell, and list NFTs</p>
+            <WalletConnectButton client={client} />
+          </CardContent>
+        </Card>
+      )}
+
       {/* Filters and Search */}
-      <Card className="bg-[#222] border-[#444]">
+      <Card className="bg-gray-800 border-gray-600">
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
@@ -158,7 +200,7 @@ const NFTMarketplace = () => {
                 placeholder="Search NFTs..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-[#333] border-[#555] text-white"
+                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
               />
             </div>
             <div className="flex gap-2">
@@ -166,7 +208,7 @@ const NFTMarketplace = () => {
                 variant={filter === 'all' ? 'default' : 'outline'}
                 onClick={() => setFilter('all')}
                 size="sm"
-                className={filter === 'all' ? 'bg-[#00ff00] text-black' : 'bg-[#333] text-white border-[#555]'}
+                className={filter === 'all' ? 'bg-green-600 text-white' : 'bg-gray-700 text-white border-gray-600'}
               >
                 All ({nfts.length})
               </Button>
@@ -174,7 +216,7 @@ const NFTMarketplace = () => {
                 variant={filter === 'listed' ? 'default' : 'outline'}
                 onClick={() => setFilter('listed')}
                 size="sm"
-                className={filter === 'listed' ? 'bg-[#00ff00] text-black' : 'bg-[#333] text-white border-[#555]'}
+                className={filter === 'listed' ? 'bg-green-600 text-white' : 'bg-gray-700 text-white border-gray-600'}
               >
                 Listed ({nfts.filter(nft => nft.isListed).length})
               </Button>
@@ -182,7 +224,7 @@ const NFTMarketplace = () => {
                 variant={filter === 'unlisted' ? 'default' : 'outline'}
                 onClick={() => setFilter('unlisted')}
                 size="sm"
-                className={filter === 'unlisted' ? 'bg-[#00ff00] text-black' : 'bg-[#333] text-white border-[#555]'}
+                className={filter === 'unlisted' ? 'bg-green-600 text-white' : 'bg-gray-700 text-white border-gray-600'}
               >
                 Unlisted ({nfts.filter(nft => !nft.isListed).length})
               </Button>
@@ -191,19 +233,9 @@ const NFTMarketplace = () => {
         </CardContent>
       </Card>
 
-      {/* Connection Status */}
-      {!account && (
-        <Card className="bg-[#222] border-[#444]">
-          <CardContent className="p-4 text-center">
-            <p className="text-gray-300 mb-3">Connect your wallet to interact with NFTs</p>
-            <p className="text-sm text-gray-400">You'll be able to buy, sell, and list NFTs once connected</p>
-          </CardContent>
-        </Card>
-      )}
-
       {/* NFT Grid */}
       {filteredNfts.length === 0 ? (
-        <Card className="bg-[#222] border-[#444]">
+        <Card className="bg-gray-800 border-gray-600">
           <CardContent className="p-8 text-center">
             <ShoppingCart className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-white mb-2">No NFTs Found</h3>
@@ -222,9 +254,8 @@ const NFTMarketplace = () => {
               nft={nft}
               onList={() => handleListNFT(nft)}
               onBuy={() => handleBuyNFT(nft)}
-              onView={() => handleViewNFT(nft)}
-              isOwner={account?.address === nft.owner}
               isConnected={!!account}
+              client={client}
             />
           ))}
         </div>
@@ -237,13 +268,14 @@ const NFTMarketplace = () => {
             nft={selectedNft}
             isOpen={showListDialog}
             onClose={() => setShowListDialog(false)}
-            contract={contract}
+            client={client}
+            nftContract={nftContract}
           />
           <BuyNFTDialog
             nft={selectedNft}
             isOpen={showBuyDialog}
             onClose={() => setShowBuyDialog(false)}
-            contract={contract}
+            client={client}
           />
         </>
       )}
