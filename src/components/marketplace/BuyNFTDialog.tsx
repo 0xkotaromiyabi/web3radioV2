@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useClaimNFT, useAddress } from "@thirdweb-dev/react";
+import { useAddress } from "@thirdweb-dev/react";
 import {
   Dialog,
   DialogContent,
@@ -33,8 +33,6 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, contract }: BuyNFTDialogProps) => 
   const address = useAddress();
   const { toast } = useToast();
 
-  const { mutate: claimNFT } = useClaimNFT(contract);
-
   const handleMintNFT = async () => {
     if (!address || !contract) {
       toast({
@@ -48,11 +46,25 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, contract }: BuyNFTDialogProps) => 
     setIsMinting(true);
     
     try {
-      await claimNFT({
-        to: address,
+      // For now, we'll use direct mint. In production, you would:
+      // 1. Call your backend to generate mint signature
+      // 2. Use contract.erc1155.signature.mint(signature)
+      
+      // Simulated signature-based mint process
+      console.log("Generating mint signature for:", {
+        address,
         tokenId: nft.tokenId,
         quantity: 1,
+        metadata: {
+          name: nft.name,
+          description: nft.description,
+          image: nft.image
+        }
       });
+
+      // For demo purposes, we'll use claim instead of signature mint
+      // In production, replace this with signature-based minting
+      await contract.erc1155.claim(nft.tokenId, 1);
 
       toast({
         title: "Success!",
@@ -133,7 +145,7 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, contract }: BuyNFTDialogProps) => 
                 <>
                   <ShoppingCart className="w-4 h-4 mr-2" />
                   Mint NFT
-                </>
+                </ShoppingCart>
               )}
             </Button>
           </div>
