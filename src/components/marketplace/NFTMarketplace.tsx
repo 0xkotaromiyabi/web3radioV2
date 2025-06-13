@@ -1,13 +1,9 @@
 
-import React, { useState, useEffect } from 'react';
-import { getContract } from "thirdweb";
-import { base } from "thirdweb/chains";
-import { useActiveAccount, useReadContract } from "thirdweb/react";
-import { getNFTs } from "thirdweb/extensions/erc1155";
+import React, { useState } from 'react';
+import { useContract, useNFTs, useAddress } from "@thirdweb-dev/react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, ShoppingCart, Wallet } from "lucide-react";
 import NFTCard from './NFTCard';
@@ -19,67 +15,59 @@ interface NFTData {
   name: string;
   description: string;
   image: string;
-  tokenId: bigint;
+  tokenId: string;
   price?: string;
   isListed?: boolean;
-  listingId?: bigint;
 }
 
-interface NFTMarketplaceProps {
-  client: any;
-}
-
-// Contract addresses
+// Contract address
 const NFT_CONTRACT_ADDRESS = "0x49FBd93023FB44fefa81351271fb703cab0f2EE4";
 
-const NFTMarketplace = ({ client }: NFTMarketplaceProps) => {
-  const [nfts, setNfts] = useState<NFTData[]>([]);
+const NFTMarketplace = () => {
   const [filteredNfts, setFilteredNfts] = useState<NFTData[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedNft, setSelectedNft] = useState<NFTData | null>(null);
   const [showBuyDialog, setShowBuyDialog] = useState(false);
   
-  const account = useActiveAccount();
+  const address = useAddress();
   const { toast } = useToast();
 
-  // NFT Contract
-  const nftContract = getContract({
-    client,
-    chain: base,
-    address: NFT_CONTRACT_ADDRESS,
-  });
+  // Get NFT contract
+  const { contract } = useContract(NFT_CONTRACT_ADDRESS, "edition");
+  const { data: nfts, isLoading } = useNFTs(contract);
 
-  // Fetch NFTs from the contract
-  const { data: contractNFTs, isLoading: nftsLoading } = useReadContract(getNFTs, {
-    contract: nftContract,
-    start: 0,
-    count: 100,
-  });
-
-  useEffect(() => {
-    if (contractNFTs) {
-      const formattedNfts: NFTData[] = contractNFTs.map((nft) => ({
-        id: nft.id.toString(),
-        name: nft.metadata.name || `NFT #${nft.id}`,
+  // Process NFTs when data loads
+  React.useEffect(() => {
+    if (nfts) {
+      const formattedNfts: NFTData[] = nfts.map((nft) => ({
+        id: nft.metadata.id?.toString() || "0",
+        name: nft.metadata.name || `NFT #${nft.metadata.id}`,
         description: nft.metadata.description || 'No description available',
         image: nft.metadata.image || '/placeholder.svg',
-        tokenId: nft.id,
+        tokenId: nft.metadata.id?.toString() || "0",
         // Mock data for buy-only marketplace
         isListed: true,
         price: (Math.random() * 0.5 + 0.01).toFixed(4),
       }));
       
-      setNfts(formattedNfts);
       setFilteredNfts(formattedNfts);
-      setLoading(false);
     }
-  }, [contractNFTs]);
+  }, [nfts]);
 
-  useEffect(() => {
-    let filtered = nfts;
+  // Filter NFTs based on search
+  React.useEffect(() => {
+    if (!nfts) return;
+    
+    let filtered = nfts.map((nft) => ({
+      id: nft.metadata.id?.toString() || "0",
+      name: nft.metadata.name || `NFT #${nft.metadata.id}`,
+      description: nft.metadata.description || 'No description available',
+      image: nft.metadata.image || '/placeholder.svg',
+      tokenId: nft.metadata.id?.toString() || "0",
+      isListed: true,
+      price: (Math.random() * 0.5 + 0.01).toFixed(4),
+    }));
 
-    // Apply search filter
     if (searchTerm) {
       filtered = filtered.filter(nft => 
         nft.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -91,7 +79,7 @@ const NFTMarketplace = ({ client }: NFTMarketplaceProps) => {
   }, [searchTerm, nfts]);
 
   const handleBuyNFT = (nft: NFTData) => {
-    if (!account) {
+    if (!address) {
       toast({
         title: "Wallet not connected",
         description: "Please connect your wallet to buy NFTs",
@@ -103,7 +91,7 @@ const NFTMarketplace = ({ client }: NFTMarketplaceProps) => {
     setShowBuyDialog(true);
   };
 
-  if (loading || nftsLoading) {
+  if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto p-6">
         <div className="flex items-center justify-center h-64">
@@ -127,19 +115,19 @@ const NFTMarketplace = ({ client }: NFTMarketplaceProps) => {
             Base Network
           </Badge>
           <Badge variant="outline" className="bg-gray-800 text-green-400 border-gray-600">
-            {nfts.length} NFTs Available
+            {filteredNfts.length} NFTs Available
           </Badge>
         </div>
       </div>
 
       {/* Wallet Connection */}
-      {!account && (
+      {!address && (
         <Card className="bg-gray-800 border-gray-600">
           <CardContent className="p-6 text-center">
             <Wallet className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-white mb-2">Connect Your Wallet</h3>
             <p className="text-gray-300 mb-4">Connect your wallet to buy NFTs</p>
-            <WalletConnectButton client={client} />
+            <WalletConnectButton />
           </CardContent>
         </Card>
       )}
@@ -176,8 +164,8 @@ const NFTMarketplace = ({ client }: NFTMarketplaceProps) => {
               key={nft.id}
               nft={nft}
               onBuy={() => handleBuyNFT(nft)}
-              isConnected={!!account}
-              client={client}
+              isConnected={!!address}
+              contract={contract}
             />
           ))}
         </div>
@@ -189,7 +177,7 @@ const NFTMarketplace = ({ client }: NFTMarketplaceProps) => {
           nft={selectedNft}
           isOpen={showBuyDialog}
           onClose={() => setShowBuyDialog(false)}
-          client={client}
+          contract={contract}
         />
       )}
     </div>

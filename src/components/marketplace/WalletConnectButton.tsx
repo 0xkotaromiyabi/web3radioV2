@@ -1,30 +1,14 @@
 
 import React from 'react';
-import { ConnectButton } from "thirdweb/react";
-import { createWallet, inAppWallet } from "thirdweb/wallets";
+import { ConnectWallet } from "@thirdweb-dev/react";
 
-interface WalletConnectButtonProps {
-  client: any;
-}
-
-const wallets = [
-  inAppWallet({
-    auth: {
-      options: ["google", "discord", "telegram", "email", "passkey"],
-    },
-  }),
-  createWallet("io.metamask"),
-  createWallet("com.coinbase.wallet"),
-  createWallet("me.rainbow"),
-];
-
-const WalletConnectButton = ({ client }: WalletConnectButtonProps) => {
+const WalletConnectButton = () => {
   return (
-    <ConnectButton
-      client={client}
-      wallets={wallets}
-      connectModal={{ size: "wide" }}
+    <ConnectWallet
       theme="dark"
+      btnTitle="Connect Wallet"
+      modalTitle="Choose your wallet"
+      modalSize="wide"
     />
   );
 };

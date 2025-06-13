@@ -10,17 +10,16 @@ interface NFTData {
   name: string;
   description: string;
   image: string;
-  tokenId: bigint;
+  tokenId: string;
   price?: string;
   isListed?: boolean;
-  listingId?: bigint;
 }
 
 interface NFTCardProps {
   nft: NFTData;
   onBuy: () => void;
   isConnected: boolean;
-  client: any;
+  contract: any;
 }
 
 const NFTCard = ({ nft, onBuy, isConnected }: NFTCardProps) => {
@@ -38,7 +37,7 @@ const NFTCard = ({ nft, onBuy, isConnected }: NFTCardProps) => {
             }}
           />
           <div className="absolute top-2 right-2">
-            <Badge className="bg-green-600 text-white">For Sale</Badge>
+            <Badge className="bg-green-600 text-white">Available</Badge>
           </div>
         </div>
 
@@ -65,7 +64,7 @@ const NFTCard = ({ nft, onBuy, isConnected }: NFTCardProps) => {
                 className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
               >
                 <ShoppingCart className="w-4 h-4 mr-1" />
-                Buy Now
+                Mint NFT
               </Button>
             ) : (
               <Button

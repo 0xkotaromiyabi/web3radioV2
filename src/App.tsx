@@ -6,6 +6,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThirdwebProvider } from "@thirdweb-dev/react";
 
 import Index from "./pages/Index";
 import News from "./pages/News";
@@ -23,20 +24,22 @@ export default function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/news" element={<News />} />
-            <Route path="/events" element={<Events />} />
-            <Route path="/stations" element={<Stations />} />
-            <Route path="/marketplace" element={<Marketplace />} />
-            <Route path="/cms" element={<CMS />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <ThirdwebProvider activeChain="base">
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/news" element={<News />} />
+              <Route path="/events" element={<Events />} />
+              <Route path="/stations" element={<Stations />} />
+              <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/cms" element={<CMS />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThirdwebProvider>
     </QueryClientProvider>
   );
 }
