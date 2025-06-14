@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
-import { useActiveAccount, useSendTransaction } from "thirdweb/react";
-import { prepareContractCall } from "thirdweb";
+import React from 'react';
+import { PayEmbed, getDefaultToken } from "thirdweb/react";
+import { base } from "thirdweb/chains";
 import {
   Dialog,
   DialogContent,
@@ -10,8 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
-import { Loader2, ShoppingCart } from "lucide-react";
+import { X } from "lucide-react";
 
 interface NFTData {
   id: string;
@@ -30,74 +29,21 @@ interface BuyNFTDialogProps {
   client: any;
 }
 
-const BuyNFTDialog = ({ nft, isOpen, onClose, contract }: BuyNFTDialogProps) => {
-  const [isMinting, setIsMinting] = useState(false);
-  const account = useActiveAccount();
-  const { toast } = useToast();
-  const { mutate: sendTransaction } = useSendTransaction();
-
-  const handleMintNFT = async () => {
-    if (!account || !contract) {
-      toast({
-        title: "Error",
-        description: "Wallet not connected or contract not available",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsMinting(true);
-    
-    try {
-      console.log("Minting NFT for:", {
-        address: account.address,
-        tokenId: nft.tokenId,
-        quantity: 1,
-      });
-
-      // Prepare the mint transaction using thirdweb v5
-      const transaction = prepareContractCall({
-        contract,
-        method: "function mintTo(address to, uint256 tokenId, uint256 amount)",
-        params: [account.address, BigInt(nft.tokenId), BigInt(1)],
-      });
-
-      sendTransaction(transaction, {
-        onSuccess: () => {
-          toast({
-            title: "Success!",
-            description: `Successfully minted ${nft.name}`,
-          });
-          onClose();
-          setIsMinting(false);
-        },
-        onError: (error) => {
-          console.error("Minting failed:", error);
-          toast({
-            title: "Minting Failed",
-            description: "There was an error minting the NFT. Please try again.",
-            variant: "destructive",
-          });
-          setIsMinting(false);
-        },
-      });
-    } catch (error) {
-      console.error("Minting failed:", error);
-      toast({
-        title: "Minting Failed",
-        description: "There was an error minting the NFT. Please try again.",
-        variant: "destructive",
-      });
-      setIsMinting(false);
-    }
-  };
-
+const BuyNFTDialog = ({ nft, isOpen, onClose, client }: BuyNFTDialogProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="bg-gray-800 border-gray-600 text-white max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-center">
-            Mint NFT
+          <DialogTitle className="text-xl font-bold text-center flex items-center justify-between">
+            Purchase NFT
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="text-gray-400 hover:text-white"
+            >
+              <X className="w-4 h-4" />
+            </Button>
           </DialogTitle>
         </DialogHeader>
 
@@ -123,39 +69,31 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, contract }: BuyNFTDialogProps) => 
               <Badge className="bg-green-600">Token ID: {nft.tokenId}</Badge>
               {nft.price && (
                 <span className="text-lg font-bold text-green-400">
-                  {nft.price} ETH
+                  {nft.price} USDC
                 </span>
               )}
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-3 pt-4">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              className="flex-1 border-gray-600 text-gray-300 hover:bg-gray-700"
-              disabled={isMinting}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleMintNFT}
-              disabled={isMinting || !account}
-              className="flex-1 bg-blue-600 hover:bg-blue-700"
-            >
-              {isMinting ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Minting...
-                </>
-              ) : (
-                <>
-                  <ShoppingCart className="w-4 h-4 mr-2" />
-                  Mint NFT
-                </>
-              )}
-            </Button>
+          {/* PayEmbed Component */}
+          <div className="pt-4">
+            <PayEmbed
+              client={client}
+              theme="dark"
+              payOptions={{
+                mode: "direct_payment",
+                paymentInfo: {
+                  amount: nft.price || "0.01",
+                  chain: base,
+                  token: getDefaultToken(base, "USDC"),
+                  sellerAddress: "0xEb0effdFB4dC5b3d5d3aC6ce29F3ED213E95d675",
+                },
+                metadata: {
+                  name: nft.name,
+                  image: nft.image,
+                },
+              }}
+            />
           </div>
         </div>
       </DialogContent>

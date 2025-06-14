@@ -55,30 +55,20 @@ const NFTCard = ({ nft, onBuy }: NFTCardProps) => {
           {/* Price */}
           {nft.price && (
             <div className="text-lg font-bold text-green-400">
-              {nft.price} ETH
+              {nft.price} USDC
             </div>
           )}
 
           {/* Buy Button */}
           <div className="flex gap-2">
-            {isConnected ? (
-              <Button
-                onClick={onBuy}
-                size="sm"
-                className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
-              >
-                <ShoppingCart className="w-4 h-4 mr-1" />
-                Mint NFT
-              </Button>
-            ) : (
-              <Button
-                disabled
-                size="sm"
-                className="flex-1 bg-gray-600 text-gray-400 cursor-not-allowed"
-              >
-                Connect Wallet
-              </Button>
-            )}
+            <Button
+              onClick={onBuy}
+              size="sm"
+              className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
+            >
+              <ShoppingCart className="w-4 h-4 mr-1" />
+              Buy NFT
+            </Button>
           </div>
         </div>
       </CardContent>

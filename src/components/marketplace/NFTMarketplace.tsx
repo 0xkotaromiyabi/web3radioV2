@@ -60,9 +60,9 @@ const NFTMarketplace = () => {
         description: nft.metadata?.description || 'No description available',
         image: nft.metadata?.image || '/placeholder.svg',
         tokenId: nft.id.toString(),
-        // Mock data for buy-only marketplace
+        // Mock data for buy-only marketplace with USDC pricing
         isListed: true,
-        price: (Math.random() * 0.5 + 0.01).toFixed(4),
+        price: (Math.random() * 50 + 5).toFixed(0), // Random price between 5-55 USDC
       }));
       
       setFilteredNfts(formattedNfts);
@@ -80,7 +80,7 @@ const NFTMarketplace = () => {
       image: nft.metadata?.image || '/placeholder.svg',
       tokenId: nft.id.toString(),
       isListed: true,
-      price: (Math.random() * 0.5 + 0.01).toFixed(4),
+      price: (Math.random() * 50 + 5).toFixed(0), // Random price between 5-55 USDC
     }));
 
     if (searchTerm) {
@@ -115,7 +115,7 @@ const NFTMarketplace = () => {
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold text-white">NFT Marketplace</h1>
         <p className="text-gray-300">
-          Buy NFTs from contract {NFT_CONTRACT_ADDRESS.slice(0, 6)}...{NFT_CONTRACT_ADDRESS.slice(-4)}
+          Buy NFTs with USDC from contract {NFT_CONTRACT_ADDRESS.slice(0, 6)}...{NFT_CONTRACT_ADDRESS.slice(-4)}
         </p>
         <div className="flex flex-wrap gap-2 justify-center">
           <Badge variant="outline" className="bg-gray-800 text-blue-400 border-gray-600">
@@ -123,6 +123,9 @@ const NFTMarketplace = () => {
           </Badge>
           <Badge variant="outline" className="bg-gray-800 text-green-400 border-gray-600">
             {filteredNfts.length} NFTs Available
+          </Badge>
+          <Badge variant="outline" className="bg-gray-800 text-yellow-400 border-gray-600">
+            USDC Payments
           </Badge>
         </div>
       </div>
@@ -132,7 +135,7 @@ const NFTMarketplace = () => {
         <CardContent className="p-6 text-center">
           <Wallet className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-white mb-2">Connect Your Wallet</h3>
-          <p className="text-gray-300 mb-4">Connect your wallet to buy NFTs</p>
+          <p className="text-gray-300 mb-4">Connect your wallet to buy NFTs with USDC</p>
           <WalletConnectButton />
         </CardContent>
       </Card>
