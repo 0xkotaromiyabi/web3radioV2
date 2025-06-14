@@ -6,7 +6,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ThirdwebProvider } from "@thirdweb-dev/react";
+import { ThirdwebProvider } from "thirdweb/react";
 
 import Index from "./pages/Index";
 import News from "./pages/News";
@@ -24,7 +24,7 @@ export default function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThirdwebProvider activeChain="base">
+      <ThirdwebProvider>
         <TooltipProvider>
           <Toaster />
           <Sonner />

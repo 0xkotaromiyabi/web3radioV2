@@ -1,6 +1,8 @@
 
 import React, { useState } from 'react';
-import { useAddress } from "@thirdweb-dev/react";
+import { useActiveAccount, useSendTransaction } from "thirdweb/react";
+import { prepareContractCall } from "thirdweb";
+import { claimTo } from "thirdweb/extensions/erc1155";
 import {
   Dialog,
   DialogContent,
@@ -26,15 +28,17 @@ interface BuyNFTDialogProps {
   isOpen: boolean;
   onClose: () => void;
   contract: any;
+  client: any;
 }
 
 const BuyNFTDialog = ({ nft, isOpen, onClose, contract }: BuyNFTDialogProps) => {
   const [isMinting, setIsMinting] = useState(false);
-  const address = useAddress();
+  const account = useActiveAccount();
   const { toast } = useToast();
+  const { mutate: sendTransaction } = useSendTransaction();
 
   const handleMintNFT = async () => {
-    if (!address || !contract) {
+    if (!account || !contract) {
       toast({
         title: "Error",
         description: "Wallet not connected or contract not available",
@@ -46,32 +50,42 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, contract }: BuyNFTDialogProps) => 
     setIsMinting(true);
     
     try {
-      // For now, we'll use direct mint. In production, you would:
-      // 1. Call your backend to generate mint signature
-      // 2. Use contract.erc1155.signature.mint(signature)
-      
-      // Simulated signature-based mint process
-      console.log("Generating mint signature for:", {
-        address,
+      console.log("Minting NFT for:", {
+        address: account.address,
         tokenId: nft.tokenId,
         quantity: 1,
-        metadata: {
-          name: nft.name,
-          description: nft.description,
-          image: nft.image
-        }
       });
 
-      // For demo purposes, we'll use claim instead of signature mint
-      // In production, replace this with signature-based minting
-      await contract.erc1155.claim(nft.tokenId, 1);
-
-      toast({
-        title: "Success!",
-        description: `Successfully minted ${nft.name}`,
+      // Prepare the claim transaction using thirdweb v5
+      const transaction = prepareContractCall({
+        contract,
+        method: claimTo,
+        params: [
+          account.address, // to
+          BigInt(nft.tokenId), // tokenId
+          BigInt(1), // quantity
+        ],
       });
-      
-      onClose();
+
+      sendTransaction(transaction, {
+        onSuccess: () => {
+          toast({
+            title: "Success!",
+            description: `Successfully minted ${nft.name}`,
+          });
+          onClose();
+          setIsMinting(false);
+        },
+        onError: (error) => {
+          console.error("Minting failed:", error);
+          toast({
+            title: "Minting Failed",
+            description: "There was an error minting the NFT. Please try again.",
+            variant: "destructive",
+          });
+          setIsMinting(false);
+        },
+      });
     } catch (error) {
       console.error("Minting failed:", error);
       toast({
@@ -79,7 +93,6 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, contract }: BuyNFTDialogProps) => 
         description: "There was an error minting the NFT. Please try again.",
         variant: "destructive",
       });
-    } finally {
       setIsMinting(false);
     }
   };
@@ -133,7 +146,7 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, contract }: BuyNFTDialogProps) => 
             </Button>
             <Button
               onClick={handleMintNFT}
-              disabled={isMinting || !address}
+              disabled={isMinting || !account}
               className="flex-1 bg-blue-600 hover:bg-blue-700"
             >
               {isMinting ? (

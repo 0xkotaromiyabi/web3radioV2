@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart } from "lucide-react";
+import { useActiveAccount } from "thirdweb/react";
 
 interface NFTData {
   id: string;
@@ -18,11 +19,14 @@ interface NFTData {
 interface NFTCardProps {
   nft: NFTData;
   onBuy: () => void;
-  isConnected: boolean;
   contract: any;
+  client: any;
 }
 
-const NFTCard = ({ nft, onBuy, isConnected }: NFTCardProps) => {
+const NFTCard = ({ nft, onBuy }: NFTCardProps) => {
+  const account = useActiveAccount();
+  const isConnected = !!account;
+
   return (
     <Card className="bg-gray-800 border-gray-600 hover:border-green-500 transition-colors group">
       <CardContent className="p-0">
