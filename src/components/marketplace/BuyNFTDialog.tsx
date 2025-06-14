@@ -123,7 +123,7 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, client }: BuyNFTDialogProps) => {
                   paymentInfo: {
                     amount: nft.price || "0.005",
                     chain: base,
-                    sellerAddress: "0xEb0effdFB4dC5b3d5d3aC6ce29F3ED213E95d675",
+                    sellerAddress: "0x242DfB7849544eE242b2265cA7E585bdec60456B",
                   },
                   metadata: {
                     name: nft.name,
@@ -151,7 +151,7 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, client }: BuyNFTDialogProps) => {
                     amount: usdcPrice,
                     chain: base,
                     token: getDefaultToken(base, "USDC"),
-                    sellerAddress: "0xEb0effdFB4dC5b3d5d3aC6ce29F3ED213E95d675",
+                    sellerAddress: "0x242DfB7849544eE242b2265cA7E585bdec60456B",
                   },
                   metadata: {
                     name: nft.name,
