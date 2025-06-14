@@ -45,6 +45,7 @@
     "@solana/web3.js": "^1.98.0",
     "@supabase/supabase-js": "^2.49.4",
     "@tanstack/react-query": "^5.62.15",
+    "@thirdweb-dev/pay": "^0.1.8",
     "@thirdweb-dev/react": "^4.9.4",
     "@thirdweb-dev/sdk": "^4.0.99",
     "@tonconnect/ui-react": "^2.0.9",

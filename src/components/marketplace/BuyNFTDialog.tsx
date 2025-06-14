@@ -1,9 +1,10 @@
+
 import React from 'react';
 import {
   useContract,
   useAddress,
   useDisconnect,
-  useActiveChainId,
+  useActiveChain,
 } from "@thirdweb-dev/react";
 import { PayEmbed } from "@thirdweb-dev/pay";
 import { base } from "@/contexts/W3RTokenContext";
@@ -20,12 +21,14 @@ interface BuyNFTDialogProps {
   nft: any;
   isOpen: boolean;
   onClose: () => void;
+  contract?: any;
+  client?: any;
 }
 
 const BuyNFTDialog: React.FC<BuyNFTDialogProps> = ({ nft, isOpen, onClose }) => {
   const address = useAddress();
   const disconnect = useDisconnect();
-  const chainId = useActiveChainId();
+  const activeChain = useActiveChain();
   const { contract } = useContract("0x7a050911ca145a00959900d3847a9dd7f7364891");
   const client = {
     clientId: "ac0e7bf99e676e48fa3a2d9f4c33089c",
