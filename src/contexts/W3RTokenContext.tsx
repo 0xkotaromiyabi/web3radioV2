@@ -10,11 +10,10 @@ interface W3RTokenContextType {
   balance: string;
   isLoading: boolean;
   listeningTime: number;
-  pendingRewards: number;
-  claimEligible: boolean;
+  rewardEligible: boolean;
+  nextRewardIn: number;
   refreshBalance: () => void;
   updateListeningTime: (seconds: number) => void;
-  getPendingRewards: () => number;
 }
 
 const W3RTokenContext = createContext<W3RTokenContextType | undefined>(undefined);
@@ -23,7 +22,7 @@ const W3RTokenContext = createContext<W3RTokenContextType | undefined>(undefined
 const base = defineChain({
   id: 8453,
   name: "Base",
-  rpc: "https://mainnet.base.org",
+  rpc: ["https://mainnet.base.org"],
 });
 
 const client = createThirdwebClient({
@@ -42,12 +41,7 @@ const contract = getContract({
 export const W3RTokenProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const account = useActiveAccount();
   const [listeningTime, setListeningTime] = useState(0);
-  const [pendingRewards, setPendingRewards] = useState(0);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-
-  // Constants
-  const CLAIM_THRESHOLD = 50000; // 50,000 W3R minimum to claim
-  const REWARD_RATE = 100; // 100 W3R per hour
 
   // Get W3R token balance
   const { data: balance, isLoading } = useReadContract(balanceOf, {
@@ -59,55 +53,40 @@ export const W3RTokenProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     },
   });
 
-  // Load listening time and pending rewards from localStorage
+  // Load listening time from localStorage
   useEffect(() => {
     if (account?.address) {
       const savedTime = localStorage.getItem(`w3r-listening-time-${account.address}`);
-      const savedPending = localStorage.getItem(`w3r-pending-rewards-${account.address}`);
-      
       if (savedTime) {
         setListeningTime(parseInt(savedTime, 10));
-      }
-      if (savedPending) {
-        setPendingRewards(parseInt(savedPending, 10));
       }
     }
   }, [account?.address]);
 
   const updateListeningTime = (seconds: number) => {
     setListeningTime(seconds);
-    
-    // Calculate pending rewards based on listening time
-    const hoursListened = Math.floor(seconds / 3600);
-    const newPendingRewards = hoursListened * REWARD_RATE;
-    setPendingRewards(newPendingRewards);
-    
     if (account?.address) {
       localStorage.setItem(`w3r-listening-time-${account.address}`, seconds.toString());
-      localStorage.setItem(`w3r-pending-rewards-${account.address}`, newPendingRewards.toString());
     }
-  };
-
-  const getPendingRewards = () => {
-    return pendingRewards;
   };
 
   const refreshBalance = () => {
     setRefreshTrigger(prev => prev + 1);
   };
 
-  // Check if user is eligible to claim (has >= 50,000 W3R pending)
-  const claimEligible = pendingRewards >= CLAIM_THRESHOLD;
+  // Calculate reward eligibility (every 3600 seconds = 1 hour)
+  const REWARD_INTERVAL = 3600; // 1 hour in seconds
+  const rewardEligible = listeningTime >= REWARD_INTERVAL && listeningTime % REWARD_INTERVAL < 60;
+  const nextRewardIn = REWARD_INTERVAL - (listeningTime % REWARD_INTERVAL);
 
   const value: W3RTokenContextType = {
     balance: balance ? (Number(balance) / 10**18).toFixed(2) : "0.00",
     isLoading,
     listeningTime,
-    pendingRewards,
-    claimEligible,
+    rewardEligible,
+    nextRewardIn,
     refreshBalance,
     updateListeningTime,
-    getPendingRewards,
   };
 
   return (
