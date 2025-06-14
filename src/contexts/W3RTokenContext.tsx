@@ -46,21 +46,34 @@ export const W3RTokenProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       console.log('Loading user data for:', account.address);
       
       // Load balance from smart contract
-      const tokenBalance = await smartContract.getTokenBalance(account.address);
-      setBalance(tokenBalance);
+      try {
+        const tokenBalance = await smartContract.getTokenBalance(account.address);
+        setBalance(tokenBalance);
+      } catch (error) {
+        console.error('Error loading token balance:', error);
+        setBalance("0.00");
+      }
 
       // Load verified listening time from backend
-      const verifiedTime = await backendApi.getVerifiedListeningTime(account.address);
-      setListeningTime(verifiedTime);
+      try {
+        const verifiedTime = await backendApi.getVerifiedListeningTime(account.address);
+        setListeningTime(verifiedTime);
+      } catch (error) {
+        console.error('Error loading verified listening time:', error);
+      }
 
       // Check reward eligibility
-      const eligibility = await backendApi.checkRewardEligibility(account.address);
-      setRewardEligible(eligibility.eligible);
-      setNextRewardIn(eligibility.nextRewardIn);
+      try {
+        const eligibility = await backendApi.checkRewardEligibility(account.address);
+        setRewardEligible(eligibility.eligible);
+        setNextRewardIn(eligibility.nextRewardIn);
+      } catch (error) {
+        console.error('Error checking reward eligibility:', error);
+      }
 
       // Also load from localStorage as backup
       const savedTime = localStorage.getItem(`w3r-listening-time-${account.address}`);
-      if (savedTime && verifiedTime === 0) {
+      if (savedTime && listeningTime === 0) {
         const localTime = parseInt(savedTime, 10);
         setListeningTime(localTime);
         console.log('Loaded listening time from localStorage:', localTime);

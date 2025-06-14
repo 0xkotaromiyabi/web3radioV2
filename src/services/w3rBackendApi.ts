@@ -34,11 +34,11 @@ export class W3RBackendApi {
       console.log('Submitting listening session:', session);
       
       const { data, error } = await supabase.functions.invoke('w3r-api', {
-        body: session,
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }
+        body: {
+          ...session,
+          action: 'submit_session'
+        },
+        method: 'POST'
       });
 
       if (error) {
@@ -48,9 +48,9 @@ export class W3RBackendApi {
 
       console.log('Session submitted successfully:', data);
       return {
-        success: data.success,
-        verifiedTime: data.verifiedTime,
-        sessionId: data.sessionId
+        success: data?.success || false,
+        verifiedTime: data?.verifiedTime || 0,
+        sessionId: data?.sessionId
       };
     } catch (error) {
       console.error('Error submitting listening session:', error);
@@ -62,7 +62,11 @@ export class W3RBackendApi {
   async getVerifiedListeningTime(userAddress: string): Promise<number> {
     try {
       const { data, error } = await supabase.functions.invoke('w3r-api', {
-        method: 'GET',
+        body: {
+          action: 'get_listening_time',
+          userAddress
+        },
+        method: 'POST'
       });
 
       if (error) {
@@ -70,7 +74,7 @@ export class W3RBackendApi {
         return 0;
       }
 
-      return data.totalListeningTime || 0;
+      return data?.totalListeningTime || 0;
     } catch (error) {
       console.error('Error getting verified listening time:', error);
       return 0;
@@ -81,11 +85,11 @@ export class W3RBackendApi {
   async requestRewardSignature(userAddress: string): Promise<RewardClaim | null> {
     try {
       const { data, error } = await supabase.functions.invoke('w3r-api', {
-        body: { userAddress },
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }
+        body: {
+          action: 'claim_reward',
+          userAddress
+        },
+        method: 'POST'
       });
 
       if (error) {
@@ -93,7 +97,7 @@ export class W3RBackendApi {
         return null;
       }
 
-      return data;
+      return data || null;
     } catch (error) {
       console.error('Error requesting reward signature:', error);
       return null;
@@ -108,7 +112,11 @@ export class W3RBackendApi {
   }> {
     try {
       const { data, error } = await supabase.functions.invoke('w3r-api', {
-        method: 'GET',
+        body: {
+          action: 'check_eligibility',
+          userAddress
+        },
+        method: 'POST'
       });
 
       if (error) {
@@ -116,7 +124,7 @@ export class W3RBackendApi {
         return { eligible: false, nextRewardIn: 0, availableRewards: 0 };
       }
 
-      return data;
+      return data || { eligible: false, nextRewardIn: 0, availableRewards: 0 };
     } catch (error) {
       console.error('Error checking reward eligibility:', error);
       return { eligible: false, nextRewardIn: 0, availableRewards: 0 };

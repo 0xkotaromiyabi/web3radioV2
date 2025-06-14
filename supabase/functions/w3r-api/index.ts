@@ -30,8 +30,10 @@ interface ListeningSession {
   stationId?: string
 }
 
-interface RewardClaimRequest {
-  userAddress: string
+interface APIRequest {
+  action: string
+  userAddress?: string
+  [key: string]: any
 }
 
 // Rate limiting function
@@ -41,59 +43,64 @@ async function checkRateLimit(userAddress: string, actionType: string): Promise<
 
   const windowStart = new Date(Date.now() - limit.windowMinutes * 60 * 1000)
 
-  // Get current rate limit record
-  const { data: rateLimitData } = await supabase
-    .from('rate_limiting')
-    .select('*')
-    .eq('user_address', userAddress)
-    .eq('action_type', actionType)
-    .single()
-
-  if (!rateLimitData) {
-    // Create new rate limit record
-    await supabase
+  try {
+    // Get current rate limit record
+    const { data: rateLimitData } = await supabase
       .from('rate_limiting')
-      .insert({
-        user_address: userAddress,
-        action_type: actionType,
-        action_count: 1,
-        last_action: new Date().toISOString()
-      })
-    return true
-  }
-
-  // Check if we're within the time window
-  const lastAction = new Date(rateLimitData.last_action)
-  if (lastAction < windowStart) {
-    // Reset counter for new window
-    await supabase
-      .from('rate_limiting')
-      .update({
-        action_count: 1,
-        last_action: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
+      .select('*')
       .eq('user_address', userAddress)
       .eq('action_type', actionType)
-    return true
-  }
+      .single()
 
-  // Check if under limit
-  if (rateLimitData.action_count < limit.maxRequests) {
-    // Increment counter
-    await supabase
-      .from('rate_limiting')
-      .update({
-        action_count: rateLimitData.action_count + 1,
-        last_action: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      .eq('user_address', userAddress)
-      .eq('action_type', actionType)
-    return true
-  }
+    if (!rateLimitData) {
+      // Create new rate limit record
+      await supabase
+        .from('rate_limiting')
+        .insert({
+          user_address: userAddress,
+          action_type: actionType,
+          action_count: 1,
+          last_action: new Date().toISOString()
+        })
+      return true
+    }
 
-  return false // Rate limit exceeded
+    // Check if we're within the time window
+    const lastAction = new Date(rateLimitData.last_action)
+    if (lastAction < windowStart) {
+      // Reset counter for new window
+      await supabase
+        .from('rate_limiting')
+        .update({
+          action_count: 1,
+          last_action: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_address', userAddress)
+        .eq('action_type', actionType)
+      return true
+    }
+
+    // Check if under limit
+    if (rateLimitData.action_count < limit.maxRequests) {
+      // Increment counter
+      await supabase
+        .from('rate_limiting')
+        .update({
+          action_count: rateLimitData.action_count + 1,
+          last_action: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_address', userAddress)
+        .eq('action_type', actionType)
+      return true
+    }
+
+    return false // Rate limit exceeded
+  } catch (error) {
+    console.error('Rate limit check error:', error)
+    return true // Allow on error
+  }
 }
 
 // Validate listening session
@@ -143,19 +150,13 @@ async function handleSubmitSession(session: ListeningSession) {
   // Check rate limit
   const rateLimitOk = await checkRateLimit(session.userAddress, 'submit_session')
   if (!rateLimitOk) {
-    return Response.json(
-      { success: false, error: 'Rate limit exceeded. Try again later.' },
-      { status: 429, headers: corsHeaders }
-    )
+    return { success: false, error: 'Rate limit exceeded. Try again later.' }
   }
 
   // Validate session
   const validation = validateListeningSession(session)
   if (!validation.valid) {
-    return Response.json(
-      { success: false, error: validation.error },
-      { status: 400, headers: corsHeaders }
-    )
+    return { success: false, error: validation.error }
   }
 
   try {
@@ -174,24 +175,18 @@ async function handleSubmitSession(session: ListeningSession) {
 
     if (error) {
       console.error('Database error:', error)
-      return Response.json(
-        { success: false, error: 'Failed to store session' },
-        { status: 500, headers: corsHeaders }
-      )
+      return { success: false, error: 'Failed to store session' }
     }
 
-    return Response.json({
+    return {
       success: true,
       verifiedTime: validation.verifiedDuration,
       sessionId: data[0].id
-    }, { headers: corsHeaders })
+    }
 
   } catch (error) {
     console.error('Error submitting session:', error)
-    return Response.json(
-      { success: false, error: 'Internal server error' },
-      { status: 500, headers: corsHeaders }
-    )
+    return { success: false, error: 'Internal server error' }
   }
 }
 
@@ -206,36 +201,27 @@ async function handleGetListeningTime(userAddress: string) {
 
     if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
       console.error('Database error:', error)
-      return Response.json(
-        { error: 'Failed to fetch listening time' },
-        { status: 500, headers: corsHeaders }
-      )
+      return { error: 'Failed to fetch listening time' }
     }
 
-    return Response.json({
+    return {
       totalListeningTime: data?.verified_listening_time || 0
-    }, { headers: corsHeaders })
+    }
 
   } catch (error) {
     console.error('Error getting listening time:', error)
-    return Response.json(
-      { error: 'Internal server error' },
-      { status: 500, headers: corsHeaders }
-    )
+    return { error: 'Internal server error' }
   }
 }
 
 // Request reward claim signature endpoint
-async function handleRewardClaim(request: RewardClaimRequest) {
-  console.log('Processing reward claim for:', request.userAddress)
+async function handleRewardClaim(userAddress: string) {
+  console.log('Processing reward claim for:', userAddress)
 
   // Check rate limit
-  const rateLimitOk = await checkRateLimit(request.userAddress, 'claim_reward')
+  const rateLimitOk = await checkRateLimit(userAddress, 'claim_reward')
   if (!rateLimitOk) {
-    return Response.json(
-      { error: 'Rate limit exceeded. Try again later.' },
-      { status: 429, headers: corsHeaders }
-    )
+    return { error: 'Rate limit exceeded. Try again later.' }
   }
 
   try {
@@ -243,22 +229,16 @@ async function handleRewardClaim(request: RewardClaimRequest) {
     const { data: userStats, error: statsError } = await supabase
       .from('user_stats')
       .select('*')
-      .eq('user_address', request.userAddress)
+      .eq('user_address', userAddress)
       .single()
 
     if (statsError && statsError.code !== 'PGRST116') {
       console.error('Database error:', statsError)
-      return Response.json(
-        { error: 'Failed to fetch user stats' },
-        { status: 500, headers: corsHeaders }
-      )
+      return { error: 'Failed to fetch user stats' }
     }
 
     if (!userStats || userStats.verified_listening_time < 3600) { // 1 hour = 3600 seconds
-      return Response.json(
-        { error: 'Insufficient listening time for reward' },
-        { status: 400, headers: corsHeaders }
-      )
+      return { error: 'Insufficient listening time for reward' }
     }
 
     // Check if user has unclaimed rewards
@@ -266,7 +246,7 @@ async function handleRewardClaim(request: RewardClaimRequest) {
     const { data: claimedRewards } = await supabase
       .from('reward_claims')
       .select('reward_amount')
-      .eq('user_address', request.userAddress)
+      .eq('user_address', userAddress)
       .eq('claimed', true)
 
     const totalClaimed = claimedRewards?.reduce((sum, claim) => sum + parseInt(claim.reward_amount), 0) || 0
@@ -274,22 +254,19 @@ async function handleRewardClaim(request: RewardClaimRequest) {
     const availableReward = totalEligible - totalClaimed
 
     if (availableReward <= 0) {
-      return Response.json(
-        { error: 'No rewards available to claim' },
-        { status: 400, headers: corsHeaders }
-      )
+      return { error: 'No rewards available to claim' }
     }
 
     // Generate signature for reward claim
     const nonce = Date.now()
     const rewardAmount = Math.min(availableReward, 100).toString() // Claim up to 100 W3R at once
-    const signature = generateRewardSignature(request.userAddress, userStats.verified_listening_time, rewardAmount, nonce)
+    const signature = generateRewardSignature(userAddress, userStats.verified_listening_time, rewardAmount, nonce)
 
     // Store reward claim record
     const { data, error } = await supabase
       .from('reward_claims')
       .insert({
-        user_address: request.userAddress,
+        user_address: userAddress,
         listening_time: userStats.verified_listening_time,
         reward_amount: rewardAmount,
         signature,
@@ -300,26 +277,20 @@ async function handleRewardClaim(request: RewardClaimRequest) {
 
     if (error) {
       console.error('Failed to store reward claim:', error)
-      return Response.json(
-        { error: 'Failed to process reward claim' },
-        { status: 500, headers: corsHeaders }
-      )
+      return { error: 'Failed to process reward claim' }
     }
 
-    return Response.json({
-      userAddress: request.userAddress,
+    return {
+      userAddress: userAddress,
       listeningTime: userStats.verified_listening_time,
       rewardAmount,
       signature,
       nonce
-    }, { headers: corsHeaders })
+    }
 
   } catch (error) {
     console.error('Error processing reward claim:', error)
-    return Response.json(
-      { error: 'Internal server error' },
-      { status: 500, headers: corsHeaders }
-    )
+    return { error: 'Internal server error' }
   }
 }
 
@@ -333,11 +304,11 @@ async function handleCheckEligibility(userAddress: string) {
       .single()
 
     if (!userStats) {
-      return Response.json({
+      return {
         eligible: false,
         nextRewardIn: 3600,
         availableRewards: 0
-      }, { headers: corsHeaders })
+      }
     }
 
     const eligibleHours = Math.floor(userStats.verified_listening_time / 3600)
@@ -353,18 +324,15 @@ async function handleCheckEligibility(userAddress: string) {
     
     const timeToNextReward = 3600 - (userStats.verified_listening_time % 3600)
 
-    return Response.json({
+    return {
       eligible: availableRewards > 0,
       nextRewardIn: timeToNextReward,
       availableRewards
-    }, { headers: corsHeaders })
+    }
 
   } catch (error) {
     console.error('Error checking eligibility:', error)
-    return Response.json(
-      { error: 'Internal server error' },
-      { status: 500, headers: corsHeaders }
-    )
+    return { error: 'Internal server error' }
   }
 }
 
@@ -375,49 +343,68 @@ serve(async (req) => {
   }
 
   try {
-    const url = new URL(req.url)
-    const path = url.pathname
+    console.log(`${req.method} ${req.url}`)
 
-    console.log(`${req.method} ${path}`)
-
-    // Route handling
-    if (req.method === 'POST' && path === '/listening/submit') {
-      const session: ListeningSession = await req.json()
-      return await handleSubmitSession(session)
-    }
+    // Parse request body
+    let requestData: APIRequest = {}
     
-    if (req.method === 'GET' && path.startsWith('/listening/')) {
-      const userAddress = path.split('/').pop()
-      if (!userAddress) {
+    if (req.method === 'POST') {
+      try {
+        requestData = await req.json()
+      } catch (e) {
+        console.error('Failed to parse JSON:', e)
         return Response.json(
-          { error: 'User address required' },
+          { error: 'Invalid JSON' },
           { status: 400, headers: corsHeaders }
         )
       }
-      return await handleGetListeningTime(userAddress)
-    }
-    
-    if (req.method === 'POST' && path === '/rewards/claim') {
-      const request: RewardClaimRequest = await req.json()
-      return await handleRewardClaim(request)
-    }
-    
-    if (req.method === 'GET' && path.startsWith('/rewards/check/')) {
-      const userAddress = path.split('/').pop()
-      if (!userAddress) {
-        return Response.json(
-          { error: 'User address required' },
-          { status: 400, headers: corsHeaders }
-        )
-      }
-      return await handleCheckEligibility(userAddress)
     }
 
-    // Default 404 response
-    return Response.json(
-      { error: 'Not found' },
-      { status: 404, headers: corsHeaders }
-    )
+    const { action } = requestData
+
+    // Route handling based on action
+    switch (action) {
+      case 'submit_session':
+        const sessionData = requestData as ListeningSession
+        const result = await handleSubmitSession(sessionData)
+        return Response.json(result, { headers: corsHeaders })
+      
+      case 'get_listening_time':
+        if (!requestData.userAddress) {
+          return Response.json(
+            { error: 'User address required' },
+            { status: 400, headers: corsHeaders }
+          )
+        }
+        const timeResult = await handleGetListeningTime(requestData.userAddress)
+        return Response.json(timeResult, { headers: corsHeaders })
+      
+      case 'claim_reward':
+        if (!requestData.userAddress) {
+          return Response.json(
+            { error: 'User address required' },
+            { status: 400, headers: corsHeaders }
+          )
+        }
+        const claimResult = await handleRewardClaim(requestData.userAddress)
+        return Response.json(claimResult, { headers: corsHeaders })
+      
+      case 'check_eligibility':
+        if (!requestData.userAddress) {
+          return Response.json(
+            { error: 'User address required' },
+            { status: 400, headers: corsHeaders }
+          )
+        }
+        const eligibilityResult = await handleCheckEligibility(requestData.userAddress)
+        return Response.json(eligibilityResult, { headers: corsHeaders })
+      
+      default:
+        return Response.json(
+          { error: 'Invalid action' },
+          { status: 400, headers: corsHeaders }
+        )
+    }
 
   } catch (error) {
     console.error('Unhandled error:', error)
