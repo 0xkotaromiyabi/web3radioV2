@@ -22,7 +22,7 @@ const W3RTokenContext = createContext<W3RTokenContextType | undefined>(undefined
 const base = defineChain({
   id: 8453,
   name: "Base",
-  rpc: ["https://mainnet.base.org"],
+  rpc: "https://mainnet.base.org",
 });
 
 const client = createThirdwebClient({
