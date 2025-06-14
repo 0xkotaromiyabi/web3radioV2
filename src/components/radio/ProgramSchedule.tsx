@@ -15,10 +15,10 @@ const ProgramSchedule = ({ isMobile }: ProgramScheduleProps) => {
   ];
 
   return (
-    <div className={`h-${isMobile ? '12' : '8'} bg-[#0a0a0a] border border-[#333] mb-2 overflow-hidden`}>
-      <div className="animate-marquee whitespace-nowrap">
+    <div className={`${isMobile ? 'h-10 sm:h-12' : 'h-6 sm:h-8'} bg-[#0a0a0a] border border-[#333] mb-2 overflow-hidden relative`}>
+      <div className="animate-marquee whitespace-nowrap flex items-center h-full">
         {upcomingPrograms.map((program, index) => (
-          <span key={index} className="text-[#00ff00] font-mono text-sm mx-4">
+          <span key={index} className="text-[#00ff00] font-mono text-xs sm:text-sm mx-4 inline-flex items-center">
             📻 {program}
           </span>
         ))}

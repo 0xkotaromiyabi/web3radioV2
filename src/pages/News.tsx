@@ -46,7 +46,7 @@ const News = () => {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
         <NavBar />
-        <div className="container py-12 flex justify-center items-center">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex justify-center items-center">
           <Loader className="h-8 w-8 animate-spin text-green-500" />
         </div>
       </div>
@@ -56,35 +56,35 @@ const News = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
       <NavBar />
-      <div className="container py-12">
-        <h1 className="text-3xl font-bold mb-8 text-green-400">Latest News</h1>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 sm:mb-8 text-green-400 text-center lg:text-left">Latest News</h1>
         
         {news.length > 0 ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {news.map((item) => (
-              <Card key={item.id} className="bg-gray-800 border-green-500 overflow-hidden">
+              <Card key={item.id} className="bg-gray-800 border-green-500 overflow-hidden hover:shadow-lg hover:shadow-green-500/10 transition-all duration-300">
                 {item.image_url && (
-                  <div className="w-full h-48 overflow-hidden">
+                  <div className="w-full h-40 sm:h-48 overflow-hidden">
                     <img 
                       src={item.image_url} 
                       alt={item.title}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     />
                   </div>
                 )}
-                <CardHeader>
-                  <CardTitle className="text-green-400">{item.title}</CardTitle>
-                  <CardDescription className="text-gray-300">{new Date(item.date).toLocaleDateString()}</CardDescription>
+                <CardHeader className="p-4 sm:p-6">
+                  <CardTitle className="text-green-400 text-base sm:text-lg line-clamp-2">{item.title}</CardTitle>
+                  <CardDescription className="text-gray-300 text-xs sm:text-sm">{new Date(item.date).toLocaleDateString()}</CardDescription>
                 </CardHeader>
-                <CardContent className="text-white">
-                  <p>{item.content}</p>
+                <CardContent className="text-white p-4 sm:p-6 pt-0">
+                  <p className="text-sm sm:text-base line-clamp-3">{item.content}</p>
                 </CardContent>
               </Card>
             ))}
           </div>
         ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-400 text-lg">No news articles available</p>
+          <div className="text-center py-16 sm:py-20">
+            <p className="text-gray-400 text-lg sm:text-xl">No news articles available</p>
           </div>
         )}
       </div>
