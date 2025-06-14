@@ -10,6 +10,7 @@ type NewsItem = {
   title: string;
   content: string;
   date: string;
+  image_url?: string;
 };
 
 const News = () => {
@@ -62,6 +63,15 @@ const News = () => {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {news.map((item) => (
               <Card key={item.id} className="bg-gray-800 border-green-500 overflow-hidden">
+                {item.image_url && (
+                  <div className="w-full h-48 overflow-hidden">
+                    <img 
+                      src={item.image_url} 
+                      alt={item.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
                 <CardHeader>
                   <CardTitle className="text-green-400">{item.title}</CardTitle>
                   <CardDescription className="text-gray-300">{new Date(item.date).toLocaleDateString()}</CardDescription>

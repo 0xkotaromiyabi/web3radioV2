@@ -13,6 +13,7 @@ type Station = {
   genre: string;
   description: string;
   streaming: boolean;
+  image_url?: string;
 };
 
 const Stations = () => {
@@ -74,6 +75,15 @@ const Stations = () => {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {stations.map((station) => (
               <Card key={station.id} className="bg-gray-800 border-green-500 overflow-hidden flex flex-col">
+                {station.image_url && (
+                  <div className="w-full h-48 overflow-hidden">
+                    <img 
+                      src={station.image_url} 
+                      alt={station.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <div>
                     <CardTitle className="text-green-400">{station.name}</CardTitle>

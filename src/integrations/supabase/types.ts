@@ -9,6 +9,39 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      events: {
+        Row: {
+          created_at: string
+          date: string
+          description: string
+          id: number
+          image_url: string | null
+          location: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          description: string
+          id?: number
+          image_url?: string | null
+          location: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          description?: string
+          id?: number
+          image_url?: string | null
+          location?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       listening_sessions: {
         Row: {
           created_at: string
@@ -42,6 +75,36 @@ export type Database = {
           updated_at?: string
           user_address?: string
           verified?: boolean | null
+        }
+        Relationships: []
+      }
+      news: {
+        Row: {
+          content: string
+          created_at: string
+          date: string
+          id: number
+          image_url: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          date: string
+          id?: number
+          image_url?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          date?: string
+          id?: number
+          image_url?: string | null
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -111,6 +174,39 @@ export type Database = {
           tx_hash?: string | null
           updated_at?: string
           user_address?: string
+        }
+        Relationships: []
+      }
+      stations: {
+        Row: {
+          created_at: string
+          description: string
+          genre: string
+          id: number
+          image_url: string | null
+          name: string
+          streaming: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          genre: string
+          id?: number
+          image_url?: string | null
+          name: string
+          streaming?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          genre?: string
+          id?: number
+          image_url?: string | null
+          name?: string
+          streaming?: boolean | null
+          updated_at?: string
         }
         Relationships: []
       }
