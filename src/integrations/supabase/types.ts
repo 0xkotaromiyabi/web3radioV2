@@ -9,7 +9,144 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      listening_sessions: {
+        Row: {
+          created_at: string
+          duration: number
+          end_time: string | null
+          id: string
+          start_time: string
+          station_id: string | null
+          updated_at: string
+          user_address: string
+          verified: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          duration?: number
+          end_time?: string | null
+          id?: string
+          start_time: string
+          station_id?: string | null
+          updated_at?: string
+          user_address: string
+          verified?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          duration?: number
+          end_time?: string | null
+          id?: string
+          start_time?: string
+          station_id?: string | null
+          updated_at?: string
+          user_address?: string
+          verified?: boolean | null
+        }
+        Relationships: []
+      }
+      rate_limiting: {
+        Row: {
+          action_count: number | null
+          action_type: string
+          created_at: string
+          id: string
+          last_action: string
+          updated_at: string
+          user_address: string
+        }
+        Insert: {
+          action_count?: number | null
+          action_type: string
+          created_at?: string
+          id?: string
+          last_action?: string
+          updated_at?: string
+          user_address: string
+        }
+        Update: {
+          action_count?: number | null
+          action_type?: string
+          created_at?: string
+          id?: string
+          last_action?: string
+          updated_at?: string
+          user_address?: string
+        }
+        Relationships: []
+      }
+      reward_claims: {
+        Row: {
+          claimed: boolean | null
+          created_at: string
+          id: string
+          listening_time: number
+          nonce: number
+          reward_amount: string
+          signature: string
+          tx_hash: string | null
+          updated_at: string
+          user_address: string
+        }
+        Insert: {
+          claimed?: boolean | null
+          created_at?: string
+          id?: string
+          listening_time: number
+          nonce: number
+          reward_amount: string
+          signature: string
+          tx_hash?: string | null
+          updated_at?: string
+          user_address: string
+        }
+        Update: {
+          claimed?: boolean | null
+          created_at?: string
+          id?: string
+          listening_time?: number
+          nonce?: number
+          reward_amount?: string
+          signature?: string
+          tx_hash?: string | null
+          updated_at?: string
+          user_address?: string
+        }
+        Relationships: []
+      }
+      user_stats: {
+        Row: {
+          created_at: string
+          id: string
+          last_reward_claim: string | null
+          total_listening_time: number | null
+          total_rewards_claimed: string | null
+          updated_at: string
+          user_address: string
+          verified_listening_time: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_reward_claim?: string | null
+          total_listening_time?: number | null
+          total_rewards_claimed?: string | null
+          updated_at?: string
+          user_address: string
+          verified_listening_time?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_reward_claim?: string | null
+          total_listening_time?: number | null
+          total_rewards_claimed?: string | null
+          updated_at?: string
+          user_address?: string
+          verified_listening_time?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -43,6 +43,8 @@ export const W3RTokenProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     setIsLoading(true);
     try {
+      console.log('Loading user data for:', account.address);
+      
       // Load balance from smart contract
       const tokenBalance = await smartContract.getTokenBalance(account.address);
       setBalance(tokenBalance);
@@ -59,7 +61,9 @@ export const W3RTokenProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       // Also load from localStorage as backup
       const savedTime = localStorage.getItem(`w3r-listening-time-${account.address}`);
       if (savedTime && verifiedTime === 0) {
-        setListeningTime(parseInt(savedTime, 10));
+        const localTime = parseInt(savedTime, 10);
+        setListeningTime(localTime);
+        console.log('Loaded listening time from localStorage:', localTime);
       }
     } catch (error) {
       console.error('Error loading user data:', error);
@@ -83,13 +87,15 @@ export const W3RTokenProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const submitListeningSession = async (duration: number) => {
-    if (!account?.address) return;
+    if (!account?.address || duration < 30) return; // Minimum 30 seconds
 
     try {
+      console.log('Submitting listening session:', { duration, userAddress: account.address });
+      
       const session = {
         userAddress: account.address,
-        startTime: Date.now() - (duration * 1000),
-        endTime: Date.now(),
+        startTime: new Date(Date.now() - (duration * 1000)).toISOString(),
+        endTime: new Date().toISOString(),
         duration,
       };
 
@@ -98,6 +104,8 @@ export const W3RTokenProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         console.log('Listening session verified:', result.verifiedTime);
         // Refresh user data after successful submission
         await loadUserData();
+      } else {
+        console.warn('Session submission failed');
       }
     } catch (error) {
       console.error('Error submitting listening session:', error);
@@ -109,6 +117,7 @@ export const W3RTokenProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     try {
       setIsLoading(true);
+      console.log('Claiming reward for:', account.address);
       
       // Request signature from backend
       const rewardClaim = await backendApi.requestRewardSignature(account.address);
@@ -116,9 +125,12 @@ export const W3RTokenProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         throw new Error('Failed to get reward signature');
       }
 
+      console.log('Received reward claim signature:', rewardClaim);
+
       // Execute claim on smart contract
       const success = await smartContract.claimReward(account);
       if (success) {
+        console.log('Reward claimed successfully on blockchain');
         // Refresh user data after successful claim
         await loadUserData();
         return true;
@@ -137,7 +149,7 @@ export const W3RTokenProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     loadUserData();
   };
 
-  // Calculate reward eligibility (every 3600 seconds = 1 hour)
+  // Calculate reward eligibility locally (every 3600 seconds = 1 hour)
   const REWARD_INTERVAL = 3600;
   const calculatedRewardEligible = listeningTime >= REWARD_INTERVAL && listeningTime % REWARD_INTERVAL < 60;
   const calculatedNextRewardIn = REWARD_INTERVAL - (listeningTime % REWARD_INTERVAL);

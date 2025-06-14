@@ -1,14 +1,13 @@
 
-// Backend API service for W3R rewards
-const API_BASE_URL = process.env.VITE_API_URL || 'http://localhost:3001/api';
+// Backend API service for W3R rewards - Updated to use Supabase Edge Functions
+import { supabase } from "@/integrations/supabase/client";
 
 export interface ListeningSession {
   userAddress: string;
-  startTime: number;
-  endTime: number;
+  startTime: string;
+  endTime: string;
   duration: number;
   stationId?: string;
-  signature?: string;
 }
 
 export interface RewardClaim {
@@ -30,21 +29,29 @@ export class W3RBackendApi {
   }
 
   // Submit listening session for verification
-  async submitListeningSession(session: ListeningSession): Promise<{ success: boolean; verifiedTime: number }> {
+  async submitListeningSession(session: ListeningSession): Promise<{ success: boolean; verifiedTime: number; sessionId?: string }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/listening/submit`, {
+      console.log('Submitting listening session:', session);
+      
+      const { data, error } = await supabase.functions.invoke('w3r-api', {
+        body: session,
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(session),
+        }
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (error) {
+        console.error('Error calling edge function:', error);
+        return { success: false, verifiedTime: 0 };
       }
 
-      return await response.json();
+      console.log('Session submitted successfully:', data);
+      return {
+        success: data.success,
+        verifiedTime: data.verifiedTime,
+        sessionId: data.sessionId
+      };
     } catch (error) {
       console.error('Error submitting listening session:', error);
       return { success: false, verifiedTime: 0 };
@@ -54,13 +61,15 @@ export class W3RBackendApi {
   // Get verified listening time for user
   async getVerifiedListeningTime(userAddress: string): Promise<number> {
     try {
-      const response = await fetch(`${API_BASE_URL}/listening/${userAddress}`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      const { data, error } = await supabase.functions.invoke('w3r-api', {
+        method: 'GET',
+      });
+
+      if (error) {
+        console.error('Error getting listening time:', error);
+        return 0;
       }
 
-      const data = await response.json();
       return data.totalListeningTime || 0;
     } catch (error) {
       console.error('Error getting verified listening time:', error);
@@ -71,19 +80,20 @@ export class W3RBackendApi {
   // Request reward claim signature
   async requestRewardSignature(userAddress: string): Promise<RewardClaim | null> {
     try {
-      const response = await fetch(`${API_BASE_URL}/rewards/claim`, {
+      const { data, error } = await supabase.functions.invoke('w3r-api', {
+        body: { userAddress },
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userAddress }),
+        }
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (error) {
+        console.error('Error requesting reward signature:', error);
+        return null;
       }
 
-      return await response.json();
+      return data;
     } catch (error) {
       console.error('Error requesting reward signature:', error);
       return null;
@@ -97,13 +107,16 @@ export class W3RBackendApi {
     availableRewards: number;
   }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/rewards/check/${userAddress}`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      const { data, error } = await supabase.functions.invoke('w3r-api', {
+        method: 'GET',
+      });
+
+      if (error) {
+        console.error('Error checking reward eligibility:', error);
+        return { eligible: false, nextRewardIn: 0, availableRewards: 0 };
       }
 
-      return await response.json();
+      return data;
     } catch (error) {
       console.error('Error checking reward eligibility:', error);
       return { eligible: false, nextRewardIn: 0, availableRewards: 0 };
