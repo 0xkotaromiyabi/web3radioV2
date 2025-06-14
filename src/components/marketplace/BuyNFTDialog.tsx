@@ -26,6 +26,16 @@ const BuyNFTDialog: React.FC<BuyNFTDialogProps> = ({ nft, isOpen, onClose }) => 
   const account = useActiveAccount();
   const activeChain = useActiveWalletChain();
 
+  const handleETHPurchase = () => {
+    console.log('Processing ETH purchase for NFT:', nft);
+    // TODO: Implement ETH purchase logic
+  };
+
+  const handleUSDCPurchase = () => {
+    console.log('Processing USDC purchase for NFT:', nft);
+    // TODO: Implement USDC purchase logic
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
@@ -96,6 +106,7 @@ const BuyNFTDialog: React.FC<BuyNFTDialogProps> = ({ nft, isOpen, onClose }) => 
                     size="sm" 
                     disabled={!account}
                     className="bg-blue-600 hover:bg-blue-700"
+                    onClick={handleETHPurchase}
                   >
                     {account ? "Buy Now" : "Connect Wallet"}
                   </Button>
@@ -118,6 +129,7 @@ const BuyNFTDialog: React.FC<BuyNFTDialogProps> = ({ nft, isOpen, onClose }) => 
                     size="sm" 
                     disabled={!account}
                     className="bg-green-600 hover:bg-green-700"
+                    onClick={handleUSDCPurchase}
                   >
                     {account ? "Buy Now" : "Connect Wallet"}
                   </Button>
