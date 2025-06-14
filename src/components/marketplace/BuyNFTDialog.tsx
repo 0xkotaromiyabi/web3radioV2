@@ -1,12 +1,6 @@
 
 import React from 'react';
-import {
-  useContract,
-  useAddress,
-  useDisconnect,
-  useActiveChain,
-} from "@thirdweb-dev/react";
-import { PayEmbed } from "@thirdweb-dev/pay";
+import { useActiveAccount, useActiveWalletChain } from "thirdweb/react";
 import { base } from "@/contexts/W3RTokenContext";
 import {
   Dialog,
@@ -14,8 +8,11 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Coins, CreditCard } from "lucide-react";
 
 interface BuyNFTDialogProps {
   nft: any;
@@ -26,13 +23,8 @@ interface BuyNFTDialogProps {
 }
 
 const BuyNFTDialog: React.FC<BuyNFTDialogProps> = ({ nft, isOpen, onClose }) => {
-  const address = useAddress();
-  const disconnect = useDisconnect();
-  const activeChain = useActiveChain();
-  const { contract } = useContract("0x7a050911ca145a00959900d3847a9dd7f7364891");
-  const client = {
-    clientId: "ac0e7bf99e676e48fa3a2d9f4c33089c",
-  };
+  const account = useActiveAccount();
+  const activeChain = useActiveWalletChain();
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -44,52 +36,106 @@ const BuyNFTDialog: React.FC<BuyNFTDialogProps> = ({ nft, isOpen, onClose }) => 
           </DialogDescription>
         </DialogHeader>
 
-          {/* ETH Payment Option */}
-          <PayEmbed
-            client={client}
-            theme="dark"
-            payOptions={{
-              mode: "direct_payment",
-              paymentInfo: {
-                amount: "0.01",
-                chain: base,
-                sellerAddress: "0x242DfB7849544eE242b2265cA7E585bdec60456B",
-              },
-              metadata: {
-                name: nft.name,
-                description: nft.description || "NFT from web3radio",
-                image: nft.image,
-              },
-            }}
-          />
+        <div className="space-y-4">
+          {/* Connection Status */}
+          <Card className="bg-gray-800 border-gray-600">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-400">Wallet Status:</span>
+                <Badge variant={account ? "default" : "destructive"}>
+                  {account ? "Connected" : "Not Connected"}
+                </Badge>
+              </div>
+              {activeChain && (
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-sm text-gray-400">Network:</span>
+                  <Badge variant="outline" className="bg-gray-700 text-green-400">
+                    {activeChain.name}
+                  </Badge>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-          <div className="text-center text-gray-400 text-sm my-4">
-            Or pay with USDC
+          {/* NFT Info */}
+          <Card className="bg-gray-800 border-gray-600">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-4">
+                <img
+                  src={nft.image || '/placeholder.svg'}
+                  alt={nft.name}
+                  className="w-16 h-16 rounded-lg object-cover"
+                />
+                <div>
+                  <h3 className="font-semibold text-white">{nft.name}</h3>
+                  <p className="text-sm text-gray-400">#{nft.tokenId}</p>
+                  <Badge className="bg-purple-600 text-white mt-1">
+                    0.01 ETH
+                  </Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Payment Options */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-white">Payment Options</h3>
+            
+            {/* ETH Payment */}
+            <Card className="bg-gray-800 border-gray-600 hover:border-blue-500 transition-colors cursor-pointer">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Coins className="w-6 h-6 text-blue-400" />
+                    <div>
+                      <div className="font-medium text-white">Pay with ETH</div>
+                      <div className="text-sm text-gray-400">0.01 ETH</div>
+                    </div>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    disabled={!account}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {account ? "Buy Now" : "Connect Wallet"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* USDC Payment */}
+            <Card className="bg-gray-800 border-gray-600 hover:border-green-500 transition-colors cursor-pointer">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <CreditCard className="w-6 h-6 text-green-400" />
+                    <div>
+                      <div className="font-medium text-white">Pay with USDC</div>
+                      <div className="text-sm text-gray-400">25 USDC</div>
+                    </div>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    disabled={!account}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    {account ? "Buy Now" : "Connect Wallet"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
-          {/* USDC Payment Option */}
-          <PayEmbed
-            client={client}
-            theme="dark"
-            payOptions={{
-              mode: "direct_payment",
-              paymentInfo: {
-                amount: "25",
-                chain: base,
-                token: {
-                  address: "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-                  name: "USD Coin",
-                  symbol: "USDC",
-                },
-                sellerAddress: "0x242DfB7849544eE242b2265cA7E585bdec60456B",
-              },
-              metadata: {
-                name: nft.name,
-                description: nft.description || "NFT from web3radio",
-                image: nft.image,
-              },
-            }}
-          />
+          {!account && (
+            <Card className="bg-yellow-900/20 border-yellow-600">
+              <CardContent className="p-4 text-center">
+                <p className="text-sm text-yellow-400">
+                  Please connect your wallet to purchase this NFT
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
