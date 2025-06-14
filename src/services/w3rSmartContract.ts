@@ -113,7 +113,7 @@ export class W3RSmartContract {
       const transaction = prepareContractCall({
         contract: this.rewardsContract,
         method: "function updateListeningTime(address, uint256)",
-        params: [userAddress, timeToAdd],
+        params: [userAddress, BigInt(timeToAdd)], // Fixed: convert to BigInt
       });
 
       const result = await sendTransaction({
