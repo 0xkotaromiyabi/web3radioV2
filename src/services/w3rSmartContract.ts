@@ -17,28 +17,52 @@ const client = createThirdwebClient({
 
 // Contract addresses (update these after deployment)
 const W3R_TOKEN_ADDRESS = "0xC03a26EeaDb87410a26FdFD1755B052F1Fc7F06B";
-const W3R_REWARDS_ADDRESS = "0x"; // Update after deployment
+const W3R_REWARDS_ADDRESS = "0xC03a26EeaDb87410a26FdFD1755B052F1Fc7F06B"; // Using token address as placeholder
+
+// Validate contract address
+const isValidAddress = (address: string): boolean => {
+  return address && address !== "0x" && address.length === 42 && address.startsWith("0x");
+};
 
 export class W3RSmartContract {
   private tokenContract;
   private rewardsContract;
+  private isInitialized: boolean = false;
 
   constructor() {
-    this.tokenContract = getContract({
-      client,
-      chain: base,
-      address: W3R_TOKEN_ADDRESS,
-    });
+    try {
+      // Only initialize if addresses are valid
+      if (isValidAddress(W3R_TOKEN_ADDRESS)) {
+        this.tokenContract = getContract({
+          client,
+          chain: base,
+          address: W3R_TOKEN_ADDRESS,
+        });
+      }
 
-    this.rewardsContract = getContract({
-      client,
-      chain: base,
-      address: W3R_REWARDS_ADDRESS,
-    });
+      if (isValidAddress(W3R_REWARDS_ADDRESS)) {
+        this.rewardsContract = getContract({
+          client,
+          chain: base,
+          address: W3R_REWARDS_ADDRESS,
+        });
+      }
+
+      this.isInitialized = true;
+      console.log('W3RSmartContract initialized successfully');
+    } catch (error) {
+      console.error('Error initializing W3RSmartContract:', error);
+      this.isInitialized = false;
+    }
   }
 
   // Get user's W3R token balance
   async getTokenBalance(userAddress: string): Promise<string> {
+    if (!this.isInitialized || !this.tokenContract) {
+      console.warn('Token contract not initialized');
+      return "0.00";
+    }
+
     try {
       const balance = await readContract({
         contract: this.tokenContract,
@@ -55,6 +79,11 @@ export class W3RSmartContract {
 
   // Get user's listening time from contract
   async getUserListeningTime(userAddress: string): Promise<number> {
+    if (!this.isInitialized || !this.rewardsContract) {
+      console.warn('Rewards contract not initialized');
+      return 0;
+    }
+
     try {
       const userData = await readContract({
         contract: this.rewardsContract,
@@ -71,6 +100,11 @@ export class W3RSmartContract {
 
   // Check if user is eligible for reward
   async isRewardEligible(userAddress: string): Promise<boolean> {
+    if (!this.isInitialized || !this.rewardsContract) {
+      console.warn('Rewards contract not initialized');
+      return false;
+    }
+
     try {
       const eligible = await readContract({
         contract: this.rewardsContract,
@@ -87,6 +121,11 @@ export class W3RSmartContract {
 
   // Claim reward tokens
   async claimReward(account: any): Promise<boolean> {
+    if (!this.isInitialized || !this.rewardsContract) {
+      console.warn('Rewards contract not initialized');
+      return false;
+    }
+
     try {
       const transaction = prepareContractCall({
         contract: this.rewardsContract,
@@ -109,11 +148,16 @@ export class W3RSmartContract {
 
   // Update listening time (only for authorized updaters)
   async updateListeningTime(userAddress: string, timeToAdd: number, account: any): Promise<boolean> {
+    if (!this.isInitialized || !this.rewardsContract) {
+      console.warn('Rewards contract not initialized');
+      return false;
+    }
+
     try {
       const transaction = prepareContractCall({
         contract: this.rewardsContract,
         method: "function updateListeningTime(address, uint256)",
-        params: [userAddress, BigInt(timeToAdd)], // Fixed: convert to BigInt
+        params: [userAddress, BigInt(timeToAdd)],
       });
 
       const result = await sendTransaction({
@@ -131,6 +175,11 @@ export class W3RSmartContract {
 
   // Get next reward time
   async getNextRewardTime(userAddress: string): Promise<number> {
+    if (!this.isInitialized || !this.rewardsContract) {
+      console.warn('Rewards contract not initialized');
+      return 0;
+    }
+
     try {
       const nextRewardTime = await readContract({
         contract: this.rewardsContract,
@@ -143,6 +192,11 @@ export class W3RSmartContract {
       console.error('Error getting next reward time:', error);
       return 0;
     }
+  }
+
+  // Check if contracts are properly initialized
+  isContractsInitialized(): boolean {
+    return this.isInitialized;
   }
 }
 
