@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { createThirdwebClient, getContract } from "thirdweb";
 import { defineChain } from "thirdweb/chains";
@@ -66,7 +65,7 @@ const NFTMarketplace = () => {
           image: nft.metadata?.image?.toString() || '/placeholder.svg',
           tokenId: nft.id.toString(),
           isListed: true,
-          price: (Math.random() * 100 + 10).toFixed(0), // Random price between 10-110 USDC
+          price: "0.005", // Fixed price of 0.005 ETH
         };
       });
       
@@ -86,7 +85,7 @@ const NFTMarketplace = () => {
       image: nft.metadata?.image?.toString() || '/placeholder.svg',
       tokenId: nft.id.toString(),
       isListed: true,
-      price: (Math.random() * 100 + 10).toFixed(0), // Random price between 10-110 USDC
+      price: "0.005", // Fixed price of 0.005 ETH
     }));
 
     if (searchTerm) {
@@ -149,7 +148,7 @@ const NFTMarketplace = () => {
             {filteredNfts.length} NFTs Available
           </Badge>
           <Badge variant="outline" className="bg-gray-800 text-purple-400 border-gray-600">
-            USDC & ETH Payments
+            0.005 ETH Each
           </Badge>
         </div>
       </div>

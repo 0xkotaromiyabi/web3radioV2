@@ -88,11 +88,11 @@ const NFTCard = ({ nft, onBuy }: NFTCardProps) => {
           {/* Price */}
           {nft.price && (
             <div className="flex items-center justify-between">
-              <div className="text-lg font-bold text-green-400">
-                {nft.price} USDC
+              <div className="text-lg font-bold text-purple-400">
+                {nft.price} ETH
               </div>
               <div className="text-sm text-gray-400">
-                ≈ {(parseFloat(nft.price) * 0.00027).toFixed(4)} ETH
+                ≈ {(parseFloat(nft.price) * 3700).toFixed(0)} USDC
               </div>
             </div>
           )}

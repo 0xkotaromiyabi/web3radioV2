@@ -31,7 +31,7 @@ interface BuyNFTDialogProps {
 }
 
 const BuyNFTDialog = ({ nft, isOpen, onClose, client }: BuyNFTDialogProps) => {
-  const [paymentMethod, setPaymentMethod] = useState<'usdc' | 'eth'>('usdc');
+  const [paymentMethod, setPaymentMethod] = useState<'usdc' | 'eth'>('eth');
 
   // Function to get IPFS image URL
   const getImageUrl = (imageUri: string) => {
@@ -48,8 +48,8 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, client }: BuyNFTDialogProps) => {
     return '/placeholder.svg';
   };
 
-  // Calculate ETH equivalent (approximate conversion)
-  const ethPrice = nft.price ? (parseFloat(nft.price) * 0.00027).toFixed(4) : "0.01";
+  // Calculate USDC equivalent (approximate conversion: 1 ETH = ~3700 USDC)
+  const usdcPrice = nft.price ? (parseFloat(nft.price) * 3700).toFixed(0) : "18.5";
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -98,19 +98,22 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, client }: BuyNFTDialogProps) => {
           {/* Payment Options */}
           <Tabs value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as 'usdc' | 'eth')} className="w-full">
             <TabsList className="grid w-full grid-cols-2 bg-gray-700">
-              <TabsTrigger value="usdc" className="data-[state=active]:bg-blue-600">
-                USDC Payment
-              </TabsTrigger>
               <TabsTrigger value="eth" className="data-[state=active]:bg-purple-600">
                 ETH Payment
               </TabsTrigger>
+              <TabsTrigger value="usdc" className="data-[state=active]:bg-blue-600">
+                USDC Payment
+              </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="usdc" className="mt-4">
+            <TabsContent value="eth" className="mt-4">
               <div className="text-center mb-4">
-                <span className="text-2xl font-bold text-green-400">
-                  {nft.price || "0.01"} USDC
+                <span className="text-2xl font-bold text-purple-400">
+                  {nft.price || "0.005"} ETH
                 </span>
+                <p className="text-xs text-gray-400 mt-1">
+                  ≈ {usdcPrice} USDC
+                </p>
               </div>
               <PayEmbed
                 client={client}
@@ -118,9 +121,8 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, client }: BuyNFTDialogProps) => {
                 payOptions={{
                   mode: "direct_payment",
                   paymentInfo: {
-                    amount: nft.price || "0.01",
+                    amount: nft.price || "0.005",
                     chain: base,
-                    token: getDefaultToken(base, "USDC"),
                     sellerAddress: "0xEb0effdFB4dC5b3d5d3aC6ce29F3ED213E95d675",
                   },
                   metadata: {
@@ -131,13 +133,13 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, client }: BuyNFTDialogProps) => {
               />
             </TabsContent>
 
-            <TabsContent value="eth" className="mt-4">
+            <TabsContent value="usdc" className="mt-4">
               <div className="text-center mb-4">
-                <span className="text-2xl font-bold text-purple-400">
-                  {ethPrice} ETH
+                <span className="text-2xl font-bold text-green-400">
+                  {usdcPrice} USDC
                 </span>
                 <p className="text-xs text-gray-400 mt-1">
-                  ≈ {nft.price || "0.01"} USDC
+                  ≈ {nft.price || "0.005"} ETH
                 </p>
               </div>
               <PayEmbed
@@ -146,8 +148,9 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, client }: BuyNFTDialogProps) => {
                 payOptions={{
                   mode: "direct_payment",
                   paymentInfo: {
-                    amount: ethPrice,
+                    amount: usdcPrice,
                     chain: base,
+                    token: getDefaultToken(base, "USDC"),
                     sellerAddress: "0xEb0effdFB4dC5b3d5d3aC6ce29F3ED213E95d675",
                   },
                   metadata: {
