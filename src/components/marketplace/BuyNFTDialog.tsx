@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { useActiveAccount, useSendTransaction } from "thirdweb/react";
 import { prepareContractCall } from "thirdweb";
-import { claimTo } from "thirdweb/extensions/erc1155";
 import {
   Dialog,
   DialogContent,
@@ -56,15 +55,11 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, contract }: BuyNFTDialogProps) => 
         quantity: 1,
       });
 
-      // Prepare the claim transaction using thirdweb v5
+      // Prepare the mint transaction using thirdweb v5
       const transaction = prepareContractCall({
         contract,
-        method: claimTo,
-        params: [
-          account.address, // to
-          BigInt(nft.tokenId), // tokenId
-          BigInt(1), // quantity
-        ],
+        method: "function mintTo(address to, uint256 tokenId, uint256 amount)",
+        params: [account.address, BigInt(nft.tokenId), BigInt(1)],
       });
 
       sendTransaction(transaction, {
