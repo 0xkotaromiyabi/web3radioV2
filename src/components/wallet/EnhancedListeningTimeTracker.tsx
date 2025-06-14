@@ -12,7 +12,7 @@ interface EnhancedListeningTimeTrackerProps {
 const EnhancedListeningTimeTracker: React.FC<EnhancedListeningTimeTrackerProps> = ({ isPlaying }) => {
   const account = useActiveAccount();
   const address = account?.address;
-  const { listeningTime, updateListeningTime, rewardEligible } = useW3RToken();
+  const { listeningTime, updateListeningTime, claimEligible, pendingRewards } = useW3RToken();
   const [timer, setTimer] = React.useState<NodeJS.Timeout | null>(null);
 
   // Start/stop timer based on isPlaying state and update W3R context
@@ -62,15 +62,24 @@ const EnhancedListeningTimeTracker: React.FC<EnhancedListeningTimeTrackerProps> 
   if (!address) return null;
 
   return (
-    <div className="mt-2 flex items-center gap-2">
-      <Clock size={14} className="text-[#00ff00]" />
-      <span className="text-xs text-gray-400">Listening Time:</span>
-      <Badge variant="outline" className={`bg-[#111] border-[#333] font-mono ${rewardEligible ? 'text-yellow-400 border-yellow-400' : 'text-[#00ff00]'}`}>
-        {formatTime(listeningTime)}
-      </Badge>
-      {rewardEligible && (
-        <Zap size={14} className="text-yellow-400 animate-pulse" />
-      )}
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <Clock size={14} className="text-[#00ff00]" />
+        <span className="text-xs text-gray-400">Listening Time:</span>
+        <Badge variant="outline" className={`bg-[#111] border-[#333] font-mono ${claimEligible ? 'text-yellow-400 border-yellow-400' : 'text-[#00ff00]'}`}>
+          {formatTime(listeningTime)}
+        </Badge>
+        {claimEligible && (
+          <Zap size={14} className="text-yellow-400 animate-pulse" />
+        )}
+      </div>
+      
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-gray-400">Pending:</span>
+        <Badge variant="outline" className="bg-[#111] text-yellow-400 border-[#333] font-mono text-xs">
+          {pendingRewards.toLocaleString()} W3R
+        </Badge>
+      </div>
     </div>
   );
 };
