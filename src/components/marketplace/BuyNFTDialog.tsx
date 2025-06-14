@@ -130,6 +130,14 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, client }: BuyNFTDialogProps) => {
                     image: getImageUrl(nft.image),
                   },
                 }}
+                customization={{
+                  prefillBuy: {
+                    allowEdits: {
+                      amount: false,
+                      currency: false,
+                    },
+                  },
+                }}
               />
             </TabsContent>
 
@@ -156,6 +164,14 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, client }: BuyNFTDialogProps) => {
                   metadata: {
                     name: nft.name,
                     image: getImageUrl(nft.image),
+                  },
+                }}
+                customization={{
+                  prefillBuy: {
+                    allowEdits: {
+                      amount: false,
+                      currency: false,
+                    },
                   },
                 }}
               />
