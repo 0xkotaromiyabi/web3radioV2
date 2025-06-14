@@ -16,7 +16,7 @@ import "./App.css";
 
 const queryClient = new QueryClient();
 
-const QueryClient: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+const QueryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <QueryClientProvider client={queryClient}>
     <ThirdwebProvider>
       {children}
@@ -28,7 +28,7 @@ function App() {
   return (
     <BrowserRouter>
       <W3RTokenProvider>
-        <QueryClient>
+        <QueryProvider>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/marketplace" element={<Marketplace />} />
@@ -39,7 +39,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
           </Routes>
           <Toaster />
-        </QueryClient>
+        </QueryProvider>
       </W3RTokenProvider>
     </BrowserRouter>
   );
