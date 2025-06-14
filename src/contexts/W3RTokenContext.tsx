@@ -1,10 +1,8 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { createThirdwebClient, getContract } from "thirdweb";
-import { defineChain } from "thirdweb/chains";
 import { useActiveAccount } from "thirdweb/react";
-import { balanceOf } from "thirdweb/extensions/erc20";
-import { useReadContract } from "thirdweb/react";
+import { W3RBackendApi } from "@/services/w3rBackendApi";
+import { W3RSmartContract } from "@/services/w3rSmartContract";
 
 interface W3RTokenContextType {
   balance: string;
@@ -14,54 +12,68 @@ interface W3RTokenContextType {
   nextRewardIn: number;
   refreshBalance: () => void;
   updateListeningTime: (seconds: number) => void;
+  claimReward: () => Promise<boolean>;
+  submitListeningSession: (duration: number) => Promise<void>;
 }
 
 const W3RTokenContext = createContext<W3RTokenContextType | undefined>(undefined);
 
-// Base Mainnet configuration
-const base = defineChain({
-  id: 8453,
-  name: "Base",
-  rpc: "https://mainnet.base.org",
-});
-
-const client = createThirdwebClient({
-  clientId: "ac0e7bf99e676e48fa3a2d9f4c33089c",
-});
-
-// W3R Token contract on Base
-const W3R_CONTRACT_ADDRESS = "0xC03a26EeaDb87410a26FdFD1755B052F1Fc7F06B";
-
-const contract = getContract({
-  client,
-  chain: base,
-  address: W3R_CONTRACT_ADDRESS,
-});
-
 export const W3RTokenProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const account = useActiveAccount();
+  const [balance, setBalance] = useState("0.00");
+  const [isLoading, setIsLoading] = useState(false);
   const [listeningTime, setListeningTime] = useState(0);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [rewardEligible, setRewardEligible] = useState(false);
+  const [nextRewardIn, setNextRewardIn] = useState(0);
 
-  // Get W3R token balance
-  const { data: balance, isLoading } = useReadContract(balanceOf, {
-    contract,
-    address: account?.address || "",
-    queryOptions: {
-      enabled: !!account?.address,
-      refetchInterval: 30000, // Refresh every 30 seconds
-    },
-  });
+  const backendApi = W3RBackendApi.getInstance();
+  const smartContract = new W3RSmartContract();
 
-  // Load listening time from localStorage
+  // Load user data when account changes
   useEffect(() => {
     if (account?.address) {
-      const savedTime = localStorage.getItem(`w3r-listening-time-${account.address}`);
-      if (savedTime) {
-        setListeningTime(parseInt(savedTime, 10));
-      }
+      loadUserData();
+    } else {
+      resetUserData();
     }
   }, [account?.address]);
+
+  const loadUserData = async () => {
+    if (!account?.address) return;
+
+    setIsLoading(true);
+    try {
+      // Load balance from smart contract
+      const tokenBalance = await smartContract.getTokenBalance(account.address);
+      setBalance(tokenBalance);
+
+      // Load verified listening time from backend
+      const verifiedTime = await backendApi.getVerifiedListeningTime(account.address);
+      setListeningTime(verifiedTime);
+
+      // Check reward eligibility
+      const eligibility = await backendApi.checkRewardEligibility(account.address);
+      setRewardEligible(eligibility.eligible);
+      setNextRewardIn(eligibility.nextRewardIn);
+
+      // Also load from localStorage as backup
+      const savedTime = localStorage.getItem(`w3r-listening-time-${account.address}`);
+      if (savedTime && verifiedTime === 0) {
+        setListeningTime(parseInt(savedTime, 10));
+      }
+    } catch (error) {
+      console.error('Error loading user data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const resetUserData = () => {
+    setBalance("0.00");
+    setListeningTime(0);
+    setRewardEligible(false);
+    setNextRewardIn(0);
+  };
 
   const updateListeningTime = (seconds: number) => {
     setListeningTime(seconds);
@@ -70,23 +82,76 @@ export const W3RTokenProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+  const submitListeningSession = async (duration: number) => {
+    if (!account?.address) return;
+
+    try {
+      const session = {
+        userAddress: account.address,
+        startTime: Date.now() - (duration * 1000),
+        endTime: Date.now(),
+        duration,
+      };
+
+      const result = await backendApi.submitListeningSession(session);
+      if (result.success) {
+        console.log('Listening session verified:', result.verifiedTime);
+        // Refresh user data after successful submission
+        await loadUserData();
+      }
+    } catch (error) {
+      console.error('Error submitting listening session:', error);
+    }
+  };
+
+  const claimReward = async (): Promise<boolean> => {
+    if (!account?.address || !rewardEligible) return false;
+
+    try {
+      setIsLoading(true);
+      
+      // Request signature from backend
+      const rewardClaim = await backendApi.requestRewardSignature(account.address);
+      if (!rewardClaim) {
+        throw new Error('Failed to get reward signature');
+      }
+
+      // Execute claim on smart contract
+      const success = await smartContract.claimReward(account);
+      if (success) {
+        // Refresh user data after successful claim
+        await loadUserData();
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error('Error claiming reward:', error);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const refreshBalance = () => {
-    setRefreshTrigger(prev => prev + 1);
+    loadUserData();
   };
 
   // Calculate reward eligibility (every 3600 seconds = 1 hour)
-  const REWARD_INTERVAL = 3600; // 1 hour in seconds
-  const rewardEligible = listeningTime >= REWARD_INTERVAL && listeningTime % REWARD_INTERVAL < 60;
-  const nextRewardIn = REWARD_INTERVAL - (listeningTime % REWARD_INTERVAL);
+  const REWARD_INTERVAL = 3600;
+  const calculatedRewardEligible = listeningTime >= REWARD_INTERVAL && listeningTime % REWARD_INTERVAL < 60;
+  const calculatedNextRewardIn = REWARD_INTERVAL - (listeningTime % REWARD_INTERVAL);
 
   const value: W3RTokenContextType = {
-    balance: balance ? (Number(balance) / 10**18).toFixed(2) : "0.00",
+    balance,
     isLoading,
     listeningTime,
-    rewardEligible,
-    nextRewardIn,
+    rewardEligible: rewardEligible || calculatedRewardEligible,
+    nextRewardIn: nextRewardIn || calculatedNextRewardIn,
     refreshBalance,
     updateListeningTime,
+    claimReward,
+    submitListeningSession,
   };
 
   return (
@@ -103,5 +168,3 @@ export const useW3RToken = () => {
   }
   return context;
 };
-
-export { contract, client, base };

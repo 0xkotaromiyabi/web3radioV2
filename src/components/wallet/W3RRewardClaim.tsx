@@ -6,11 +6,11 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useW3RToken } from "@/contexts/W3RTokenContext";
 import { useActiveAccount } from "thirdweb/react";
-import { Coins, Clock, Gift } from 'lucide-react';
+import { Coins, Clock, Gift, Loader } from 'lucide-react';
 
 const W3RRewardClaim = () => {
   const account = useActiveAccount();
-  const { balance, rewardEligible, nextRewardIn, refreshBalance } = useW3RToken();
+  const { balance, rewardEligible, nextRewardIn, claimReward, isLoading } = useW3RToken();
   const { toast } = useToast();
   const [isClaiming, setIsClaiming] = useState(false);
 
@@ -33,23 +33,21 @@ const W3RRewardClaim = () => {
 
     setIsClaiming(true);
     try {
-      // In a real implementation, this would call your backend API
-      // to generate a signature and then mint tokens
+      const success = await claimReward();
       
-      // Mock the reward claim process
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      toast({
-        title: "Reward Claimed!",
-        description: "You've received 100 W3R tokens for your listening time!",
-      });
-      
-      refreshBalance();
+      if (success) {
+        toast({
+          title: "Reward Claimed Successfully! 🎉",
+          description: "You've received 100 W3R tokens for your listening time!",
+        });
+      } else {
+        throw new Error('Claim failed');
+      }
     } catch (error) {
       console.error('Error claiming reward:', error);
       toast({
         title: "Claim Failed",
-        description: "Unable to claim reward. Please try again later.",
+        description: "Unable to claim reward. Please ensure you have sufficient gas and try again.",
         variant: "destructive",
       });
     } finally {
@@ -66,7 +64,8 @@ const W3RRewardClaim = () => {
           <Coins className="w-4 h-4 text-yellow-400" />
           W3R Rewards
         </h3>
-        <Badge variant="outline" className="bg-[#111] text-yellow-400 border-[#333]">
+        <Badge variant="outline" className="bg-[#111] text-yellow-400 border-[#333] flex items-center gap-1">
+          {isLoading && <Loader className="w-3 h-3 animate-spin" />}
           {balance} W3R
         </Badge>
       </div>
@@ -80,10 +79,11 @@ const W3RRewardClaim = () => {
             </div>
             <Button
               onClick={handleClaimReward}
-              disabled={isClaiming}
+              disabled={isClaiming || isLoading}
               size="sm"
-              className="w-full bg-green-600 hover:bg-green-700 text-white"
+              className="w-full bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
             >
+              {isClaiming && <Loader className="w-3 h-3 animate-spin" />}
               {isClaiming ? "Claiming..." : "Claim 100 W3R"}
             </Button>
           </div>
@@ -101,7 +101,15 @@ const W3RRewardClaim = () => {
       </div>
 
       <div className="text-xs text-gray-400 text-center">
-        Earn 100 W3R tokens for every hour of listening
+        🎵 Earn 100 W3R tokens for every hour of verified listening
+      </div>
+
+      {/* Status indicator */}
+      <div className="flex items-center justify-center gap-2 text-xs">
+        <div className={`w-2 h-2 rounded-full ${isLoading ? 'bg-yellow-400 animate-pulse' : 'bg-green-400'}`} />
+        <span className="text-gray-400">
+          {isLoading ? 'Syncing...' : 'Connected to Base'}
+        </span>
       </div>
     </Card>
   );
