@@ -21,5 +21,11 @@
         "name": "Web3Radio"
       }
     }
+  },
+  "miniApp": {
+    "name": "Web3Radio",
+    "iconUrl": "https://www.web3radio.xyz/web3radio-logo.png",
+    "manifestUrl": "https://web3radio.xyz/.well-known/farcaster.json",
+    "url": "https://web3radio.xyz"
   }
 }

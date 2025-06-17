@@ -2,8 +2,10 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { WagmiProvider } from 'wagmi';
 import { ThirdwebProvider } from "thirdweb/react";
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
+import { config } from "./config/wagmi";
 import { client } from "./services/w3rSmartContract";
 import { W3RTokenProvider } from "./contexts/W3RTokenContext";
 import { Toaster } from "@/components/ui/toaster";
@@ -28,24 +30,26 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThirdwebProvider>
-        <TonConnectUIProvider manifestUrl="https://ton.org/app-manifest.json">
-          <W3RTokenProvider>
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/marketplace" element={<Marketplace />} />
-                <Route path="/news" element={<News />} />
-                <Route path="/events" element={<Events />} />
-                <Route path="/stations" element={<Stations />} />
-                <Route path="/cms" element={<CMS />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-              </Routes>
-              <Toaster />
-            </BrowserRouter>
-          </W3RTokenProvider>
-        </TonConnectUIProvider>
-      </ThirdwebProvider>
+      <WagmiProvider config={config}>
+        <ThirdwebProvider>
+          <TonConnectUIProvider manifestUrl="https://ton.org/app-manifest.json">
+            <W3RTokenProvider>
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/marketplace" element={<Marketplace />} />
+                  <Route path="/news" element={<News />} />
+                  <Route path="/events" element={<Events />} />
+                  <Route path="/stations" element={<Stations />} />
+                  <Route path="/cms" element={<CMS />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                </Routes>
+                <Toaster />
+              </BrowserRouter>
+            </W3RTokenProvider>
+          </TonConnectUIProvider>
+        </ThirdwebProvider>
+      </WagmiProvider>
     </QueryClientProvider>
   );
 }
