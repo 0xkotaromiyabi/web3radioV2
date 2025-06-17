@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { createThirdwebClient } from "thirdweb";
 import { ConnectButton } from "thirdweb/react";
@@ -9,6 +8,7 @@ import NFTCollection from './NFTCollection';
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
+import FarcasterConnectMenu from './FarcasterConnectMenu';
 
 interface WalletConnectionProps {
   isPlaying: boolean;
@@ -54,6 +54,9 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
           theme="dark"
         />
       </div>
+
+      {/* Farcaster Wallet Connection */}
+      <FarcasterConnectMenu />
 
       {/* Enhanced Listening Time Tracker with W3R Integration */}
       <EnhancedListeningTimeTracker isPlaying={isPlaying} />
