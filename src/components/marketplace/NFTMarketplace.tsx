@@ -137,6 +137,9 @@ const NFTMarketplace = () => {
         <h1 className="text-4xl font-bold text-white bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
           NFT Marketplace
         </h1>
+        <p className="text-gray-300">
+          Buy premium NFTs with USDC or ETH from contract {NFT_CONTRACT_ADDRESS.slice(0, 6)}...{NFT_CONTRACT_ADDRESS.slice(-4)}
+        </p>
         <div className="flex flex-wrap gap-2 justify-center">
           <Badge variant="outline" className="bg-gray-800 text-blue-400 border-gray-600">
             Base Network

@@ -1,8 +1,8 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = 'https://zxyoidfksqmccwvdduxk.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4eW9pZGZrc3FtY2N3dmRkdXhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5MTMwNDEsImV4cCI6MjA2NTQ4OTA0MX0.sjAUWjkuJAp-RVskCTa9BwanW6PSKj94fMmFCv3lghM';
+const supabaseUrl = 'https://apdpgmmlcwjxgwaqsmqu.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwZHBnbW1sY3dqeGd3YXFzbXF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2Mzg3MTIsImV4cCI6MjA2MzIxNDcxMn0.qcy0vzpSgiZyQWciTBhlOG5Q_TiNGgSdMX1PfmB4I9c';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -43,7 +43,7 @@ export const fetchNews = async () => {
   return { data, error };
 };
 
-export const addNewsItem = async (newsItem: { title: string; content: string; date: string; image_url?: string }) => {
+export const addNewsItem = async (newsItem: { title: string; content: string; date: string }) => {
   const { data, error } = await supabase
     .from('news')
     .insert([newsItem])
@@ -70,7 +70,7 @@ export const fetchEvents = async () => {
   return { data, error };
 };
 
-export const addEvent = async (event: { title: string; date: string; location: string; description: string; image_url?: string }) => {
+export const addEvent = async (event: { title: string; date: string; location: string; description: string }) => {
   const { data, error } = await supabase
     .from('events')
     .insert([event])
@@ -96,7 +96,7 @@ export const fetchStations = async () => {
   return { data, error };
 };
 
-export const addStation = async (station: { name: string; genre: string; description: string; streaming: boolean; image_url?: string }) => {
+export const addStation = async (station: { name: string; genre: string; description: string; streaming: boolean }) => {
   const { data, error } = await supabase
     .from('stations')
     .insert([station])
