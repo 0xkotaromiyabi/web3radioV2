@@ -80,21 +80,20 @@ const NavBar = () => {
                 </Link>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <Link to="/marketplace">
+                <a href="https://kotarominami.xyz/shop" target="_blank" rel="noopener noreferrer">
                   <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1")}>
                     <ShoppingCart className="h-4 w-4" />
                     <span>Marketplace</span>
                   </NavigationMenuLink>
-                </Link>
+                </a>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <Link to="/cms">
-                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1", isAdmin ? "border-green-500" : "")}>
-                    <Settings className="h-4 w-4" />
-                    <span>Dashboard</span>
-                    {isAdmin && <span className="ml-1 h-2 w-2 rounded-full bg-green-500"></span>}
+                <a href="https://kotarominami.xyz" target="_blank" rel="noopener noreferrer">
+                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1")}>
+                    <Newspaper className="h-4 w-4" />
+                    <span>Articles</span>
                   </NavigationMenuLink>
-                </Link>
+                </a>
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
@@ -154,23 +153,26 @@ const NavBar = () => {
               <Radio className="h-4 w-4" />
               <span>Radio Stations</span>
             </Link>
-            <Link 
-              to="/marketplace" 
+            <a 
+              href="https://kotarominami.xyz/shop" 
+              target="_blank" 
+              rel="noopener noreferrer"
               className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800"
               onClick={() => setMobileMenuOpen(false)}
             >
               <ShoppingCart className="h-4 w-4" />
               <span>Marketplace</span>
-            </Link>
-            <Link 
-              to="/cms" 
+            </a>
+            <a 
+              href="https://kotarominami.xyz" 
+              target="_blank" 
+              rel="noopener noreferrer"
               className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800"
               onClick={() => setMobileMenuOpen(false)}
             >
-              <Settings className="h-4 w-4" />
-              <span>Dashboard</span>
-              {isAdmin && <span className="ml-1 h-2 w-2 rounded-full bg-green-500"></span>}
-            </Link>
+              <Newspaper className="h-4 w-4" />
+              <span>Articles</span>
+            </a>
             <div className="pt-2 border-t border-gray-800">
               <Button 
                 variant="outline" 
