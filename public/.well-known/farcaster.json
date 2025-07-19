@@ -6,25 +6,27 @@
     "signature": "MHhlMjA2YzllYWRlZGY0ZDcxMmI5ZmNlNDc4ZTIzOWIyZGU3YjA1M2FiZGU1MDM1NjU2OTBkZGEzMWYxZWE3MGQ4N2JkYTdhYWExZTJkNjdhMGE2NTAxYTk1MDFjMmEwN2RlODliYmMyNTA1Y2M3NjNkZjZiOGZmYmZlYzMwNWM4YjFi"
   },
   "frame": {
-    "version": "next",
+    "version": "1",
     "name": "Web3Radio",
     "iconUrl": "https://www.web3radio.xyz/web3radio-logo.png",
     "splashImageUrl": "https://www.web3radio.xyz/web3radio-logo.png",
     "splashBackgroundColor": "#000000",
     "homeUrl": "https://web3radio.xyz",
-    "imageUrl": "https://i.imgur.com/emXbMkd.png",
-    "button": {
-      "title": "🎧 Listen to Web3Radio",
-      "action": {
-        "type": "launch_frame",
-        "url": "https://www.web3radio.xyz",
-        "name": "Web3Radio"
-      }
-    }
+    "subtitle": "Decentralized Radio Station",
+    "description": "Live stations, curated news, and upcoming events for the on-chain world.",
+    "primaryCategory": "music",
+    "tags": [
+      "radio",
+      "web3",
+      "farcaster",
+      "events"
+    ],
+    "heroImageUrl": "https://i.imgur.com/emXbMkd.png",
+    "ogTitle": "Web3Radio",
+    "ogDescription": "Explore the sound of on-chain culture with Web3Radio.",
+    "ogImageUrl": "https://i.imgur.com/emXbMkd.png"
   },
   "miniApp": {
-    "name": "Web3Radio",
-    "iconUrl": "https://www.web3radio.xyz/web3radio-logo.png",
     "manifestUrl": "https://web3radio.xyz/.well-known/farcaster.json",
     "url": "https://web3radio.xyz"
   }

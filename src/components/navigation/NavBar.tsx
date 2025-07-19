@@ -33,65 +33,65 @@ const NavBar = () => {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-[#444] bg-gray-900/95 backdrop-blur">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex h-14 sm:h-16 items-center justify-between">
-        <div className="flex items-center gap-2 sm:gap-4">
-          <Link to="/" className="flex items-center gap-1 sm:gap-2">
+      <div className="container flex h-16 items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link to="/" className="flex items-center gap-2">
             <img 
               src="/web3radio-logo.png" 
               alt="Web3Radio" 
-              className="h-6 w-6 sm:h-8 sm:w-8" 
+              className="h-8 w-8" 
             />
-            <span className="font-bold text-white text-sm sm:text-base hidden xs:inline-block">Web3Radio</span>
+            <span className="font-bold text-white sm:inline-block">Web3Radio</span>
           </Link>
           
           {/* Desktop Navigation */}
-          <NavigationMenu className="hidden lg:flex">
+          <NavigationMenu className="hidden md:flex">
             <NavigationMenuList className="gap-1">
               <NavigationMenuItem>
                 <Link to="/">
-                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1 text-sm")}>
-                    <Home className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="hidden xl:inline">Home</span>
+                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1")}>
+                    <Home className="h-4 w-4" />
+                    <span>Home</span>
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <Link to="/news">
-                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1 text-sm")}>
-                    <Newspaper className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="hidden xl:inline">News</span>
+                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1")}>
+                    <Newspaper className="h-4 w-4" />
+                    <span>News</span>
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <Link to="/events">
-                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1 text-sm")}>
-                    <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="hidden xl:inline">Events</span>
+                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1")}>
+                    <Calendar className="h-4 w-4" />
+                    <span>Events</span>
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <Link to="/stations">
-                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1 text-sm")}>
-                    <Radio className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="hidden xl:inline">Stations</span>
+                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1")}>
+                    <Radio className="h-4 w-4" />
+                    <span>Radio Stations</span>
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <Link to="/marketplace">
-                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1 text-sm")}>
-                    <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="hidden xl:inline">Marketplace</span>
+                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1")}>
+                    <ShoppingCart className="h-4 w-4" />
+                    <span>Marketplace</span>
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <Link to="/dashboard">
-                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1 text-sm", isAdmin ? "border-green-500" : "")}>
-                    <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="hidden xl:inline">Dashboard</span>
+                <Link to="/cms">
+                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1", isAdmin ? "border-green-500" : "")}>
+                    <Settings className="h-4 w-4" />
+                    <span>Dashboard</span>
                     {isAdmin && <span className="ml-1 h-2 w-2 rounded-full bg-green-500"></span>}
                   </NavigationMenuLink>
                 </Link>
@@ -103,29 +103,28 @@ const NavBar = () => {
         {/* Broadcaster Button - Desktop */}
         <Button 
           variant="outline" 
-          className="hidden md:flex gap-1 text-xs sm:text-sm bg-gradient-to-r from-purple-600 to-blue-500 border-none text-white hover:from-purple-700 hover:to-blue-600 px-2 sm:px-4 py-1 sm:py-2"
+          className="hidden md:flex gap-1 bg-gradient-to-r from-purple-600 to-blue-500 border-none text-white hover:from-purple-700 hover:to-blue-600"
         >
-          <Mic className="h-3 w-3 sm:h-4 sm:w-4" />
-          <span className="hidden lg:inline">Become a Broadcaster</span>
-          <span className="lg:hidden">Broadcast</span>
+          <Mic className="h-4 w-4" />
+          <span>Become a Broadcaster</span>
         </Button>
 
         {/* Mobile Menu Toggle */}
         <button
-          className="flex lg:hidden items-center justify-center rounded-md p-2 text-white hover:bg-gray-800 transition-colors"
+          className="flex md:hidden items-center justify-center rounded-md p-2 text-white"
           onClick={toggleMobileMenu}
         >
-          {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
       </div>
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <div className="lg:hidden px-4 pb-3 pt-2 bg-gray-900 border-b border-[#444]">
-          <nav className="flex flex-col space-y-2">
+        <div className="md:hidden px-4 pb-3 pt-2 bg-gray-900 border-b border-[#444]">
+          <nav className="flex flex-col space-y-3">
             <Link 
               to="/" 
-              className="flex items-center gap-3 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800 transition-colors"
+              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800"
               onClick={() => setMobileMenuOpen(false)}
             >
               <Home className="h-4 w-4" />
@@ -133,7 +132,7 @@ const NavBar = () => {
             </Link>
             <Link 
               to="/news" 
-              className="flex items-center gap-3 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800 transition-colors"
+              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800"
               onClick={() => setMobileMenuOpen(false)}
             >
               <Newspaper className="h-4 w-4" />
@@ -141,7 +140,7 @@ const NavBar = () => {
             </Link>
             <Link 
               to="/events" 
-              className="flex items-center gap-3 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800 transition-colors"
+              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800"
               onClick={() => setMobileMenuOpen(false)}
             >
               <Calendar className="h-4 w-4" />
@@ -149,7 +148,7 @@ const NavBar = () => {
             </Link>
             <Link 
               to="/stations" 
-              className="flex items-center gap-3 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800 transition-colors"
+              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800"
               onClick={() => setMobileMenuOpen(false)}
             >
               <Radio className="h-4 w-4" />
@@ -157,15 +156,15 @@ const NavBar = () => {
             </Link>
             <Link 
               to="/marketplace" 
-              className="flex items-center gap-3 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800 transition-colors"
+              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800"
               onClick={() => setMobileMenuOpen(false)}
             >
               <ShoppingCart className="h-4 w-4" />
               <span>Marketplace</span>
             </Link>
             <Link 
-              to="/dashboard" 
-              className="flex items-center gap-3 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800 transition-colors"
+              to="/cms" 
+              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800"
               onClick={() => setMobileMenuOpen(false)}
             >
               <Settings className="h-4 w-4" />
@@ -175,7 +174,7 @@ const NavBar = () => {
             <div className="pt-2 border-t border-gray-800">
               <Button 
                 variant="outline" 
-                className="w-full flex gap-2 justify-center bg-gradient-to-r from-purple-600 to-blue-500 border-none text-white hover:from-purple-700 hover:to-blue-600"
+                className="w-full flex gap-1 justify-center bg-gradient-to-r from-purple-600 to-blue-500 border-none text-white hover:from-purple-700 hover:to-blue-600"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <Mic className="h-4 w-4" />
