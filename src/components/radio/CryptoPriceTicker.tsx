@@ -54,10 +54,10 @@ const CryptoPriceTicker = ({ isMobile }: CryptoPriceTickerProps) => {
   }, []);
 
   return (
-    <div className={`h-${isMobile ? '12' : '8'} bg-[#0a0a0a] border border-[#333] mb-2 overflow-hidden`}>
-      <div className="animate-marquee whitespace-nowrap">
+    <div className="h-6 sm:h-8 md:h-10 bg-[#0a0a0a] border border-[#333] mb-2 overflow-hidden rounded">
+      <div className="animate-marquee whitespace-nowrap h-full flex items-center">
         {cryptoPrices.map((price, index) => (
-          <span key={index} className="text-[#00ff00] font-mono text-sm mx-4">
+          <span key={index} className="text-[#00ff00] font-mono text-xs sm:text-sm mx-2 sm:mx-4">
             {price}
           </span>
         ))}

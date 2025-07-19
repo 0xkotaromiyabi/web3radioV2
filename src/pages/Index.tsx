@@ -20,7 +20,7 @@ const Index = () => {
   return (
     <ThirdwebProvider>
       <TonConnectUIProvider manifestUrl="https://ton.org/app-manifest.json">
-        <div className="min-h-screen w-full bg-gradient-to-b from-gray-900 to-gray-800 relative">
+        <div className="min-h-screen w-full bg-gradient-to-b from-gray-900 to-gray-800 relative overflow-x-hidden">
           <Particles
             id="tsparticles"
             init={particlesInit}
@@ -75,7 +75,7 @@ const Index = () => {
           />
           <div className="relative z-10 flex flex-col min-h-screen">
             <NavBar />
-            <div className="flex-1 w-full">
+            <div className="flex-1 w-full px-2 sm:px-4 md:px-6 lg:px-8">
               <Radio />
             </div>
           </div>

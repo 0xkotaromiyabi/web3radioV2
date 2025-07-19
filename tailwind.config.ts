@@ -18,6 +18,9 @@ export default {
       },
     },
     extend: {
+      screens: {
+        'xs': '475px',
+      },
       colors: {
         // Vintage radio colors
         wood: {

@@ -12,61 +12,66 @@ const StationSelector = ({ currentStation, onStationChange }: StationSelectorPro
   const isMobile = useIsMobile();
 
   return (
-    <div className={`mb-4 flex ${isMobile ? 'flex-wrap' : ''} gap-2 justify-center`}>
+    <div className="mb-4 flex flex-wrap gap-2 justify-center">
       <button
         onClick={() => onStationChange('web3')}
-        className={`px-4 py-2 rounded-full flex items-center gap-2 ${
+        className={`px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-full flex items-center gap-1 sm:gap-2 text-xs sm:text-sm ${
           currentStation === 'web3'
             ? 'bg-[#00ff00] text-black'
             : 'bg-[#333] text-gray-300'
-        } ${isMobile ? 'mb-2' : ''}`}
+        } transition-all duration-200 hover:scale-105`}
       >
-        <RadioIcon size={16} />
-        Web3 Radio
+        <RadioIcon size={14} className="sm:w-4 sm:h-4" />
+        <span className="hidden xs:inline sm:inline">Web3 Radio</span>
+        <span className="xs:hidden">Web3</span>
       </button>
       <button
         onClick={() => onStationChange('Venus')}
-        className={`px-4 py-2 rounded-full flex items-center gap-2 ${
+        className={`px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-full flex items-center gap-1 sm:gap-2 text-xs sm:text-sm ${
           currentStation === 'Venus'
             ? 'bg-[#00ff00] text-black'
             : 'bg-[#333] text-gray-300'
-        } ${isMobile ? 'mb-2' : ''}`}
+        } transition-all duration-200 hover:scale-105`}
       >
-        <RadioIcon size={16} />
-        Venus FM
+        <RadioIcon size={14} className="sm:w-4 sm:h-4" />
+        <span className="hidden xs:inline sm:inline">Venus FM</span>
+        <span className="xs:hidden">Venus</span>
       </button>
       <button
         onClick={() => onStationChange('iradio')}
-        className={`px-4 py-2 rounded-full flex items-center gap-2 ${
+        className={`px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-full flex items-center gap-1 sm:gap-2 text-xs sm:text-sm ${
           currentStation === 'iradio'
             ? 'bg-[#00ff00] text-black'
             : 'bg-[#333] text-gray-300'
-        } ${isMobile ? 'mb-2' : ''}`}
+        } transition-all duration-200 hover:scale-105`}
       >
-        <RadioIcon size={16} />
-        i-Radio
+        <RadioIcon size={14} className="sm:w-4 sm:h-4" />
+        <span className="hidden xs:inline sm:inline">i-Radio</span>
+        <span className="xs:hidden">iRadio</span>
       </button>
       <button
         onClick={() => onStationChange('female')}
-        className={`px-4 py-2 rounded-full flex items-center gap-2 ${
+        className={`px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-full flex items-center gap-1 sm:gap-2 text-xs sm:text-sm ${
           currentStation === 'female'
             ? 'bg-[#00ff00] text-black'
             : 'bg-[#333] text-gray-300'
-        } ${isMobile ? 'mb-2' : ''}`}
+        } transition-all duration-200 hover:scale-105`}
       >
-        <RadioIcon size={16} />
-        Female Radio
+        <RadioIcon size={14} className="sm:w-4 sm:h-4" />
+        <span className="hidden xs:inline sm:inline">Female Radio</span>
+        <span className="xs:hidden">Female</span>
       </button>
       <button
         onClick={() => onStationChange('delta')}
-        className={`px-4 py-2 rounded-full flex items-center gap-2 ${
+        className={`px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-full flex items-center gap-1 sm:gap-2 text-xs sm:text-sm ${
           currentStation === 'delta'
             ? 'bg-[#00ff00] text-black'
             : 'bg-[#333] text-gray-300'
-        }`}
+        } transition-all duration-200 hover:scale-105`}
       >
-        <RadioIcon size={16} />
-        Delta FM
+        <RadioIcon size={14} className="sm:w-4 sm:h-4" />
+        <span className="hidden xs:inline sm:inline">Delta FM</span>
+        <span className="xs:hidden">Delta</span>
       </button>
     </div>
   );

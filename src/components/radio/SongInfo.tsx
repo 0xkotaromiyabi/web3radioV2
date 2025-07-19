@@ -48,47 +48,47 @@ const SongInfo = ({ currentSong, isLoading, currentStation, onRefresh, lastUpdat
     'Stream Metadata';
 
   return (
-    <div className="bg-[#1a1a1a] border border-[#333] rounded p-3 mb-4">
-      <div className="flex justify-between items-center mb-2">
-        <h3 className="text-[#00ff00] font-bold flex items-center gap-2">
-          <Music size={16} />
+    <div className="bg-[#1a1a1a] border border-[#333] rounded p-3 sm:p-4 mb-4">
+      <div className="flex justify-between items-center mb-2 sm:mb-3">
+        <h3 className="text-[#00ff00] font-bold flex items-center gap-2 text-sm sm:text-base">
+          <Music size={14} className="sm:w-4 sm:h-4" />
           <span>Now Playing</span>
         </h3>
-        <div className="flex gap-2">
+        <div className="flex gap-1 sm:gap-2">
           {onRefresh && (
             <button 
               onClick={onRefresh}
-              className="text-gray-400 hover:text-[#00ff00] transition-colors"
+              className="text-gray-400 hover:text-[#00ff00] transition-colors p-1"
               title="Refresh song info"
             >
-              <RefreshCw size={14} />
+              <RefreshCw size={12} className="sm:w-3.5 sm:h-3.5" />
             </button>
           )}
           <button 
             onClick={() => setShowPlaylist(!showPlaylist)}
-            className={`text-gray-400 hover:text-[#00ff00] transition-colors ${showPlaylist ? 'text-[#00ff00]' : ''}`}
+            className={`text-gray-400 hover:text-[#00ff00] transition-colors p-1 ${showPlaylist ? 'text-[#00ff00]' : ''}`}
             title={showPlaylist ? "Hide playlist" : "Show playlist"}
           >
-            <ListMusic size={14} />
+            <ListMusic size={12} className="sm:w-3.5 sm:h-3.5" />
           </button>
         </div>
       </div>
-      <div className="text-white text-sm space-y-2">
-        <p className="flex items-center gap-2">
-          <Music size={14} className="text-gray-400" />
-          <span className="font-medium">{currentSong.title || 'Unknown Title'}</span>
+      <div className="text-white text-xs sm:text-sm space-y-1.5 sm:space-y-2">
+        <p className="flex items-start gap-2">
+          <Music size={12} className="text-gray-400 mt-0.5 flex-shrink-0 sm:w-3.5 sm:h-3.5" />
+          <span className="font-medium break-words">{currentSong.title || 'Unknown Title'}</span>
         </p>
-        <p className="flex items-center gap-2">
-          <User size={14} className="text-gray-400" />
-          <span>{currentSong.artist || 'Unknown Artist'}</span>
+        <p className="flex items-start gap-2">
+          <User size={12} className="text-gray-400 mt-0.5 flex-shrink-0 sm:w-3.5 sm:h-3.5" />
+          <span className="break-words">{currentSong.artist || 'Unknown Artist'}</span>
         </p>
-        <p className="flex items-center gap-2">
-          <Disc size={14} className="text-gray-400" />
-          <span>{currentSong.album || 'Unknown Album'}</span>
+        <p className="flex items-start gap-2">
+          <Disc size={12} className="text-gray-400 mt-0.5 flex-shrink-0 sm:w-3.5 sm:h-3.5" />
+          <span className="break-words">{currentSong.album || 'Unknown Album'}</span>
         </p>
         {lastUpdated && (
           <p className="flex items-center gap-2 text-xs text-gray-400">
-            <Clock size={12} className="text-gray-500" />
+            <Clock size={10} className="text-gray-500 sm:w-3 sm:h-3" />
             <span>Updated: {lastUpdated}</span>
           </p>
         )}
@@ -96,17 +96,17 @@ const SongInfo = ({ currentSong, isLoading, currentStation, onRefresh, lastUpdat
       
       {/* Playlist Section */}
       {showPlaylist && playlist.length > 0 && (
-        <div className="mt-4 pt-3 border-t border-[#333]">
+        <div className="mt-3 sm:mt-4 pt-3 border-t border-[#333]">
           <h4 className="text-[#00ff00] text-xs font-bold mb-2 flex items-center gap-2">
-            <ListMusic size={12} />
+            <ListMusic size={10} className="sm:w-3 sm:h-3" />
             <span>Recent Playlist</span>
           </h4>
-          <div className="max-h-48 overflow-y-auto pr-1 custom-scrollbar">
-            <ul className="space-y-2">
+          <div className="max-h-32 sm:max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+            <ul className="space-y-1.5 sm:space-y-2">
               {playlist.map((song, index) => (
                 <li key={index} className="text-xs py-1 border-b border-[#333] last:border-0">
-                  <p className="text-white font-medium">{song.title || 'Unknown'}</p>
-                  <p className="text-gray-400">{song.artist || 'Unknown'}</p>
+                  <p className="text-white font-medium break-words">{song.title || 'Unknown'}</p>
+                  <p className="text-gray-400 break-words">{song.artist || 'Unknown'}</p>
                 </li>
               ))}
             </ul>
@@ -114,7 +114,7 @@ const SongInfo = ({ currentSong, isLoading, currentStation, onRefresh, lastUpdat
         </div>
       )}
 
-      <div className="mt-2 text-[10px] text-gray-500">
+      <div className="mt-2 text-[9px] sm:text-[10px] text-gray-500 break-words">
         Source: {stationSource}
       </div>
     </div>

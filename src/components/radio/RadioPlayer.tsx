@@ -247,22 +247,22 @@ const RadioPlayer = () => {
         playlist={playlist[currentStation]}
       />
 
-      <div className="bg-[#232323] rounded-lg shadow-xl border border-[#444] select-none">
-        <div className="bg-gradient-to-r from-[#1a1a1a] to-[#333] p-1 flex justify-between items-center">
-          <div className="text-[#00ff00] text-xs font-bold">
+      <div className="bg-[#232323] rounded-lg shadow-xl border border-[#444] select-none max-w-full overflow-hidden">
+        <div className="bg-gradient-to-r from-[#1a1a1a] to-[#333] p-2 sm:p-3 flex justify-between items-center">
+          <div className="text-[#00ff00] text-xs sm:text-sm font-bold truncate">
             {currentStation === 'web3' ? 'Web3 Radio' : 
              currentStation === 'Venus' ? 'Venus FM' : 
              currentStation === 'iradio' ? 'i-Radio' : 
              currentStation === 'female' ? 'Female Radio' : 'Delta FM'}
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-1 sm:gap-2">
             <button className="text-gray-400 hover:text-white text-xs">_</button>
             <button className="text-gray-400 hover:text-white text-xs">□</button>
             <button className="text-gray-400 hover:text-white text-xs">×</button>
           </div>
         </div>
 
-        <div className="bg-[#000] p-4">
+        <div className="bg-[#000] p-2 sm:p-3 md:p-4 space-y-2">
           <ProgramSchedule isMobile={isMobile} />
           <CryptoPriceTicker isMobile={isMobile} />
           <AudioVisualizer />
