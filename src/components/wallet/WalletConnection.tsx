@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { createThirdwebClient } from "thirdweb";
 import { ConnectButton } from "thirdweb/react";
@@ -5,10 +6,11 @@ import { inAppWallet, createWallet } from "thirdweb/wallets";
 import EnhancedListeningTimeTracker from './EnhancedListeningTimeTracker';
 import W3RRewardClaim from './W3RRewardClaim';
 import NFTCollection from './NFTCollection';
+import FarcasterConnectMenu from './FarcasterConnectMenu';
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
-import FarcasterConnectMenu from './FarcasterConnectMenu';
+import { Separator } from "@/components/ui/separator";
 
 interface WalletConnectionProps {
   isPlaying: boolean;
@@ -45,18 +47,30 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
 
   return (
     <div className="border-t border-[#444] p-4 space-y-4">
-      {/* Thirdweb Connect Button */}
-      <div className="flex justify-center">
-        <ConnectButton
-          client={client}
-          wallets={wallets}
-          connectModal={{ size: "compact" }}
-          theme="dark"
-        />
+      {/* Farcaster Frame Wallet Connection */}
+      <div className="space-y-2">
+        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+          Farcaster Mini App
+        </h4>
+        <FarcasterConnectMenu />
       </div>
 
-      {/* Farcaster Wallet Connection */}
-      <FarcasterConnectMenu />
+      <Separator className="bg-[#444]" />
+
+      {/* Thirdweb Connect Button */}
+      <div className="space-y-2">
+        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+          Alternative Wallets
+        </h4>
+        <div className="flex justify-center">
+          <ConnectButton
+            client={client}
+            wallets={wallets}
+            connectModal={{ size: "compact" }}
+            theme="dark"
+          />
+        </div>
+      </div>
 
       {/* Enhanced Listening Time Tracker with W3R Integration */}
       <EnhancedListeningTimeTracker isPlaying={isPlaying} />

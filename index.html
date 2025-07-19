@@ -1,33 +1,43 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>web3radio</title>
-    <meta name="description" content="Decentralized Radio Station" />
+    <title>Web3Radio - Decentralized Radio Station</title>
+    <meta name="description" content="Live stations, curated news, and upcoming events for the on-chain world." />
     <meta name="author" content="web3radio" />
-    <meta property="og:image" content="/og-image.png" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://web3radio.xyz/" />
+    <meta property="og:title" content="Web3Radio - Decentralized Radio Station" />
+    <meta property="og:description" content="Explore the sound of on-chain culture with Web3Radio." />
+    <meta property="og:image" content="https://i.imgur.com/emXbMkd.png" />
 
-    <!-- ✅ Farcaster Mini App Embed -->
-    <meta name="fc:frame" content='{
-      "version": "next",
-      "imageUrl": "https://i.imgur.com/emXbMkd.png",
-      "button": {
-        "title": "🎧 Listen to Web3Radio",
-        "action": {
-          "type": "launch_frame",
-          "url": "https://www.web3radio.xyz",
-          "name": "Web3Radio",
-          "splashImageUrl": "https://www.web3radio.xyz/web3radio-logo.png",
-          "splashBackgroundColor": "#000000"
-        }
-      }
-    }' />
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://web3radio.xyz/" />
+    <meta property="twitter:title" content="Web3Radio - Decentralized Radio Station" />
+    <meta property="twitter:description" content="Explore the sound of on-chain culture with Web3Radio." />
+    <meta property="twitter:image" content="https://i.imgur.com/emXbMkd.png" />
+
+    <!-- Farcaster Frame -->
+    <meta name="fc:frame" content="vNext" />
+    <meta name="fc:frame:image" content="https://i.imgur.com/emXbMkd.png" />
+    <meta name="fc:frame:button:1" content="🎧 Listen Now" />
+    <meta name="fc:frame:button:1:action" content="link" />
+    <meta name="fc:frame:button:1:target" content="https://web3radio.xyz" />
+    
+    <!-- Farcaster Miniapp -->
+    <meta name="fc:frame:miniapp:manifest" content="https://web3radio.xyz/.well-known/farcaster.json" />
+    
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/web3radio-logo.png" />
   </head>
 
   <body>
     <div id="root"></div>
-    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

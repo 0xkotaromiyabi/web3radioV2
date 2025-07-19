@@ -1,183 +1,84 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import WalletConnection from '../wallet/WalletConnection';
-import RadioControls from './RadioControls';
+import React, { useState, useRef, useEffect } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import RadioDisplay from './RadioDisplay';
 import StationSelector from './StationSelector';
+import RadioControls from './RadioControls';
 import SongInfo from './SongInfo';
+import AudioVisualizer from './AudioVisualizer';
 import ProgramSchedule from './ProgramSchedule';
 import CryptoPriceTicker from './CryptoPriceTicker';
-import AudioVisualizer from './AudioVisualizer';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useToast } from '@/components/ui/use-toast';
-
-interface Song {
-  title: string;
-  artist: string;
-  album: string;
-}
-
-interface Playlist {
-  [key: string]: Song[];
-}
 
 const RadioPlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(50);
-  const [currentStation, setCurrentStation] = useState('web3');
-  const [currentSong, setCurrentSong] = useState<Song | null>(null);
-  const [isLoadingSong, setIsLoadingSong] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
-  const [playlist, setPlaylist] = useState<Playlist>({
-    female: [],
-    delta: [],
-    iradio: [],
-    web3: [],
-    Prambors: []
-  });
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [volume, setVolume] = useState(70);
+  const [currentStation, setCurrentStation] = useState('Web3Radio Main');
+  const [currentSong, setCurrentSong] = useState('Welcome to Web3Radio');
+  const audioRef = useRef<HTMLAudioElement>(null);
   const isMobile = useIsMobile();
-  const { toast } = useToast();
 
-  const stations = {
-    web3: 'https://web3radio.cloud/stream',
-    Prambors: 'https://rust.mrngroup.co:8040/stream',
-    iradio: 'https://n04.radiojar.com/4ywdgup3bnzuv?1744076195=&rj-tok=AAABlhMxTIcARnjabAV4uyOIpA&rj-ttl=5',
-    female: 'https://s1.cloudmu.id/listen/female_radio/radio.mp3',
-    delta: 'https://s1.cloudmu.id/listen/delta_fm/radio.mp3'
-  };
-
-  const addToPlaylist = (station: string, song: Song) => {
-    if (!song.title || !song.artist) return;
-    
-    const existingSongs = playlist[station] || [];
-    const isDuplicate = existingSongs.some(
-      existing => existing.title === song.title && existing.artist === song.artist
-    );
-    
-    if (!isDuplicate) {
-      setPlaylist(prev => ({
-        ...prev,
-        [station]: [song, ...existingSongs.slice(0, 19)]
-      }));
+  const stations = [
+    { 
+      id: 'main', 
+      name: 'Web3Radio Main', 
+      url: 'https://stream.web3radio.xyz/main',
+      description: 'Main station with crypto news and music',
+      genre: 'Crypto News & Music'
+    },
+    { 
+      id: 'lofi', 
+      name: 'Crypto LoFi', 
+      url: 'https://stream.web3radio.xyz/lofi',
+      description: 'Relaxing beats for coding and trading',
+      genre: 'LoFi Beats'
+    },
+    { 
+      id: 'news', 
+      name: 'Crypto News 24/7', 
+      url: 'https://stream.web3radio.xyz/news',
+      description: 'Latest crypto and blockchain news',
+      genre: 'News & Analysis'
+    },
+    { 
+      id: 'defi', 
+      name: 'DeFi Deep Dive', 
+      url: 'https://stream.web3radio.xyz/defi',
+      description: 'In-depth DeFi discussions and tutorials',
+      genre: 'Educational'
+    },
+    { 
+      id: 'nft', 
+      name: 'NFT Spotlight', 
+      url: 'https://stream.web3radio.xyz/nft',
+      description: 'NFT artist interviews and marketplace updates',
+      genre: 'Art & Culture'
     }
-  };
+  ];
 
-  const fetchOnlineRadioBoxInfo = async (station: string) => {
-    setIsLoadingSong(true);
-    
-    try {
-      if (!['female', 'delta', 'iradio'].includes(station)) {
-        setDefaultSongInfo(station);
-        return;
-      }
-      
-      mockOnlineRadioBoxResponse(station);
-    } catch (error) {
-      console.error('Error fetching song info:', error);
-      setDefaultSongInfo(station);
-    }
-  };
-
-  const mockOnlineRadioBoxResponse = (station: string) => {
-    setTimeout(() => {
-      let songInfo;
-      
-      const femaleSongs = [
-        { title: 'Beautiful Life', artist: 'Dipha Barus feat. Afgan', album: 'Female Radio Top Hits' },
-        { title: 'Love Story', artist: 'Taylor Swift', album: 'Fearless' },
-        { title: 'You Belong With Me', artist: 'Taylor Swift', album: 'Fearless' },
-        { title: 'Wildest Dreams', artist: 'Taylor Swift', album: '1989' },
-        { title: 'Hati-Hati di Jalan', artist: 'Tulus', album: 'Monokrom' }
-      ];
-      
-      const deltaSongs = [
-        { title: 'Kau Yang Sempurna', artist: 'Rizky Febian', album: 'Delta FM Showcase' },
-        { title: 'Tak Pernah Padam', artist: 'Afgan', album: 'Delta Top 40' },
-        { title: 'Waktuku Hampa', artist: 'Ari Lasso', album: 'Best of Delta' },
-        { title: 'Separuh Nafas', artist: 'Dewa 19', album: 'Bintang Lima' },
-        { title: 'Bintang di Surga', artist: 'Peterpan', album: 'Bintang di Surga' }
-      ];
-      
-      const iRadioSongs = [
-        { title: 'Pergilah Kasih', artist: 'Chrisye', album: 'i-Radio Indonesian Hits' },
-        { title: 'Harusnya Aku', artist: 'Armada', album: 'Top 40 Indonesia' },
-        { title: 'Adu Rayu', artist: 'Yovie Tulus Glenn', album: 'Indonesian Collaboration' },
-        { title: 'Anganku Anganmu', artist: 'Raisa & Isyana', album: 'Duet Hits' },
-        { title: 'Sebatas Mimpi', artist: 'Nano', album: 'i-Radio Playlist' }
-      ];
-      
-      if (station === 'female') {
-        songInfo = femaleSongs[Math.floor(Math.random() * femaleSongs.length)];
-      } else if (station === 'delta') {
-        songInfo = deltaSongs[Math.floor(Math.random() * deltaSongs.length)];
-      } else if (station === 'iradio') {
-        songInfo = iRadioSongs[Math.floor(Math.random() * iRadioSongs.length)];
-      } else {
-        setDefaultSongInfo(station);
-        return;
-      }
-      
-      setCurrentSong(songInfo);
-      addToPlaylist(station, songInfo);
-      setLastUpdated(new Date().toLocaleTimeString());
-      setIsLoadingSong(false);
-      
-      console.log(`Updated song info for ${station}:`, songInfo);
-    }, 1000);
-  };
-
-  const setDefaultSongInfo = (station: string) => {
-    const stationInfo = {
-      title: 'Live Broadcast',
-      artist: station === 'web3' ? 'Web3 Radio' :
-              station === 'Prambors' ? 'Prambors Radio' :
-              station === 'iradio' ? 'i-Radio' :
-              station === 'female' ? 'Female Radio' : 'Delta FM',
-      album: 'Live Stream'
-    };
-    
-    setCurrentSong(stationInfo);
-    setLastUpdated(new Date().toLocaleTimeString());
-    setIsLoadingSong(false);
-  };
-
-  const changeStation = (station: 'web3' | 'Prambors' | 'iradio' | 'female' | 'delta') => {
+  const togglePlay = () => {
     if (audioRef.current) {
-      audioRef.current.pause();
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play().catch(console.error);
+      }
+      setIsPlaying(!isPlaying);
     }
-    setCurrentStation(station);
-    setIsPlaying(false);
-    setCurrentSong(null);
-    setLastUpdated(null);
   };
 
-  useEffect(() => {
-    if (!isPlaying) return;
-    
-    if (!['female', 'delta', 'iradio'].includes(currentStation)) return;
-    
-    const refreshInterval = setInterval(() => {
-      console.log(`Auto-refreshing song info for ${currentStation}`);
-      fetchOnlineRadioBoxInfo(currentStation);
-    }, 30000);
-    
-    return () => clearInterval(refreshInterval);
-  }, [isPlaying, currentStation]);
-
-  useEffect(() => {
-    const audio = new Audio(stations[currentStation]);
-    audioRef.current = audio;
-    audio.volume = volume / 100;
-    
-    audio.addEventListener('play', () => {
-      fetchOnlineRadioBoxInfo(currentStation);
-    });
-    
-    return () => {
-      audio.pause();
-      audio.src = '';
-    };
-  }, [currentStation]);
+  const handleStationChange = (stationId: string) => {
+    const station = stations.find(s => s.id === stationId);
+    if (station) {
+      setCurrentStation(station.name);
+      setCurrentSong(`Now playing on ${station.name}`);
+      if (audioRef.current) {
+        audioRef.current.src = station.url;
+        if (isPlaying) {
+          audioRef.current.play().catch(console.error);
+        }
+      }
+    }
+  };
 
   useEffect(() => {
     if (audioRef.current) {
@@ -185,99 +86,97 @@ const RadioPlayer = () => {
     }
   }, [volume]);
 
-  const refreshSongInfo = () => {
-    toast({
-      title: "Refreshing song info",
-      description: `Updating current song information for ${
-        currentStation === 'web3' ? 'Web3 Radio' :
-        currentStation === 'Prambors' ? 'Prambors Radio' :
-        currentStation === 'iradio' ? 'i-Radio' :
-        currentStation === 'female' ? 'Female Radio' : 'Delta FM'
-      }`,
-      duration: 1500,
-    });
-    fetchOnlineRadioBoxInfo(currentStation);
-  };
-
-  const togglePlay = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-        setCurrentSong(null);
-      } else {
-        audioRef.current.play()
-          .then(() => {
-            fetchOnlineRadioBoxInfo(currentStation);
-            toast({
-              title: "Radio playing",
-              description: `Now playing ${
-                currentStation === 'web3' ? 'Web3 Radio' :
-                currentStation === 'Prambors' ? 'Prambors Radio' :
-                currentStation === 'iradio' ? 'i-Radio' :
-                currentStation === 'female' ? 'Female Radio' : 'Delta FM'
-              }`,
-            });
-          })
-          .catch((error) => {
-            console.error("Error playing audio:", error);
-            toast({
-              title: "Playback error",
-              description: "There was an error playing this station. Please try again.",
-              variant: "destructive"
-            });
-          });
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
-
   return (
-    <>
-      <StationSelector 
-        currentStation={currentStation}
-        onStationChange={changeStation}
-      />
+    <div className="w-full max-w-4xl mx-auto">
+      <audio ref={audioRef} preload="none" />
       
-      <SongInfo 
-        currentSong={currentSong}
-        isLoading={isLoadingSong}
-        currentStation={currentStation}
-        onRefresh={refreshSongInfo}
-        lastUpdated={lastUpdated || undefined}
-        playlist={playlist[currentStation]}
-      />
-
-      <div className="bg-[#232323] rounded-lg shadow-xl border border-[#444] select-none">
-        <div className="bg-gradient-to-r from-[#1a1a1a] to-[#333] p-1 flex justify-between items-center">
-          <div className="text-[#00ff00] text-xs font-bold">
-            {currentStation === 'web3' ? 'Web3 Radio' : 
-             currentStation === 'Prambors' ? 'Prambors Radio' : 
-             currentStation === 'iradio' ? 'i-Radio' : 
-             currentStation === 'female' ? 'Female Radio' : 'Delta FM'}
-          </div>
-          <div className="flex gap-2">
-            <button className="text-gray-400 hover:text-white text-xs">_</button>
-            <button className="text-gray-400 hover:text-white text-xs">□</button>
-            <button className="text-gray-400 hover:text-white text-xs">×</button>
+      {/* Crypto Price Ticker */}
+      <CryptoPriceTicker isMobile={isMobile} />
+      
+      {/* Program Schedule */}
+      <ProgramSchedule isMobile={isMobile} />
+      
+      {/* Station List Display */}
+      <div className="mb-6 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-xl shadow-2xl border border-green-500/30 overflow-hidden">
+        <div className="p-4 sm:p-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-green-400 mb-4 text-center">
+            🎧 Web3 Radio Stations
+          </h2>
+          <div className="grid gap-3 sm:gap-4">
+            {stations.map((station) => (
+              <div 
+                key={station.id} 
+                className={`p-3 sm:p-4 rounded-lg border transition-all duration-200 cursor-pointer ${
+                  currentStation === station.name
+                    ? 'bg-green-500/20 border-green-500/50 shadow-lg'
+                    : 'bg-gray-800/50 border-gray-700/50 hover:bg-gray-700/50 hover:border-green-500/30'
+                }`}
+                onClick={() => handleStationChange(station.id)}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-white text-sm sm:text-base">
+                      {station.name}
+                    </h3>
+                    <p className="text-gray-300 text-xs sm:text-sm mb-1">
+                      {station.description}
+                    </p>
+                    <span className="inline-block px-2 py-1 rounded-full bg-green-500/20 text-green-400 text-xs">
+                      {station.genre}
+                    </span>
+                  </div>
+                  <div className="ml-3">
+                    {currentStation === station.name && isPlaying ? (
+                      <div className="flex gap-1">
+                        <div className="w-1 h-4 bg-green-500 animate-pulse"></div>
+                        <div className="w-1 h-6 bg-green-400 animate-pulse delay-100"></div>
+                        <div className="w-1 h-5 bg-green-300 animate-pulse delay-200"></div>
+                      </div>
+                    ) : (
+                      <div className={`w-3 h-3 rounded-full ${
+                        currentStation === station.name ? 'bg-green-500' : 'bg-gray-500'
+                      }`}></div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-
-        <div className="bg-[#000] p-4">
-          <ProgramSchedule isMobile={isMobile} />
-          <CryptoPriceTicker isMobile={isMobile} />
-          <AudioVisualizer />
+      </div>
+      
+      {/* Main Radio Interface */}
+      <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-xl shadow-2xl border border-green-500/30 overflow-hidden">
+        <div className="p-4 sm:p-6">
+          <RadioDisplay 
+            isPlaying={isPlaying}
+            currentStation={currentStation}
+            currentTrack={currentSong}
+          />
+          
+          <StationSelector 
+            stations={stations}
+            currentStation={currentStation}
+            onStationChange={handleStationChange}
+          />
+          
+          <SongInfo 
+            title={currentSong}
+            artist="Web3Radio"
+            album={currentStation}
+          />
+          
+          {isPlaying && <AudioVisualizer />}
         </div>
-
-        <RadioControls 
+        
+        <RadioControls
           isPlaying={isPlaying}
           volume={volume}
           togglePlay={togglePlay}
           setVolume={setVolume}
         />
-
-        <WalletConnection isPlaying={isPlaying} />
       </div>
-    </>
+    </div>
   );
 };
 
