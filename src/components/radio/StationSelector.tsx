@@ -5,7 +5,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 interface StationSelectorProps {
   currentStation: string;
-  onStationChange: (station: 'web3' | 'Prambors' | 'iradio' | 'female' | 'delta') => void;
+  onStationChange: (station: 'web3' | 'Venus' | 'iradio' | 'female' | 'delta') => void;
 }
 
 const StationSelector = ({ currentStation, onStationChange }: StationSelectorProps) => {
@@ -25,15 +25,15 @@ const StationSelector = ({ currentStation, onStationChange }: StationSelectorPro
         Web3 Radio
       </button>
       <button
-        onClick={() => onStationChange('Prambors')}
+        onClick={() => onStationChange('Venus')}
         className={`px-4 py-2 rounded-full flex items-center gap-2 ${
-          currentStation === 'Prambors'
+          currentStation === 'Venus'
             ? 'bg-[#00ff00] text-black'
             : 'bg-[#333] text-gray-300'
         } ${isMobile ? 'mb-2' : ''}`}
       >
         <RadioIcon size={16} />
-        Prambors Radio
+        Venus FM
       </button>
       <button
         onClick={() => onStationChange('iradio')}

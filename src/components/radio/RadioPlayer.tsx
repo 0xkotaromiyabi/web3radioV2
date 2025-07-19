@@ -32,7 +32,7 @@ const RadioPlayer = () => {
     delta: [],
     iradio: [],
     web3: [],
-    Prambors: []
+    Venus: []
   });
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const isMobile = useIsMobile();
@@ -40,7 +40,7 @@ const RadioPlayer = () => {
 
   const stations = {
     web3: 'https://web3radio.cloud/stream',
-    Prambors: 'https://rust.mrngroup.co:8040/stream',
+    Venus: 'https://stream.zeno.fm/3wiuocujuobtv',
     iradio: 'https://n04.radiojar.com/4ywdgup3bnzuv?1744076195=&rj-tok=AAABlhMxTIcARnjabAV4uyOIpA&rj-ttl=5',
     female: 'https://s1.cloudmu.id/listen/female_radio/radio.mp3',
     delta: 'https://s1.cloudmu.id/listen/delta_fm/radio.mp3'
@@ -130,7 +130,7 @@ const RadioPlayer = () => {
     const stationInfo = {
       title: 'Live Broadcast',
       artist: station === 'web3' ? 'Web3 Radio' :
-              station === 'Prambors' ? 'Prambors Radio' :
+              station === 'Venus' ? 'Venus FM' :
               station === 'iradio' ? 'i-Radio' :
               station === 'female' ? 'Female Radio' : 'Delta FM',
       album: 'Live Stream'
@@ -141,7 +141,7 @@ const RadioPlayer = () => {
     setIsLoadingSong(false);
   };
 
-  const changeStation = (station: 'web3' | 'Prambors' | 'iradio' | 'female' | 'delta') => {
+  const changeStation = (station: 'web3' | 'Venus' | 'iradio' | 'female' | 'delta') => {
     if (audioRef.current) {
       audioRef.current.pause();
     }
@@ -190,7 +190,7 @@ const RadioPlayer = () => {
       title: "Refreshing song info",
       description: `Updating current song information for ${
         currentStation === 'web3' ? 'Web3 Radio' :
-        currentStation === 'Prambors' ? 'Prambors Radio' :
+        currentStation === 'Venus' ? 'Venus FM' :
         currentStation === 'iradio' ? 'i-Radio' :
         currentStation === 'female' ? 'Female Radio' : 'Delta FM'
       }`,
@@ -212,7 +212,7 @@ const RadioPlayer = () => {
               title: "Radio playing",
               description: `Now playing ${
                 currentStation === 'web3' ? 'Web3 Radio' :
-                currentStation === 'Prambors' ? 'Prambors Radio' :
+                currentStation === 'Venus' ? 'Venus FM' :
                 currentStation === 'iradio' ? 'i-Radio' :
                 currentStation === 'female' ? 'Female Radio' : 'Delta FM'
               }`,
@@ -251,7 +251,7 @@ const RadioPlayer = () => {
         <div className="bg-gradient-to-r from-[#1a1a1a] to-[#333] p-1 flex justify-between items-center">
           <div className="text-[#00ff00] text-xs font-bold">
             {currentStation === 'web3' ? 'Web3 Radio' : 
-             currentStation === 'Prambors' ? 'Prambors Radio' : 
+             currentStation === 'Venus' ? 'Venus FM' : 
              currentStation === 'iradio' ? 'i-Radio' : 
              currentStation === 'female' ? 'Female Radio' : 'Delta FM'}
           </div>
