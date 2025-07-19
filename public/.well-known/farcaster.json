@@ -1,3 +1,4 @@
+
 {
   "accountAssociation": {
     "header": "eyJmaWQiOjM1NjM4MiwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweGM2MzBjYTMzMDBlYzA3QTU3MmQ3MjU2QUQ0RENkODMxN2M1NTc2ODgifQ",
@@ -24,5 +25,9 @@
     "ogTitle": "Web3Radio",
     "ogDescription": "Explore the sound of on-chain culture with Web3Radio.",
     "ogImageUrl": "https://i.imgur.com/emXbMkd.png"
+  },
+  "miniApp": {
+    "manifestUrl": "https://web3radio.xyz/.well-known/farcaster.json",
+    "url": "https://web3radio.xyz"
   }
 }

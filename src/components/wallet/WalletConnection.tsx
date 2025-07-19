@@ -1,13 +1,14 @@
-
 import React, { useState } from 'react';
 import { createThirdwebClient } from "thirdweb";
 import { ConnectButton } from "thirdweb/react";
 import { inAppWallet, createWallet } from "thirdweb/wallets";
-import ListeningTimeTracker from './ListeningTimeTracker';
+import EnhancedListeningTimeTracker from './EnhancedListeningTimeTracker';
+import W3RRewardClaim from './W3RRewardClaim';
 import NFTCollection from './NFTCollection';
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
+import FarcasterConnectMenu from './FarcasterConnectMenu';
 
 interface WalletConnectionProps {
   isPlaying: boolean;
@@ -54,8 +55,14 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
         />
       </div>
 
-      {/* Listening Time Tracker */}
-      <ListeningTimeTracker isPlaying={isPlaying} />
+      {/* Farcaster Wallet Connection */}
+      <FarcasterConnectMenu />
+
+      {/* Enhanced Listening Time Tracker with W3R Integration */}
+      <EnhancedListeningTimeTracker isPlaying={isPlaying} />
+
+      {/* W3R Reward Claim Component */}
+      <W3RRewardClaim />
 
       {/* NFT Collection Display */}
       <NFTCollection client={client} />
@@ -65,7 +72,7 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
         <div className="text-center">
           <h3 className="text-sm font-bold text-white mb-2">Web3 Radio Wallet</h3>
           <p className="text-xs text-gray-400">
-            Connect your wallet to track listening time and access premium features
+            Connect your wallet to earn W3R tokens and access premium features
           </p>
         </div>
       </Card>

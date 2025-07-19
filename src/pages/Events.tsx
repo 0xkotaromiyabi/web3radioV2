@@ -12,6 +12,7 @@ type Event = {
   date: string;
   location: string;
   description: string;
+  image_url?: string;
 };
 
 const Events = () => {
@@ -64,6 +65,15 @@ const Events = () => {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {events.map((event) => (
               <Card key={event.id} className="bg-gray-800 border-green-500 overflow-hidden flex flex-col">
+                {event.image_url && (
+                  <div className="w-full h-48 overflow-hidden">
+                    <img 
+                      src={event.image_url} 
+                      alt={event.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
                 <CardHeader>
                   <CardTitle className="text-green-400">{event.title}</CardTitle>
                 </CardHeader>
