@@ -6,6 +6,7 @@ import { WagmiProvider } from 'wagmi';
 import { ThirdwebProvider } from "thirdweb/react";
 import { client } from "./services/w3rSmartContract";
 import { W3RTokenProvider } from "./contexts/W3RTokenContext";
+import { MiniKitContextProvider } from "./providers/MiniKitProvider";
 import { config } from "./config/wagmi";
 import { Toaster } from "@/components/ui/toaster";
 import Index from "./pages/Index";
@@ -21,26 +22,28 @@ const queryClient = new QueryClient();
 
 function App() {
   return (
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        <ThirdwebProvider>
-          <W3RTokenProvider>
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/marketplace" element={<Marketplace />} />
-                <Route path="/news" element={<News />} />
-                <Route path="/events" element={<Events />} />
-                <Route path="/stations" element={<Stations />} />
-                <Route path="/cms" element={<CMS />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-              </Routes>
-              <Toaster />
-            </BrowserRouter>
-          </W3RTokenProvider>
-        </ThirdwebProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <MiniKitContextProvider>
+      <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}>
+          <ThirdwebProvider>
+            <W3RTokenProvider>
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/marketplace" element={<Marketplace />} />
+                  <Route path="/news" element={<News />} />
+                  <Route path="/events" element={<Events />} />
+                  <Route path="/stations" element={<Stations />} />
+                  <Route path="/cms" element={<CMS />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                </Routes>
+                <Toaster />
+              </BrowserRouter>
+            </W3RTokenProvider>
+          </ThirdwebProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </MiniKitContextProvider>
   );
 }
 

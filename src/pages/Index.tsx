@@ -4,11 +4,14 @@ import NavBar from '@/components/navigation/NavBar';
 import { ThirdwebProvider } from "thirdweb/react";
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import { useCallback } from 'react';
+import { useMiniKitContext } from '@/hooks/useMiniKitContext';
 import Particles from 'react-particles';
 import type { Container, Engine } from 'tsparticles-engine';
 import { loadFull } from 'tsparticles';
 
 const Index = () => {
+  const { isFrameReady, user, client, location } = useMiniKitContext();
+  
   const particlesInit = useCallback(async (engine: Engine) => {
     await loadFull(engine);
   }, []);
