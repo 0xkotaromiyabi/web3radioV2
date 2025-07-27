@@ -16,6 +16,7 @@ import Events from "./pages/Events";
 import Stations from "./pages/Stations";
 import CMS from "./pages/CMS";
 import Dashboard from "./pages/Dashboard";
+import Faucet from "./pages/Faucet";
 import "./App.css";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ function App() {
                   <Route path="/stations" element={<Stations />} />
                   <Route path="/cms" element={<CMS />} />
                   <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/faucet" element={<Faucet />} />
                 </Routes>
                 <Toaster />
               </BrowserRouter>
