@@ -80,14 +80,6 @@ const NavBar = () => {
                 </Link>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <Link to="/faucet">
-                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1")}>
-                    <Coins className="h-4 w-4" />
-                    <span>Faucet</span>
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
                 <a href="https://kotarominami.xyz/shop" target="_blank" rel="noopener noreferrer">
                   <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1")}>
                     <ShoppingCart className="h-4 w-4" />
@@ -160,14 +152,6 @@ const NavBar = () => {
             >
               <Radio className="h-4 w-4" />
               <span>Radio Stations</span>
-            </Link>
-            <Link 
-              to="/faucet" 
-              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <Coins className="h-4 w-4" />
-              <span>Faucet</span>
             </Link>
             <a 
               href="https://kotarominami.xyz/shop" 
