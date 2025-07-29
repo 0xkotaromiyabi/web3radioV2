@@ -5,7 +5,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 interface StationSelectorProps {
   currentStation: string;
-  onStationChange: (station: 'web3' | 'Venus' | 'iradio' | 'female' | 'delta') => void;
+  onStationChange: (station: 'web3' | 'Venus' | 'iradio' | 'female' | 'delta' | 'longplayer') => void;
 }
 
 const StationSelector = ({ currentStation, onStationChange }: StationSelectorProps) => {
@@ -72,6 +72,18 @@ const StationSelector = ({ currentStation, onStationChange }: StationSelectorPro
         <RadioIcon size={14} className="sm:w-4 sm:h-4" />
         <span className="hidden xs:inline sm:inline">Delta FM</span>
         <span className="xs:hidden">Delta</span>
+      </button>
+      <button
+        onClick={() => onStationChange('longplayer')}
+        className={`px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-full flex items-center gap-1 sm:gap-2 text-xs sm:text-sm ${
+          currentStation === 'longplayer'
+            ? 'bg-[#00ff00] text-black'
+            : 'bg-[#333] text-gray-300'
+        } transition-all duration-200 hover:scale-105`}
+      >
+        <RadioIcon size={14} className="sm:w-4 sm:h-4" />
+        <span className="hidden xs:inline sm:inline">Longplayer</span>
+        <span className="xs:hidden">Long</span>
       </button>
     </div>
   );

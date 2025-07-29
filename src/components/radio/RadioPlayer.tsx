@@ -32,7 +32,8 @@ const RadioPlayer = () => {
     delta: [],
     iradio: [],
     web3: [],
-    Venus: []
+    Venus: [],
+    longplayer: []
   });
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const isMobile = useIsMobile();
@@ -43,7 +44,8 @@ const RadioPlayer = () => {
     Venus: 'https://stream.zeno.fm/3wiuocujuobtv',
     iradio: 'https://n04.radiojar.com/4ywdgup3bnzuv?1744076195=&rj-tok=AAABlhMxTIcARnjabAV4uyOIpA&rj-ttl=5',
     female: 'https://s1.cloudmu.id/listen/female_radio/radio.mp3',
-    delta: 'https://s1.cloudmu.id/listen/delta_fm/radio.mp3'
+    delta: 'https://s1.cloudmu.id/listen/delta_fm/radio.mp3',
+    longplayer: 'http://icecast.spc.org:8000/longplayer'
   };
 
   const addToPlaylist = (station: string, song: Song) => {
@@ -66,7 +68,7 @@ const RadioPlayer = () => {
     setIsLoadingSong(true);
     
     try {
-      if (!['female', 'delta', 'iradio'].includes(station)) {
+      if (!['female', 'delta', 'iradio', 'longplayer'].includes(station)) {
         setDefaultSongInfo(station);
         return;
       }
@@ -105,6 +107,14 @@ const RadioPlayer = () => {
         { title: 'Anganku Anganmu', artist: 'Raisa & Isyana', album: 'Duet Hits' },
         { title: 'Sebatas Mimpi', artist: 'Nano', album: 'i-Radio Playlist' }
       ];
+
+      const longplayerSongs = [
+        { title: 'Millennium Composition', artist: 'Jem Finer', album: 'Longplayer' },
+        { title: 'Tibetan Singing Bowls', artist: 'Various Artists', album: 'Longplayer Session' },
+        { title: 'Eternal Fragment', artist: 'Longplayer Project', album: 'Continuous Play' },
+        { title: 'Thousand Year Echo', artist: 'Jem Finer', album: 'Trinity Buoy Wharf' },
+        { title: 'Infinite Loop', artist: 'Longplayer Collective', album: 'Ambient Millennium' }
+      ];
       
       if (station === 'female') {
         songInfo = femaleSongs[Math.floor(Math.random() * femaleSongs.length)];
@@ -112,6 +122,8 @@ const RadioPlayer = () => {
         songInfo = deltaSongs[Math.floor(Math.random() * deltaSongs.length)];
       } else if (station === 'iradio') {
         songInfo = iRadioSongs[Math.floor(Math.random() * iRadioSongs.length)];
+      } else if (station === 'longplayer') {
+        songInfo = longplayerSongs[Math.floor(Math.random() * longplayerSongs.length)];
       } else {
         setDefaultSongInfo(station);
         return;
@@ -132,7 +144,8 @@ const RadioPlayer = () => {
       artist: station === 'web3' ? 'Web3 Radio' :
               station === 'Venus' ? 'Venus FM' :
               station === 'iradio' ? 'i-Radio' :
-              station === 'female' ? 'Female Radio' : 'Delta FM',
+              station === 'female' ? 'Female Radio' :
+              station === 'longplayer' ? 'Longplayer' : 'Delta FM',
       album: 'Live Stream'
     };
     
@@ -141,7 +154,7 @@ const RadioPlayer = () => {
     setIsLoadingSong(false);
   };
 
-  const changeStation = (station: 'web3' | 'Venus' | 'iradio' | 'female' | 'delta') => {
+  const changeStation = (station: 'web3' | 'Venus' | 'iradio' | 'female' | 'delta' | 'longplayer') => {
     if (audioRef.current) {
       audioRef.current.pause();
     }
@@ -154,7 +167,7 @@ const RadioPlayer = () => {
   useEffect(() => {
     if (!isPlaying) return;
     
-    if (!['female', 'delta', 'iradio'].includes(currentStation)) return;
+    if (!['female', 'delta', 'iradio', 'longplayer'].includes(currentStation)) return;
     
     const refreshInterval = setInterval(() => {
       console.log(`Auto-refreshing song info for ${currentStation}`);
@@ -192,7 +205,8 @@ const RadioPlayer = () => {
         currentStation === 'web3' ? 'Web3 Radio' :
         currentStation === 'Venus' ? 'Venus FM' :
         currentStation === 'iradio' ? 'i-Radio' :
-        currentStation === 'female' ? 'Female Radio' : 'Delta FM'
+        currentStation === 'female' ? 'Female Radio' :
+        currentStation === 'longplayer' ? 'Longplayer' : 'Delta FM'
       }`,
       duration: 1500,
     });
@@ -214,7 +228,8 @@ const RadioPlayer = () => {
                 currentStation === 'web3' ? 'Web3 Radio' :
                 currentStation === 'Venus' ? 'Venus FM' :
                 currentStation === 'iradio' ? 'i-Radio' :
-                currentStation === 'female' ? 'Female Radio' : 'Delta FM'
+                currentStation === 'female' ? 'Female Radio' :
+                currentStation === 'longplayer' ? 'Longplayer' : 'Delta FM'
               }`,
             });
           })
@@ -253,7 +268,8 @@ const RadioPlayer = () => {
             {currentStation === 'web3' ? 'Web3 Radio' : 
              currentStation === 'Venus' ? 'Venus FM' : 
              currentStation === 'iradio' ? 'i-Radio' : 
-             currentStation === 'female' ? 'Female Radio' : 'Delta FM'}
+             currentStation === 'female' ? 'Female Radio' :
+             currentStation === 'longplayer' ? 'Longplayer' : 'Delta FM'}
           </div>
           <div className="flex gap-1 sm:gap-2">
             <button className="text-gray-400 hover:text-white text-xs">_</button>
