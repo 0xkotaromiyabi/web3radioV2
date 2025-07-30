@@ -42,20 +42,23 @@ const EventsTicker = ({ isMobile }: EventsTickerProps) => {
     return `📅 ${date} - ${event.title} @ ${event.location}`;
   };
 
+  const createEventText = () => {
+    if (events.length === 0) {
+      return "📅 Loading upcoming events...";
+    }
+    
+    // Create multiple copies for seamless looping
+    const eventTexts = events.map(formatEventText);
+    const repeatedEvents = [...eventTexts, ...eventTexts, ...eventTexts];
+    return repeatedEvents.join(" • ");
+  };
+
   return (
     <div className={`h-${isMobile ? '12' : '8'} bg-[#0a0a0a] border border-[#333] mb-2 overflow-hidden rounded`}>
       <div className="animate-marquee whitespace-nowrap h-full flex items-center">
-        {events.length > 0 ? (
-          events.map((event, index) => (
-            <span key={index} className="text-[#00ff00] font-mono text-xs sm:text-sm mx-2 sm:mx-4">
-              {formatEventText(event)}
-            </span>
-          ))
-        ) : (
-          <span className="text-[#00ff00] font-mono text-xs sm:text-sm mx-2 sm:mx-4">
-            📅 Loading upcoming events...
-          </span>
-        )}
+        <span className="text-[#00ff00] font-mono text-xs sm:text-sm">
+          {createEventText()}
+        </span>
       </div>
     </div>
   );
