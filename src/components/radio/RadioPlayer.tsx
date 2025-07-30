@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import WalletConnection from '../wallet/WalletConnection';
 import RadioControls from './RadioControls';
 import StationSelector from './StationSelector';
-import SongInfo from './SongInfo';
+
 import EventsTicker from './EventsTicker';
 import CryptoPriceTicker from './CryptoPriceTicker';
 import AudioVisualizer from './AudioVisualizer';
@@ -253,14 +253,7 @@ const RadioPlayer = () => {
         onStationChange={changeStation}
       />
       
-      <SongInfo 
-        currentSong={currentSong}
-        isLoading={isLoadingSong}
-        currentStation={currentStation}
-        onRefresh={refreshSongInfo}
-        lastUpdated={lastUpdated || undefined}
-        playlist={playlist[currentStation]}
-      />
+      <EventsTicker isMobile={isMobile} />
 
       <div className="bg-[#232323] rounded-lg shadow-xl border border-[#444] select-none max-w-full overflow-hidden">
         <div className="bg-gradient-to-r from-[#1a1a1a] to-[#333] p-2 sm:p-3 flex justify-between items-center">
@@ -279,7 +272,6 @@ const RadioPlayer = () => {
         </div>
 
         <div className="bg-[#000] p-2 sm:p-3 md:p-4 space-y-2">
-          <EventsTicker isMobile={isMobile} />
           <CryptoPriceTicker isMobile={isMobile} />
           <AudioVisualizer />
         </div>
