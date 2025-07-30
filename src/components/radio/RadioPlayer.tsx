@@ -4,7 +4,7 @@ import WalletConnection from '../wallet/WalletConnection';
 import RadioControls from './RadioControls';
 import StationSelector from './StationSelector';
 import SongInfo from './SongInfo';
-import ProgramSchedule from './ProgramSchedule';
+import EventsTicker from './EventsTicker';
 import CryptoPriceTicker from './CryptoPriceTicker';
 import AudioVisualizer from './AudioVisualizer';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -279,7 +279,7 @@ const RadioPlayer = () => {
         </div>
 
         <div className="bg-[#000] p-2 sm:p-3 md:p-4 space-y-2">
-          <ProgramSchedule isMobile={isMobile} />
+          <EventsTicker isMobile={isMobile} />
           <CryptoPriceTicker isMobile={isMobile} />
           <AudioVisualizer />
         </div>
