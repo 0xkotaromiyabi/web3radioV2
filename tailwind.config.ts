@@ -53,12 +53,18 @@ export default {
         marquee: {
           '0%': { transform: 'translateX(100%)' },
           '100%': { transform: 'translateX(-100%)' }
+        },
+        'text-clip': {
+          '0%': { clipPath: 'inset(0 100% 0 0)' },
+          '50%': { clipPath: 'inset(0 0 0 0)' },
+          '100%': { clipPath: 'inset(0 0 0 100%)' }
         }
       },
       animation: {
         "led-glow": "led-glow 2s ease-in-out infinite",
         "dial-turn": "dial-turn 3s ease-in-out",
-        "marquee": "marquee 20s linear infinite"
+        "marquee": "marquee 20s linear infinite",
+        "text-clip": "text-clip 15s linear infinite"
       },
       backgroundImage: {
         "wood-pattern": "url('/wood-texture.png')",

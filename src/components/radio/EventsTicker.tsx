@@ -55,7 +55,7 @@ const EventsTicker = ({ isMobile }: EventsTickerProps) => {
 
   return (
     <div className={`h-${isMobile ? '12' : '8'} bg-[#0a0a0a] border border-[#333] mb-2 overflow-hidden rounded`}>
-      <div className="animate-marquee whitespace-nowrap h-full flex items-center">
+      <div className="animate-text-clip whitespace-nowrap h-full flex items-center">
         <span className="text-[#00ff00] font-mono text-xs sm:text-sm">
           {createEventText()}
         </span>
