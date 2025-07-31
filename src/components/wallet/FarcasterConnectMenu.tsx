@@ -9,7 +9,7 @@ const TOKEN_ADDRESS =
   "0x18bc5bcc660cf2b9ce3cd51a404afe1a0cbd3c22";
 const SELLER = "0x0000000000000000000000000000000000000000";
 
-const buyUrl = `https://embed.thirdweb.com/buy?clientId=ac0e7bf99e676e48fa3a2d9f4c33089c&projectId=prj_cmbp08mgv018saj0k1galvt3w&chainId=8453&tokenAddress=0x18bc5bcc660cf2b9ce3cd51a404afe1a0cbd3c22&amount=0.002&seller=0x0000000000000000000000000000000000000000&currency=USD&theme=dark&primaryColor=%2300ff00`;
+const buyUrl = ``;
 
 const BuyIDRXWidget = () => (
   <Card className="p-4 bg-gradient-to-r from-[#1a1a1a] to-[#333] border-[#555]">
