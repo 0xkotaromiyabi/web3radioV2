@@ -18,24 +18,26 @@ const FarcasterConnectMenu = () => {
 
   if (!isConnected) {
     return (
-      <div className="space-y-4">
-        <Card className="p-4 bg-[#1a1a1a] border-[#444]">
-          <div className="space-y-3">
-            <h3 className="text-sm font-bold text-white">Connect</h3>
-            <WalletConnectButton />
+      <div className="flex flex-col items-center justify-center min-h-screen p-4 space-y-6 max-w-md mx-auto">
+        <Card className="w-full p-4 sm:p-6 bg-[#1a1a1a] border-[#444]">
+          <div className="space-y-4 text-center">
+            <h3 className="text-base sm:text-lg font-bold text-white">Connect with Base App</h3>
+            <div className="flex justify-center">
+              <WalletConnectButton />
+            </div>
           </div>
         </Card>
         
-        <Card className="p-4 bg-gradient-to-r from-[#1a1a1a] to-[#333] border-[#555]">
+        <Card className="w-full p-4 sm:p-6 bg-gradient-to-r from-[#1a1a1a] to-[#333] border-[#555]">
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-white">Buy Token</h3>
-              <Badge variant="outline" className="bg-[#111] text-blue-400 border-[#333]">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <h3 className="text-base sm:text-lg font-bold text-white text-center sm:text-left">Buy IDRX Token</h3>
+              <Badge variant="outline" className="bg-[#111] text-blue-400 border-[#333] self-center sm:self-auto">
                 Base Chain
               </Badge>
             </div>
-            <div className="text-xs text-gray-400 mb-3">
-              Purchase tokens directly on any network
+            <div className="text-xs sm:text-sm text-gray-400 text-center">
+              Purchase IDRX tokens directly on Base network
             </div>
             <div className="w-full rounded-lg overflow-hidden">
               <PayEmbed
@@ -50,29 +52,31 @@ const FarcasterConnectMenu = () => {
   }
 
   return (
-    <Card className="p-4 bg-[#1a1a1a] border-[#444]">
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-white">Connected</h3>
-          <Badge variant="outline" className="bg-green-500/20 text-green-400 border-green-500/30">
-            Connected
-          </Badge>
+    <div className="flex flex-col items-center justify-center min-h-screen p-4 space-y-6 max-w-md mx-auto">
+      <Card className="w-full p-4 sm:p-6 bg-[#1a1a1a] border-[#444]">
+        <div className="space-y-4 text-center">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <h3 className="text-base sm:text-lg font-bold text-white">Connected to Base App</h3>
+            <Badge variant="outline" className="bg-green-500/20 text-green-400 border-green-500/30 self-center sm:self-auto">
+              Connected
+            </Badge>
+          </div>
+          <div className="text-xs sm:text-sm text-gray-400">
+            Address: {address?.slice(0, 6)}...{address?.slice(-4)}
+          </div>
         </div>
-        <div className="text-xs text-gray-400">
-          Address: {address?.slice(0, 6)}...{address?.slice(-4)}
-        </div>
-      </div>
+      </Card>
       
-      <Card className="p-4 bg-gradient-to-r from-[#1a1a1a] to-[#333] border-[#555] mt-4">
+      <Card className="w-full p-4 sm:p-6 bg-gradient-to-r from-[#1a1a1a] to-[#333] border-[#555]">
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white">Buy Token</h3>
-            <Badge variant="outline" className="bg-[#111] text-blue-400 border-[#333]">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <h3 className="text-base sm:text-lg font-bold text-white text-center sm:text-left">Buy IDRX Token</h3>
+            <Badge variant="outline" className="bg-[#111] text-blue-400 border-[#333] self-center sm:self-auto">
               Base Chain
             </Badge>
           </div>
-          <div className="text-xs text-gray-400 mb-3">
-            Purchase tokens directly on any network
+          <div className="text-xs sm:text-sm text-gray-400 text-center">
+            Purchase IDRX tokens directly on Base network
           </div>
           <div className="w-full rounded-lg overflow-hidden">
             <PayEmbed
@@ -82,7 +86,7 @@ const FarcasterConnectMenu = () => {
           </div>
         </div>
       </Card>
-    </Card>
+    </div>
   );
 };
 
