@@ -31,13 +31,13 @@ const FarcasterConnectMenu = () => {
         <Card className="w-full p-4 sm:p-6 bg-gradient-to-r from-[#1a1a1a] to-[#333] border-[#555]">
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <h3 className="text-base sm:text-lg font-bold text-white text-center sm:text-left">Buy IDRX Token</h3>
+              <h3 className="text-base sm:text-lg font-bold text-white text-center sm:text-left">Buy Crypto</h3>
               <Badge variant="outline" className="bg-[#111] text-blue-400 border-[#333] self-center sm:self-auto">
                 Base Chain
               </Badge>
             </div>
             <div className="text-xs sm:text-sm text-gray-400 text-center">
-              Purchase IDRX tokens directly on Base network
+              
             </div>
             <div className="w-full rounded-lg overflow-hidden">
               <PayEmbed
@@ -76,7 +76,7 @@ const FarcasterConnectMenu = () => {
             </Badge>
           </div>
           <div className="text-xs sm:text-sm text-gray-400 text-center">
-            Purchase IDRX tokens directly on Base network
+            
           </div>
           <div className="w-full rounded-lg overflow-hidden">
             <PayEmbed
