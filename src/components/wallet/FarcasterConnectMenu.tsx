@@ -21,7 +21,7 @@ const FarcasterConnectMenu = () => {
       <div className="space-y-4">
         <Card className="p-4 bg-[#1a1a1a] border-[#444]">
           <div className="space-y-3">
-            <h3 className="text-sm font-bold text-white">Connect with Base App</h3>
+            <h3 className="text-sm font-bold text-white">Connect</h3>
             <WalletConnectButton />
           </div>
         </Card>
@@ -29,13 +29,13 @@ const FarcasterConnectMenu = () => {
         <Card className="p-4 bg-gradient-to-r from-[#1a1a1a] to-[#333] border-[#555]">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-white">Buy IDRX Token</h3>
+              <h3 className="text-sm font-bold text-white">Buy Token</h3>
               <Badge variant="outline" className="bg-[#111] text-blue-400 border-[#333]">
                 Base Chain
               </Badge>
             </div>
             <div className="text-xs text-gray-400 mb-3">
-              Purchase IDRX tokens directly on Base network
+              Purchase tokens directly on any network
             </div>
             <div className="w-full rounded-lg overflow-hidden">
               <PayEmbed
@@ -53,7 +53,7 @@ const FarcasterConnectMenu = () => {
     <Card className="p-4 bg-[#1a1a1a] border-[#444]">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-white">Connected to Base App</h3>
+          <h3 className="text-sm font-bold text-white">Connected</h3>
           <Badge variant="outline" className="bg-green-500/20 text-green-400 border-green-500/30">
             Connected
           </Badge>
@@ -66,13 +66,13 @@ const FarcasterConnectMenu = () => {
       <Card className="p-4 bg-gradient-to-r from-[#1a1a1a] to-[#333] border-[#555] mt-4">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white">Buy IDRX Token</h3>
+            <h3 className="text-sm font-bold text-white">Buy Token</h3>
             <Badge variant="outline" className="bg-[#111] text-blue-400 border-[#333]">
               Base Chain
             </Badge>
           </div>
           <div className="text-xs text-gray-400 mb-3">
-            Purchase IDRX tokens directly on Base network
+            Purchase tokens directly on any network
           </div>
           <div className="w-full rounded-lg overflow-hidden">
             <PayEmbed
