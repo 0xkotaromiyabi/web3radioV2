@@ -3,7 +3,6 @@ import { createThirdwebClient } from "thirdweb";
 import { ConnectButton, useActiveAccount } from "thirdweb/react";
 import { inAppWallet, createWallet } from "thirdweb/wallets";
 import EnhancedListeningTimeTracker from './EnhancedListeningTimeTracker';
-import W3RRewardClaim from './W3RRewardClaim';
 import NFTCollection from './NFTCollection';
 import { Card } from "@/components/ui/card";
 import FarcasterConnectMenu from './FarcasterConnectMenu';
@@ -68,11 +67,8 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
       {/* Farcaster Wallet Connection */}
       <FarcasterConnectMenu />
 
-      {/* Enhanced Listening Time Tracker with W3R Integration */}
+      {/* Enhanced Listening Time Tracker */}
       <EnhancedListeningTimeTracker isPlaying={isPlaying} />
-
-      {/* W3R Reward Claim Component */}
-      <W3RRewardClaim />
 
       {/* NFT Collection Display */}
       <NFTCollection client={client} />
