@@ -3,7 +3,9 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from 'wagmi';
-import { ThirdwebProvider } from "thirdweb/react";
+import { ThirdwebProvider, ConnectButton } from "thirdweb/react";
+import { createThirdwebClient } from "thirdweb";
+import { base } from "thirdweb/chains";
 import { client } from "./services/w3rSmartContract";
 import { W3RTokenProvider } from "./contexts/W3RTokenContext";
 import { MiniKitContextProvider } from "./providers/MiniKitProvider";
@@ -20,6 +22,10 @@ import Dashboard from "./pages/Dashboard";
 import "./App.css";
 
 const queryClient = new QueryClient();
+
+const thirdwebClient = createThirdwebClient({
+  clientId: "ac0e7bf99e676e48fa3a2d9f4c33089c",
+});
 
 function App() {
   return (

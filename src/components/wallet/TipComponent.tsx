@@ -160,13 +160,19 @@ const TipComponent = () => {
 
           <Button
             onClick={handleTip}
-            disabled={loading || !amount}
-            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+            disabled={loading || !amount || !account}
+            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:opacity-50"
+            title={!account ? "Connect your wallet first" : ""}
           >
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Sending Tip...
+              </>
+            ) : !account ? (
+              <>
+                <Heart className="mr-2 h-4 w-4" />
+                Connect Wallet to Tip
               </>
             ) : (
               <>
