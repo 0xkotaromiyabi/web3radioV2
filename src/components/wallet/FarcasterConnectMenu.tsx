@@ -1,17 +1,10 @@
 import React from "react";
-import { createThirdwebClient } from "thirdweb";
-import { base } from "thirdweb/chains";
-import { ConnectButton, PayEmbed } from "thirdweb/react";
 import { useAccount } from "wagmi";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import WalletConnectButton from "../marketplace/WalletConnectButton";
+import TipComponent from "./TipComponent";
 
-const client = createThirdwebClient({
-  clientId: "ac0e7bf99e676e48fa3a2d9f4c33089c",
-});
-
-const TOKEN_ADDRESS = "0x18bc5bcc660cf2b9ce3cd51a404afe1a0cbd3c22";
 
 const FarcasterConnectMenu = () => {
   const { isConnected, address } = useAccount();
@@ -28,25 +21,7 @@ const FarcasterConnectMenu = () => {
           </div>
         </Card>
         
-        <Card className="w-full p-4 sm:p-6 bg-gradient-to-r from-[#1a1a1a] to-[#333] border-[#555]">
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <h3 className="text-base sm:text-lg font-bold text-white text-center sm:text-left">Buy Crypto</h3>
-              <Badge variant="outline" className="bg-[#111] text-blue-400 border-[#333] self-center sm:self-auto">
-                Base Chain
-              </Badge>
-            </div>
-            <div className="text-xs sm:text-sm text-gray-400 text-center">
-              
-            </div>
-            <div className="w-full rounded-lg overflow-hidden">
-              <PayEmbed
-                client={client}
-                theme="dark"
-              />
-            </div>
-          </div>
-        </Card>
+        <TipComponent />
       </div>
     );
   }
@@ -67,25 +42,7 @@ const FarcasterConnectMenu = () => {
         </div>
       </Card>
       
-      <Card className="w-full p-4 sm:p-6 bg-gradient-to-r from-[#1a1a1a] to-[#333] border-[#555]">
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <h3 className="text-base sm:text-lg font-bold text-white text-center sm:text-left">Buy Crypto</h3>
-            <Badge variant="outline" className="bg-[#111] text-blue-400 border-[#333] self-center sm:self-auto">
-              Base Chain
-            </Badge>
-          </div>
-          <div className="text-xs sm:text-sm text-gray-400 text-center">
-            
-          </div>
-          <div className="w-full rounded-lg overflow-hidden">
-            <PayEmbed
-              client={client}
-              theme="dark"
-            />
-          </div>
-        </div>
-      </Card>
+      <TipComponent />
     </div>
   );
 };
