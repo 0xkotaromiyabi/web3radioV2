@@ -116,7 +116,7 @@ const TipComponent = () => {
   };
 
   return (
-    <Card className="p-4 sm:p-6 bg-card border-border">
+    <Card className="p-4 sm:p-6 bg-background border-border shadow-lg">
       <div className="space-y-4">
         <div className="text-center">
           <h3 className="text-base sm:text-lg font-bold text-foreground mb-2">
@@ -202,13 +202,13 @@ const TipComponent = () => {
             </Button>
 
             {txResult && (
-              <div className="mt-4 p-3 bg-green-100 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md">
-                <p className="text-green-800 dark:text-green-400 text-sm font-medium">Sent! Tx hash:</p>
+              <div className="mt-4 p-3 bg-secondary border border-border rounded-md">
+                <p className="text-foreground text-sm font-medium">Sent! Tx hash:</p>
                 <a
                   href={`https://basescan.org/tx/${txResult.transactionHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 text-xs break-all underline"
+                  className="text-primary hover:text-primary/80 text-xs break-all underline"
                 >
                   {txResult.transactionHash}
                 </a>
@@ -216,16 +216,16 @@ const TipComponent = () => {
             )}
 
             {txError && (
-              <div className="mt-4 p-3 bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-                <p className="text-red-800 dark:text-red-400 text-sm">{txError.message}</p>
+              <div className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+                <p className="text-destructive text-sm">{txError.message}</p>
               </div>
             )}
           </div>
         )}
 
         {error && (
-          <div className="mt-4 p-3 bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-            <p className="text-red-800 dark:text-red-400 text-sm">{error.message}</p>
+          <div className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+            <p className="text-destructive text-sm">{error.message}</p>
           </div>
         )}
       </div>
