@@ -1,110 +1,68 @@
 import React, { useState } from "react";
-import {
-  createThirdwebClient,
-  NATIVE_TOKEN_ADDRESS,
-  getContract,
-  prepareContractCall,
-  sendTransaction,
-} from "thirdweb";
-import { useActiveAccount } from "thirdweb/react";
+import { createThirdwebClient, prepareTransaction } from "thirdweb";
 import { base } from "thirdweb/chains";
+import {
+  useConnect,
+  useActiveWallet,
+  useSendTransaction,
+} from "thirdweb/react";
+import { createWallet } from "thirdweb/wallets";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Heart } from "lucide-react";
+import { Loader2, Heart, Wallet } from "lucide-react";
 
-const TOKENS = [
-  {
-    label: "ETH",
-    address: NATIVE_TOKEN_ADDRESS,
-    decimals: 18,
-  },
-  {
-    label: "USDT",
-    address: "0xA7D9Ddbe1f17865597fBD27EC712455208B6B76D",
-    decimals: 6,
-  },
-  {
-    label: "USDC",
-    address: "0xd9AAEC86b65d86F6a7B5b1b0c42Ffa531710b6CA",
-    decimals: 6,
-  },
-  {
-    label: "IDRX",
-    address: "0x18Bc5bcC660cf2B9cE3cd51a404aFe1a0cBD3C22",
-    decimals: 18,
-  },
-];
+const BASE_TIP_ADDRESS = "0x242DfB7849544eE242b2265cA7E585bdec60456B";
 
 const client = createThirdwebClient({
   clientId: "ac0e7bf99e676e48fa3a2d9f4c33089c",
 });
 
-const TIP_ADDRESS = "0x242DfB7849544eE242b2265cA7E585bdec60456B";
-
-function toWei(amount: string, decimals: number): bigint {
-  return BigInt(Math.floor(Number(amount) * 10 ** decimals));
-}
-
 const TipComponent = () => {
-  const [selectedToken, setSelectedToken] = useState(TOKENS[0]);
-  const [amount, setAmount] = useState("");
-  const [loading, setLoading] = useState(false);
-  const account = useActiveAccount();
+  const [amount, setAmount] = useState("0.001");
+  const { connect, isConnecting, error } = useConnect();
+  const wallet = useActiveWallet();
+  const {
+    mutate: sendTx,
+    data: txResult,
+    error: txError,
+    isPending,
+  } = useSendTransaction();
   const { toast } = useToast();
 
-  const handleTip = async () => {
-    if (!account) {
+  // Show success toast when transaction completes
+  React.useEffect(() => {
+    if (txResult) {
       toast({
-        title: "Wallet Not Connected",
-        description: "Please connect your wallet first!",
-        variant: "destructive",
+        title: "Sawer Sent Successfully!",
+        description: `${amount} ETH has been sent`,
       });
-      return;
     }
+  }, [txResult, amount, toast]);
 
-    if (!amount || Number(amount) <= 0) {
-      toast({
-        title: "Invalid Amount",
-        description: "Please enter a valid amount to tip",
-        variant: "destructive",
-      });
-      return;
-    }
+  // Connect Metamask
+  const handleConnect = () => {
+    connect(async () => {
+      const metamask = createWallet("io.metamask");
+      await metamask.connect({ client });
+      return metamask;
+    });
+  };
 
-    setLoading(true);
+  // Kirim Tip
+  const handleSendTip = async () => {
     try {
-      let tx;
-      if (selectedToken.address === NATIVE_TOKEN_ADDRESS) {
-        // Native ETH transfer
-        tx = {
-          to: TIP_ADDRESS,
-          value: toWei(amount, selectedToken.decimals),
-        };
-      } else {
-        // ERC20 transfer
-        const contract = await getContract({
-          client,
-          address: selectedToken.address,
-          chain: base,
-        });
-        tx = prepareContractCall({
-          contract,
-          method: "function transfer(address to, uint256 amount)",
-          params: [TIP_ADDRESS, toWei(amount, selectedToken.decimals)],
-        });
-      }
-      
-      await sendTransaction({ account, transaction: tx });
-      
-      toast({
-        title: "Tip Sent Successfully!",
-        description: `${amount} ${selectedToken.label} tip has been sent`,
+      // Konversi ETH ke wei
+      const valueWei = BigInt(Number(amount) * 1e18);
+      const transaction = prepareTransaction({
+        to: BASE_TIP_ADDRESS,
+        value: valueWei,
+        chain: base,
+        client,
+        data: "0x",
       });
-      
-      setAmount("");
+      sendTx(transaction);
     } catch (err: any) {
       toast({
         title: "Transaction Failed",
@@ -112,76 +70,98 @@ const TipComponent = () => {
         variant: "destructive",
       });
     }
-    setLoading(false);
   };
 
   return (
     <Card className="p-4 sm:p-6 bg-gradient-to-r from-[#1a1a1a] to-[#333] border-[#555]">
       <div className="space-y-4">
         <div className="text-center">
-          <h3 className="text-base sm:text-lg font-bold text-white mb-2">Send a Tip</h3>
+          <h3 className="text-base sm:text-lg font-bold text-white mb-2">
+            Sawer Onchain ke {BASE_TIP_ADDRESS.slice(0, 6)}...
+            {BASE_TIP_ADDRESS.slice(-4)}
+          </h3>
           <p className="text-xs sm:text-sm text-gray-400">
-            Support Web3 Radio with your favorite token
+            Support Web3 Radio dengan ETH
           </p>
         </div>
 
-        <div className="space-y-3">
-          <div>
-            <label className="text-sm text-gray-300 mb-2 block">Select Token</label>
-            <Select 
-              value={selectedToken.label} 
-              onValueChange={(value) => setSelectedToken(TOKENS.find(t => t.label === value) || TOKENS[0])}
-            >
-              <SelectTrigger className="bg-[#222] border-[#444] text-white">
-                <SelectValue placeholder="Select token" />
-              </SelectTrigger>
-              <SelectContent className="bg-[#222] border-[#444]">
-                {TOKENS.map((token) => (
-                  <SelectItem key={token.label} value={token.label} className="text-white hover:bg-[#333]">
-                    {token.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-300 mb-2 block">Amount</label>
-            <Input
-              type="number"
-              min="0"
-              step="any"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder={`Enter ${selectedToken.label} amount`}
-              className="bg-[#222] border-[#444] text-white placeholder:text-gray-500"
-            />
-          </div>
-
+        {!wallet ? (
           <Button
-            onClick={handleTip}
-            disabled={loading || !amount || !account}
-            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:opacity-50"
-            title={!account ? "Connect your wallet first" : ""}
+            onClick={handleConnect}
+            disabled={isConnecting}
+            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
           >
-            {loading ? (
+            {isConnecting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Sending Tip...
-              </>
-            ) : !account ? (
-              <>
-                <Heart className="mr-2 h-4 w-4" />
-                Connect Wallet to Tip
+                Connecting...
               </>
             ) : (
               <>
-                <Heart className="mr-2 h-4 w-4" />
-                Send Tip
+                <Wallet className="mr-2 h-4 w-4" />
+                Connect Wallet
               </>
             )}
           </Button>
-        </div>
+        ) : (
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm text-gray-300 mb-2 block">Amount (ETH)</label>
+              <Input
+                type="number"
+                step="0.0001"
+                value={amount}
+                min={0.0001}
+                onChange={(e) => setAmount(e.target.value)}
+                className="bg-[#222] border-[#444] text-white placeholder:text-gray-500"
+              />
+            </div>
+
+            <Button
+              onClick={handleSendTip}
+              disabled={isPending}
+              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+            >
+              {isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Heart className="mr-2 h-4 w-4" />
+                  Send Tip
+                </>
+              )}
+            </Button>
+
+            {txResult && (
+              <div className="mt-4 p-3 bg-green-500/20 border border-green-500/30 rounded-md">
+                <p className="text-green-400 text-sm font-medium">Sent! Tx hash:</p>
+                <a
+                  href={`https://basescan.org/tx/${txResult.transactionHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:text-blue-300 text-xs break-all"
+                >
+                  {txResult.transactionHash}
+                </a>
+              </div>
+            )}
+
+            {txError && (
+              <div className="mt-4 p-3 bg-red-500/20 border border-red-500/30 rounded-md">
+                <p className="text-red-400 text-sm">{txError.message}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {error && (
+          <div className="mt-4 p-3 bg-red-500/20 border border-red-500/30 rounded-md">
+            <p className="text-red-400 text-sm">{error.message}</p>
+          </div>
+        )}
       </div>
     </Card>
   );
