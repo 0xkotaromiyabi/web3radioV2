@@ -10,8 +10,36 @@ import { createWallet } from "thirdweb/wallets";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Heart, Wallet } from "lucide-react";
+import { Loader2, Heart, Wallet, Send } from "lucide-react";
+
+const TOKENS = [
+  {
+    symbol: "ETH",
+    name: "Base ETH",
+    decimals: 18,
+    address: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+  },
+  {
+    symbol: "USDC",
+    name: "USDC",
+    decimals: 6,
+    address: "0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA",
+  },
+  {
+    symbol: "USDT",
+    name: "Tether USDT",
+    decimals: 6,
+    address: "0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2",
+  },
+  {
+    symbol: "IDRX",
+    name: "IDRX",
+    decimals: 18,
+    address: "0x18Bc5bcC660cf2B9cE3cd51a404aFe1a0cBD3C22",
+  },
+];
 
 const BASE_TIP_ADDRESS = "0x242DfB7849544eE242b2265cA7E585bdec60456B";
 
@@ -20,6 +48,7 @@ const client = createThirdwebClient({
 });
 
 const TipComponent = () => {
+  const [selectedToken, setSelectedToken] = useState(TOKENS[0]);
   const [amount, setAmount] = useState("0.001");
   const { connect, isConnecting, error } = useConnect();
   const wallet = useActiveWallet();
@@ -36,10 +65,10 @@ const TipComponent = () => {
     if (txResult) {
       toast({
         title: "Sawer Sent Successfully!",
-        description: `${amount} ETH has been sent`,
+        description: `${amount} ${selectedToken.symbol} has been sent`,
       });
     }
-  }, [txResult, amount, toast]);
+  }, [txResult, amount, selectedToken.symbol, toast]);
 
   // Connect Metamask
   const handleConnect = () => {
@@ -50,38 +79,51 @@ const TipComponent = () => {
     });
   };
 
-  // Kirim Tip
+  // Send Tip
   const handleSendTip = async () => {
     try {
-      // Konversi ETH ke wei
-      const valueWei = BigInt(Number(amount) * 1e18);
-      const transaction = prepareTransaction({
-        to: BASE_TIP_ADDRESS,
-        value: valueWei,
-        chain: base,
-        client,
-        data: "0x",
-      });
-      sendTx(transaction);
+      const n = Number(amount);
+      if (!n || n <= 0) throw new Error("Invalid amount");
+      
+      // Convert amount to proper decimals
+      const value = BigInt(n * Math.pow(10, selectedToken.decimals));
+      
+      // Native ETH transfer
+      if (selectedToken.address === "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE") {
+        const transaction = prepareTransaction({
+          to: BASE_TIP_ADDRESS,
+          value: value,
+          chain: base,
+          client,
+          data: "0x",
+        });
+        sendTx(transaction);
+      } else {
+        // ERC20 token transfer - simplified for now, would need proper contract interaction
+        toast({
+          title: "Coming Soon",
+          description: "ERC20 token transfers will be available soon",
+          variant: "default",
+        });
+      }
     } catch (err: any) {
       toast({
         title: "Transaction Failed",
-        description: err?.message || "Failed to send tip",
+        description: err?.message || "Failed to send sawer",
         variant: "destructive",
       });
     }
   };
 
   return (
-    <Card className="p-4 sm:p-6 bg-gradient-to-r from-[#1a1a1a] to-[#333] border-[#555]">
+    <Card className="p-4 sm:p-6 bg-card border-border">
       <div className="space-y-4">
         <div className="text-center">
-          <h3 className="text-base sm:text-lg font-bold text-white mb-2">
-            Sawer Onchain ke {BASE_TIP_ADDRESS.slice(0, 6)}...
-            {BASE_TIP_ADDRESS.slice(-4)}
+          <h3 className="text-base sm:text-lg font-bold text-foreground mb-2">
+            Sawer Onchain
           </h3>
-          <p className="text-xs sm:text-sm text-gray-400">
-            Support Web3 Radio dengan ETH
+          <p className="text-xs sm:text-sm text-muted-foreground">
+            Support Web3 Radio dengan crypto
           </p>
         </div>
 
@@ -89,7 +131,8 @@ const TipComponent = () => {
           <Button
             onClick={handleConnect}
             disabled={isConnecting}
-            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+            className="w-full"
+            variant="default"
           >
             {isConnecting ? (
               <>
@@ -106,21 +149,44 @@ const TipComponent = () => {
         ) : (
           <div className="space-y-3">
             <div>
-              <label className="text-sm text-gray-300 mb-2 block">Amount (ETH)</label>
+              <label className="text-sm text-foreground mb-2 block">Select Token</label>
+              <Select
+                value={selectedToken.symbol}
+                onValueChange={(value) => {
+                  const token = TOKENS.find(t => t.symbol === value);
+                  if (token) setSelectedToken(token);
+                }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select token" />
+                </SelectTrigger>
+                <SelectContent>
+                  {TOKENS.map((token) => (
+                    <SelectItem key={token.symbol} value={token.symbol}>
+                      {token.symbol} ({token.name})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <label className="text-sm text-foreground mb-2 block">Amount ({selectedToken.symbol})</label>
               <Input
                 type="number"
                 step="0.0001"
                 value={amount}
                 min={0.0001}
                 onChange={(e) => setAmount(e.target.value)}
-                className="bg-[#222] border-[#444] text-white placeholder:text-gray-500"
+                className="w-full"
               />
             </div>
 
             <Button
               onClick={handleSendTip}
-              disabled={isPending}
-              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+              disabled={isPending || !wallet}
+              className="w-full"
+              variant="default"
             >
               {isPending ? (
                 <>
@@ -129,20 +195,20 @@ const TipComponent = () => {
                 </>
               ) : (
                 <>
-                  <Heart className="mr-2 h-4 w-4" />
-                  Send Tip
+                  <Send className="mr-2 h-4 w-4" />
+                  Send Sawer
                 </>
               )}
             </Button>
 
             {txResult && (
-              <div className="mt-4 p-3 bg-green-500/20 border border-green-500/30 rounded-md">
-                <p className="text-green-400 text-sm font-medium">Sent! Tx hash:</p>
+              <div className="mt-4 p-3 bg-green-100 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md">
+                <p className="text-green-800 dark:text-green-400 text-sm font-medium">Sent! Tx hash:</p>
                 <a
                   href={`https://basescan.org/tx/${txResult.transactionHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 hover:text-blue-300 text-xs break-all"
+                  className="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 text-xs break-all underline"
                 >
                   {txResult.transactionHash}
                 </a>
@@ -150,16 +216,16 @@ const TipComponent = () => {
             )}
 
             {txError && (
-              <div className="mt-4 p-3 bg-red-500/20 border border-red-500/30 rounded-md">
-                <p className="text-red-400 text-sm">{txError.message}</p>
+              <div className="mt-4 p-3 bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+                <p className="text-red-800 dark:text-red-400 text-sm">{txError.message}</p>
               </div>
             )}
           </div>
         )}
 
         {error && (
-          <div className="mt-4 p-3 bg-red-500/20 border border-red-500/30 rounded-md">
-            <p className="text-red-400 text-sm">{error.message}</p>
+          <div className="mt-4 p-3 bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+            <p className="text-red-800 dark:text-red-400 text-sm">{error.message}</p>
           </div>
         )}
       </div>
