@@ -123,7 +123,7 @@ const TipComponent = () => {
             Sawer Onchain
           </h3>
           <p className="text-xs sm:text-sm text-muted-foreground">
-            Support Web3 Radio dengan crypto
+            Support Web3Radio
           </p>
         </div>
 
