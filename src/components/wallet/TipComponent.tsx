@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { createThirdwebClient, prepareTransaction } from "thirdweb";
+import { createThirdwebClient, prepareTransaction, getContract, prepareContractCall } from "thirdweb";
 import { base } from "thirdweb/chains";
 import {
   useConnect,
@@ -85,11 +85,10 @@ const TipComponent = () => {
       const n = Number(amount);
       if (!n || n <= 0) throw new Error("Invalid amount");
       
-      // Convert amount to proper decimals
       const value = BigInt(n * Math.pow(10, selectedToken.decimals));
       
-      // Native ETH transfer
       if (selectedToken.address === "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE") {
+        // Native ETH transfer
         const transaction = prepareTransaction({
           to: BASE_TIP_ADDRESS,
           value: value,
@@ -99,12 +98,18 @@ const TipComponent = () => {
         });
         sendTx(transaction);
       } else {
-        // ERC20 token transfer - simplified for now, would need proper contract interaction
-        toast({
-          title: "Coming Soon",
-          description: "ERC20 token transfers will be available soon",
-          variant: "default",
+        // TRANSFER ERC20
+        const contract = getContract({
+          address: selectedToken.address,
+          chain: base,
+          client,
         });
+        const transaction = prepareContractCall({
+          contract,
+          method: "function transfer(address to, uint256 value)",
+          params: [BASE_TIP_ADDRESS, value],
+        });
+        sendTx(transaction);
       }
     } catch (err: any) {
       toast({
@@ -150,16 +155,16 @@ const TipComponent = () => {
           <div className="space-y-3">
             <div>
               <label className="text-sm text-foreground mb-2 block">Select Token</label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="flex flex-wrap gap-2 sm:flex-nowrap">
                 {TOKENS.map((token) => (
                   <Button
                     key={token.symbol}
                     variant={selectedToken.symbol === token.symbol ? "default" : "outline"}
                     onClick={() => setSelectedToken(token)}
-                    className="h-auto p-3 flex flex-col items-center"
+                    className="flex-1 h-auto p-2 sm:p-3 flex flex-col items-center min-w-0"
                   >
-                    <span className="font-semibold">{token.symbol}</span>
-                    <span className="text-xs opacity-70">{token.name}</span>
+                    <span className="font-semibold text-xs sm:text-sm">{token.symbol}</span>
+                    <span className="text-xs opacity-70 truncate">{token.name}</span>
                   </Button>
                 ))}
               </div>
