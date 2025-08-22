@@ -150,24 +150,19 @@ const TipComponent = () => {
           <div className="space-y-3">
             <div>
               <label className="text-sm text-foreground mb-2 block">Select Token</label>
-              <Select
-                value={selectedToken.symbol}
-                onValueChange={(value) => {
-                  const token = TOKENS.find(t => t.symbol === value);
-                  if (token) setSelectedToken(token);
-                }}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select token" />
-                </SelectTrigger>
-                <SelectContent>
-                  {TOKENS.map((token) => (
-                    <SelectItem key={token.symbol} value={token.symbol}>
-                      {token.symbol} ({token.name})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="grid grid-cols-2 gap-2">
+                {TOKENS.map((token) => (
+                  <Button
+                    key={token.symbol}
+                    variant={selectedToken.symbol === token.symbol ? "default" : "outline"}
+                    onClick={() => setSelectedToken(token)}
+                    className="h-auto p-3 flex flex-col items-center"
+                  >
+                    <span className="font-semibold">{token.symbol}</span>
+                    <span className="text-xs opacity-70">{token.name}</span>
+                  </Button>
+                ))}
+              </div>
             </div>
             
             <div>
