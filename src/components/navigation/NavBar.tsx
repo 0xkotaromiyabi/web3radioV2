@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Newspaper, Calendar, Radio, Mic, Menu, X, Settings } from 'lucide-react';
+import { Home, Newspaper, Calendar, Radio, Mic, Menu, X, Settings, Shield } from 'lucide-react';
 import { 
   NavigationMenu,
   NavigationMenuList,
@@ -79,6 +79,14 @@ const NavBar = () => {
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link to="/17an-onchain">
+                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1")}>
+                    <Shield className="h-4 w-4" />
+                    <span>17an Onchain</span>
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
         </div>
@@ -136,6 +144,14 @@ const NavBar = () => {
             >
               <Radio className="h-4 w-4" />
               <span>Radio Stations</span>
+            </Link>
+            <Link 
+              to="/17an-onchain" 
+              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Shield className="h-4 w-4" />
+              <span>17an Onchain</span>
             </Link>
             <div className="pt-2 border-t border-gray-800">
               <Button 

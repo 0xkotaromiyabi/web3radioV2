@@ -18,6 +18,7 @@ import Events from "./pages/Events";
 import Stations from "./pages/Stations";
 import CMS from "./pages/CMS";
 import Dashboard from "./pages/Dashboard";
+import VerificationOnchain from "./pages/VerificationOnchain";
 
 import "./App.css";
 
@@ -43,6 +44,7 @@ function App() {
                   <Route path="/stations" element={<Stations />} />
                   <Route path="/cms" element={<CMS />} />
                   <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/17an-onchain" element={<VerificationOnchain />} />
                   
                 </Routes>
                 <Toaster />
