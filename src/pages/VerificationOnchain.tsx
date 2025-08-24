@@ -17,7 +17,7 @@ const thirdwebClient = createThirdwebClient({
 
 const ENS_MESSAGES = {
   "kotarominami.eth": "ngapain ikut lomba?",
-  "digiweave.eth": "eh lu kan di blacklist dari lomba",
+  "0xdigiweave.eth": "eh lu kan di blacklist dari lomba",
 };
 
 function VerificationPlayground() {
