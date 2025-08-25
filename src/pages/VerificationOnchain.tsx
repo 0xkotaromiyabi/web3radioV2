@@ -88,7 +88,7 @@ function VerificationPlayground() {
               Wallet Verification
             </CardTitle>
             <CardDescription>
-              Connect your wallet to verify your identity and ENS domain
+              Connect your wallet to verify your identity
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
