@@ -18,7 +18,13 @@ const thirdwebClient = createThirdwebClient({
 const ENS_MESSAGES = {
   "kotarominami.eth": "ngapain ikut lomba?",
   "0xdigiweave.eth": "eh lu kan di blacklist dari lomba",
-};
+  "0xe4b19fcbb0c8ace2098bacc7a495c6c524ace29e": "Selamat yah... kamu Juara 1 - Tunggu informasi selanjutnya untuk distribusi hadiahnya",
+  "0xe11a28587ea6f9cbef23f4d241760c628f17a533": "Selamat yah... kamu Juara 2 - Tunggu informasi selanjutnya untuk distribusi hadiahnya",
+  "0x97784f68681969213c5f086821a615fb3ccc2251": "Selamat yah... kamu Juara 3 - Tunggu informasi selanjutnya untuk distribusi hadiahnya",
+  "0x44093cacd048b9e0f7ed5227fda8d77c27d05b18": "Selamat yah... kamu Juara 4 - Tunggu informasi selanjutnya untuk distribusi hadiahnya",
+  "0x0e86f8ca9974e321a56c4033178e02e2051f8248": "Selamat yah... kamu Juara 5 - Tunggu informasi selanjutnya untuk distribusi hadiahnya",
+  ----- ada 9 juara tapi lagi males ngetik -----
+  };
 
 function VerificationPlayground() {
   const account = useActiveAccount();
