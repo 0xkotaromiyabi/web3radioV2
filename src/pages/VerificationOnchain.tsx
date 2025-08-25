@@ -15,7 +15,7 @@ const thirdwebClient = createThirdwebClient({
   clientId: "ac0e7bf99e676e48fa3a2d9f4c33089c",
 });
 
-const ENS_MESSAGES = {
+const REGISTERED_WALLETS = {
   "kotarominami.eth": "ngapain ikut lomba?",
   "0xdigiweave.eth": "eh lu kan di blacklist dari lomba",
   "0xe4b19fcbb0c8ace2098bacc7a495c6c524ace29e": "Selamat yah... kamu Juara 1 - Tunggu informasi selanjutnya untuk distribusi hadiahnya",
@@ -27,7 +27,7 @@ const ENS_MESSAGES = {
   "0x2320f3c72d1fac30defec17e65e622b516bf251e": "Selamat yah... kamu Juara harapan, ga tau harapan apa - Tunggu informasi selanjutnya untuk distribusi hadiahnya",
   "0x4636fab7dbf13a5071e519a6e7c021d4b89ffff4": "Selamat yah... kamu Juara harapan, ga tau harapan apa - Tunggu informasi selanjutnya untuk distribusi hadiahnya",
   "0x925c001c23ae3fbdc37ea2775c92abb37b48f529": "Selamat yah... kamu Juara harapan, ga tau harapan apa - Tunggu informasi selanjutnya untuk distribusi hadiahnya",
-  };
+};
 
 function VerificationPlayground() {
   const account = useActiveAccount();
@@ -36,11 +36,20 @@ function VerificationPlayground() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    async function checkENS() {
+    async function checkWallet() {
       if (account?.address) {
         setIsLoading(true);
         try {
-          // Use reverse ENS lookup via public API as fallback
+          // Check if wallet address is directly registered
+          const walletAddress = account.address.toLowerCase();
+          if (REGISTERED_WALLETS[walletAddress]) {
+            setNotif(REGISTERED_WALLETS[walletAddress]);
+            setEnsName("");
+            setIsLoading(false);
+            return;
+          }
+
+          // Check ENS if wallet address not found
           const response = await fetch(`https://api.ensideas.com/ens/resolve/${account.address}`);
           if (response.ok) {
             const data = await response.json();
@@ -48,23 +57,23 @@ function VerificationPlayground() {
             
             if (ens && ens.endsWith('.eth')) {
               setEnsName(ens);
-              if (ENS_MESSAGES[ens]) {
-                setNotif(ENS_MESSAGES[ens]);
+              if (REGISTERED_WALLETS[ens]) {
+                setNotif(REGISTERED_WALLETS[ens]);
               } else {
-                setNotif("");
+                setNotif("anda belum beruntung, coba di event selanjutnya");
               }
             } else {
               setEnsName("");
-              setNotif("");
+              setNotif("anda belum beruntung, coba di event selanjutnya");
             }
           } else {
             setEnsName("");
-            setNotif("");
+            setNotif("anda belum beruntung, coba di event selanjutnya");
           }
         } catch (error) {
-          console.error("Error fetching ENS:", error);
+          console.error("Error checking wallet:", error);
           setEnsName("");
-          setNotif("");
+          setNotif("anda belum beruntung, coba di event selanjutnya");
         } finally {
           setIsLoading(false);
         }
@@ -73,7 +82,7 @@ function VerificationPlayground() {
         setNotif("");
       }
     }
-    checkENS();
+    checkWallet();
   }, [account?.address]);
 
   return (
