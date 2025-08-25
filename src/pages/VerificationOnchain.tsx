@@ -23,7 +23,10 @@ const ENS_MESSAGES = {
   "0x97784f68681969213c5f086821a615fb3ccc2251": "Selamat yah... kamu Juara 3 - Tunggu informasi selanjutnya untuk distribusi hadiahnya",
   "0x44093cacd048b9e0f7ed5227fda8d77c27d05b18": "Selamat yah... kamu Juara 4 - Tunggu informasi selanjutnya untuk distribusi hadiahnya",
   "0x0e86f8ca9974e321a56c4033178e02e2051f8248": "Selamat yah... kamu Juara 5 - Tunggu informasi selanjutnya untuk distribusi hadiahnya",
-  ----- ada 9 juara tapi lagi males ngetik -----
+  "0x03cf1a2dbeaf53077c6bb1fd28b52b41ef730a25": "Selamat yah... kamu Juara harapan, ga tau harapan apa - Tunggu informasi selanjutnya untuk distribusi hadiahnya",
+  "0x2320f3c72d1fac30defec17e65e622b516bf251e": "Selamat yah... kamu Juara harapan, ga tau harapan apa - Tunggu informasi selanjutnya untuk distribusi hadiahnya",
+  "0x4636fab7dbf13a5071e519a6e7c021d4b89ffff4": "Selamat yah... kamu Juara harapan, ga tau harapan apa - Tunggu informasi selanjutnya untuk distribusi hadiahnya",
+  "0x925c001c23ae3fbdc37ea2775c92abb37b48f529": "Selamat yah... kamu Juara harapan, ga tau harapan apa - Tunggu informasi selanjutnya untuk distribusi hadiahnya",
   };
 
 function VerificationPlayground() {
