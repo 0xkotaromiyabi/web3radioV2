@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   ThirdwebProvider,
   ConnectButton,
@@ -6,10 +6,23 @@ import {
 } from "thirdweb/react";
 import { mainnet } from "thirdweb/chains";
 import { createThirdwebClient } from "thirdweb";
+import {
+  ConnectionProvider,
+  WalletProvider,
+  useWallet,
+} from "@solana/wallet-adapter-react";
+import {
+  WalletModalProvider,
+  WalletMultiButton,
+} from "@solana/wallet-adapter-react-ui";
+import { clusterApiUrl } from "@solana/web3.js";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Shield, CheckCircle, AlertTriangle } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NavBar from "@/components/navigation/NavBar";
+
+import "@solana/wallet-adapter-react-ui/styles.css";
 
 const thirdwebClient = createThirdwebClient({
   clientId: "ac0e7bf99e676e48fa3a2d9f4c33089c",
@@ -29,7 +42,7 @@ const REGISTERED_WALLETS = {
   "0x925c001c23ae3fbdc37ea2775c92abb37b48f529": "Selamat yah... kamu Juara harapan, ga tau harapan apa - Tunggu informasi selanjutnya untuk distribusi hadiahnya",
 };
 
-function VerificationPlayground() {
+function EthereumVerification() {
   const account = useActiveAccount();
   const [notif, setNotif] = useState("");
   const [ensName, setEnsName] = useState("");
@@ -86,6 +99,156 @@ function VerificationPlayground() {
   }, [account?.address]);
 
   return (
+    <div className="space-y-6">
+      <div className="flex justify-center">
+        <ConnectButton 
+          client={thirdwebClient} 
+          chain={mainnet}
+          theme="dark"
+        />
+      </div>
+
+      {account?.address && (
+        <div className="space-y-4">
+          <div className="p-4 bg-secondary/20 rounded-lg">
+            <h3 className="font-semibold text-foreground mb-2">Ethereum Wallet Connected</h3>
+            <p className="text-sm text-muted-foreground font-mono break-all">
+              {account.address}
+            </p>
+          </div>
+
+          {isLoading && (
+            <div className="text-center text-muted-foreground">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-2"></div>
+              Checking ENS domain...
+            </div>
+          )}
+
+          {ensName && !isLoading && (
+            <div className="p-4 bg-primary/10 rounded-lg">
+              <h3 className="font-semibold text-foreground mb-2">ENS Domain Found</h3>
+              <p className="text-primary font-mono">{ensName}</p>
+            </div>
+          )}
+
+          {notif && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription className="font-medium">
+                {notif}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {account.address && !notif && !isLoading && (
+            <Alert>
+              <CheckCircle className="h-4 w-4" />
+              <AlertDescription>
+                Wallet terverifikasi! {ensName ? `Welcome, ${ensName}` : "No ENS domain found, but wallet is connected successfully."}
+              </AlertDescription>
+            </Alert>
+          )}
+        </div>
+      )}
+
+      {!account?.address && (
+        <div className="text-center text-muted-foreground">
+          <Shield className="h-12 w-12 mx-auto mb-3 opacity-50" />
+          <p>Connect your Ethereum wallet to start verification process</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SolanaVerification() {
+  const { publicKey, connected } = useWallet();
+  const [notif, setNotif] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    async function checkSolanaWallet() {
+      if (publicKey && connected) {
+        setIsLoading(true);
+        try {
+          const walletAddress = publicKey.toString().toLowerCase();
+          
+          // Check if Solana wallet address is registered
+          if (REGISTERED_WALLETS[walletAddress]) {
+            setNotif(REGISTERED_WALLETS[walletAddress]);
+          } else {
+            setNotif("anda belum beruntung, coba di event selanjutnya");
+          }
+        } catch (error) {
+          console.error("Error checking Solana wallet:", error);
+          setNotif("anda belum beruntung, coba di event selanjutnya");
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        setNotif("");
+      }
+    }
+    checkSolanaWallet();
+  }, [publicKey, connected]);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-center">
+        <WalletMultiButton />
+      </div>
+
+      {connected && publicKey && (
+        <div className="space-y-4">
+          <div className="p-4 bg-secondary/20 rounded-lg">
+            <h3 className="font-semibold text-foreground mb-2">Solana Wallet Connected</h3>
+            <p className="text-sm text-muted-foreground font-mono break-all">
+              {publicKey.toString()}
+            </p>
+          </div>
+
+          {isLoading && (
+            <div className="text-center text-muted-foreground">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-2"></div>
+              Checking wallet registration...
+            </div>
+          )}
+
+          {notif && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription className="font-medium">
+                {notif}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {connected && !notif && !isLoading && (
+            <Alert>
+              <CheckCircle className="h-4 w-4" />
+              <AlertDescription>
+                Solana wallet terverifikasi!
+              </AlertDescription>
+            </Alert>
+          )}
+        </div>
+      )}
+
+      {!connected && (
+        <div className="text-center text-muted-foreground">
+          <Shield className="h-12 w-12 mx-auto mb-3 opacity-50" />
+          <p>Connect your Solana wallet to start verification process</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function VerificationPlayground() {
+  const endpoint = useMemo(() => clusterApiUrl("devnet"), []);
+  const wallets = useMemo(() => [], []);
+
+  return (
     <div className="min-h-screen bg-background">
       <NavBar />
       <div className="container mx-auto px-4 py-8 max-w-2xl">
@@ -110,63 +273,26 @@ function VerificationPlayground() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="flex justify-center">
-              <ConnectButton 
-                client={thirdwebClient} 
-                chain={mainnet}
-                theme="dark"
-              />
-            </div>
-
-            {account?.address && (
-              <div className="space-y-4">
-                <div className="p-4 bg-secondary/20 rounded-lg">
-                  <h3 className="font-semibold text-foreground mb-2">Wallet Connected</h3>
-                  <p className="text-sm text-muted-foreground font-mono break-all">
-                    {account.address}
-                  </p>
-                </div>
-
-                {isLoading && (
-                  <div className="text-center text-muted-foreground">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-2"></div>
-                    Checking ENS domain...
-                  </div>
-                )}
-
-                {ensName && !isLoading && (
-                  <div className="p-4 bg-primary/10 rounded-lg">
-                    <h3 className="font-semibold text-foreground mb-2">ENS Domain Found</h3>
-                    <p className="text-primary font-mono">{ensName}</p>
-                  </div>
-                )}
-
-                {notif && (
-                  <Alert variant="destructive">
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertDescription className="font-medium">
-                      {notif}
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                {account.address && !notif && !isLoading && (
-                  <Alert>
-                    <CheckCircle className="h-4 w-4" />
-                    <AlertDescription>
-                      Wallet terverifikasi! {ensName ? `Welcome, ${ensName}` : "No ENS domain found, but wallet is connected successfully."}
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </div>
-            )}
-
-            {!account?.address && (
-              <div className="text-center text-muted-foreground">
-                <Shield className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p>Connect your wallet to start verification process</p>
-              </div>
-            )}
+            <Tabs defaultValue="ethereum" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="ethereum">Ethereum</TabsTrigger>
+                <TabsTrigger value="solana">Solana</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="ethereum" className="mt-6">
+                <EthereumVerification />
+              </TabsContent>
+              
+              <TabsContent value="solana" className="mt-6">
+                <ConnectionProvider endpoint={endpoint}>
+                  <WalletProvider wallets={wallets}>
+                    <WalletModalProvider>
+                      <SolanaVerification />
+                    </WalletModalProvider>
+                  </WalletProvider>
+                </ConnectionProvider>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
 
