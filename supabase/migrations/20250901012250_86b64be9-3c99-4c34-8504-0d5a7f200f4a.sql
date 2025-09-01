@@ -1,0 +1,2 @@
+-- Create edge function for AI chat
+-- This will be handled by the Supabase Edge Function we'll create next

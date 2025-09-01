@@ -13,7 +13,7 @@ import {
 } from "@solana/wallet-adapter-react-ui";
 import { clusterApiUrl } from "@solana/web3.js";
 import EnhancedListeningTimeTracker from './EnhancedListeningTimeTracker';
-import NFTCollection from './NFTCollection';
+import AIChat from './AIChat';
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import FarcasterConnectMenu from './FarcasterConnectMenu';
@@ -147,8 +147,8 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
       {/* Enhanced Listening Time Tracker */}
       <EnhancedListeningTimeTracker isPlaying={isPlaying} />
 
-      {/* NFT Collection Display */}
-      <NFTCollection client={client} />
+      {/* AI Chat Interface */}
+      <AIChat client={client} />
 
       {/* Info Card */}
       <Card className="p-3 bg-[#222] border-[#444]">

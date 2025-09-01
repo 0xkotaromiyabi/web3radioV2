@@ -6,45 +6,67 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Send, Bot, User } from "lucide-react";
+import { createClient } from '@supabase/supabase-js';
 
 interface AIChatProps {
   client: any;
 }
 
-interface ThirdwebAiMessage {
-  id: string;
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-  metadata?: {
-    session_id?: string;
-    reasoning?: string;
-  };
-}
+const supabaseUrl = 'https://zxyoidfksqmccwvdduxk.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4eW9pZGZrc3FtY2N3dmRkdXhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5MTMwNDEsImV4cCI6MjA2NTQ4OTA0MX0.sjAUWjkuJAp-RVskCTa9BwanW6PSKj94fMmFCv3lghM';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const AIChat: React.FC<AIChatProps> = ({ client }) => {
   const [sessionId, setSessionId] = useState("");
   const [inputValue, setInputValue] = useState("");
-
-  const { messages, append, isLoading } = useChat<ThirdwebAiMessage>({
-    api: "/api/chat", // This will be handled by our Supabase Edge Function
-    onFinish: (message) => {
-      // Record session id for continuity
-      setSessionId(message.metadata?.session_id ?? "");
-    },
-  });
+  const [messages, setMessages] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSend = async () => {
     if (!inputValue.trim()) return;
     
-    await append(
-      { role: "user", content: inputValue },
-      {
+    const userMessage = {
+      id: Date.now().toString(),
+      role: "user" as const,
+      content: inputValue,
+    };
+    
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue("");
+    setIsLoading(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-chat', {
         body: {
+          messages: [...messages, userMessage],
           sessionId,
         },
+      });
+      
+      if (error) throw error;
+      
+      const aiMessage = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant" as const,
+        content: data.content || "Sorry, I couldn't process that request.",
+      };
+      
+      setMessages(prev => [...prev, aiMessage]);
+      
+      if (data.session_id) {
+        setSessionId(data.session_id);
       }
-    );
-    setInputValue("");
+    } catch (error) {
+      console.error('AI Chat Error:', error);
+      const errorMessage = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant" as const,
+        content: "Sorry, I'm having trouble connecting right now. Please try again.",
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
