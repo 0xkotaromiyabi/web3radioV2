@@ -14,6 +14,7 @@ import {
 import { clusterApiUrl } from "@solana/web3.js";
 import EnhancedListeningTimeTracker from './EnhancedListeningTimeTracker';
 import AIChat from './AIChat';
+import XMTPChatRoom from '../chat/XMTPChatRoom';
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import FarcasterConnectMenu from './FarcasterConnectMenu';
@@ -149,6 +150,9 @@ const WalletConnection = ({ isPlaying }: WalletConnectionProps) => {
 
       {/* AI Chat Interface */}
       <AIChat client={client} />
+
+      {/* XMTP Chatroom */}
+      <XMTPChatRoom />
 
       {/* Info Card */}
       <Card className="p-3 bg-[#222] border-[#444]">
