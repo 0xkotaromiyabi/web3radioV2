@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: web3radio-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: web3radio
+      POSTGRES_USER: web3radio
+      POSTGRES_PASSWORD: web3radio_local_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./server/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U web3radio -d web3radio"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: ./server
+    container_name: web3radio-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://web3radio:web3radio_local_dev@postgres:5432/web3radio
+      JWT_SECRET: local_dev_jwt_secret_change_in_production
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+
+volumes:
+  postgres_data:

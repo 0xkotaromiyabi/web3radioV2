@@ -36,7 +36,7 @@ const WalletConnectButton = () => {
       client={client}
       wallets={wallets}
       connectModal={{ size: "compact" }}
-      theme="dark"
+      theme="light"
     />
   );
 };

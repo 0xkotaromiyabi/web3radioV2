@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchEvents } from '@/lib/supabase';
+import { Calendar } from 'lucide-react';
 
 interface EventsTickerProps {
   isMobile: boolean;
@@ -29,7 +30,7 @@ const EventsTicker = ({ isMobile }: EventsTickerProps) => {
     };
 
     loadEvents();
-    const interval = setInterval(loadEvents, 30000); // Refresh every 30 seconds
+    const interval = setInterval(loadEvents, 30000);
 
     return () => clearInterval(interval);
   }, []);
@@ -39,26 +40,30 @@ const EventsTicker = ({ isMobile }: EventsTickerProps) => {
       day: 'numeric',
       month: 'short'
     });
-    return `📅 ${date} - ${event.title} @ ${event.location}`;
+    return `${date} - ${event.title} @ ${event.location}`;
   };
 
-  const createEventText = () => {
-    if (events.length === 0) {
-      return "📅 Loading upcoming events...";
-    }
-    
-    // Create multiple copies for seamless looping
-    const eventTexts = events.map(formatEventText);
-    const repeatedEvents = [...eventTexts, ...eventTexts, ...eventTexts];
-    return repeatedEvents.join(" • ");
-  };
+  if (events.length === 0) {
+    return null;
+  }
 
   return (
-    <div className={`h-${isMobile ? '12' : '8'} bg-[#0a0a0a] border border-[#333] mb-2 overflow-hidden rounded`}>
-      <div className="animate-text-clip whitespace-nowrap h-full flex items-center">
-        <span className="text-[#00ff00] font-mono text-xs sm:text-sm">
-          {createEventText()}
-        </span>
+    <div className="mb-4 rounded-xl bg-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] border border-gray-200/60 overflow-hidden">
+      <div className="flex items-center px-4 py-3">
+        <div className="flex items-center gap-2 flex-shrink-0 pr-4 border-r border-gray-200/50">
+          <Calendar className="w-4 h-4 text-blue-500" />
+          <span className="text-sm font-medium text-foreground">Events</span>
+        </div>
+        <div className="overflow-hidden ml-4 flex-1">
+          <div className="animate-marquee whitespace-nowrap">
+            {events.map((event, index) => (
+              <span key={event.id} className="text-sm text-muted-foreground mx-4">
+                {formatEventText(event)}
+                {index < events.length - 1 && <span className="mx-4 text-gray-300">•</span>}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

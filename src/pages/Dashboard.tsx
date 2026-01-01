@@ -1,19 +1,24 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import NavBar from '@/components/navigation/NavBar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, Newspaper, Radio, Loader, Eye, Trash2, Plus } from "lucide-react";
-import { signIn, signOut, getCurrentUser, fetchNews, deleteNewsItem, fetchEvents, deleteEvent, fetchStations, deleteStation, subscribeToTable } from '@/lib/supabase';
+import { Loader2, Eye, Trash2, Plus, Edit, Wallet, ShieldCheck, Radio } from "lucide-react";
+import { fetchNews, deleteNewsItem, fetchEvents, deleteEvent, fetchStations, deleteStation, subscribeToTable } from '@/lib/supabase';
 import NewsEditor from '@/components/cms/NewsEditor';
 import EventEditor from '@/components/cms/EventEditor';
 import StationEditor from '@/components/cms/StationEditor';
+import CMSSidebar from '@/components/cms/CMSSidebar';
+import MediaLibrary from '@/components/cms/MediaLibrary';
+import DashboardOverview from '@/components/cms/DashboardOverview';
+import { ConnectButton, useActiveAccount, useDisconnect } from "thirdweb/react";
+import { client } from "@/services/w3rSmartContract";
+
+// Super Admin Wallet Addresses (lowercase for comparison)
+const SUPER_ADMINS = [
+  "0x242dfb7849544ee242b2265ca7e585bdec60456b",
+  "0xdbca8ab9eb325a8f550ffc6e45277081a6c7d681",
+  "0x13dd8b8f54c3b54860f8d41a6fbff7ffc6bf01ef"
+];
 
 // Type definitions
 type NewsItem = {
@@ -46,11 +51,10 @@ type Station = {
 };
 
 const Dashboard = () => {
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [activeTab, setActiveTab] = useState("news");
+  const activeAccount = useActiveAccount();
+  const { disconnect } = useDisconnect();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
   const [showEditor, setShowEditor] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -60,29 +64,37 @@ const Dashboard = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [stations, setStations] = useState<Station[]>([]);
 
-  // Check authentication on mount
+  // Check if connected wallet is admin
   useEffect(() => {
-    const checkUser = async () => {
-      try {
-        const currentUser = await getCurrentUser();
-        setUser(currentUser || null);
-      } catch (error) {
-        console.error('Error checking authentication:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    checkUser();
-  }, []);
+    if (activeAccount) {
+      const address = activeAccount.address.toLowerCase();
+      const isSuperAdmin = SUPER_ADMINS.some(admin => admin.toLowerCase() === address);
+      setIsAdmin(isSuperAdmin);
 
-  // Load data when authenticated
+      if (isSuperAdmin) {
+        toast({
+          title: "Admin Access Granted",
+          description: "Welcome back, Super Admin!",
+        });
+      } else {
+        toast({
+          title: "Access Denied",
+          description: "Your wallet is not authorized to access the CMS.",
+          variant: "destructive",
+        });
+      }
+    } else {
+      setIsAdmin(false);
+    }
+  }, [activeAccount, toast]);
+
+  // Load data when admin is authenticated
   useEffect(() => {
-    if (user) {
+    if (isAdmin) {
       loadAllData();
       setupRealtimeSubscriptions();
     }
-  }, [user]);
+  }, [isAdmin]);
 
   const loadAllData = async () => {
     await loadNews();
@@ -94,7 +106,7 @@ const Dashboard = () => {
     const newsSubscription = subscribeToTable('news', () => loadNews());
     const eventsSubscription = subscribeToTable('events', () => loadEvents());
     const stationsSubscription = subscribeToTable('stations', () => loadStations());
-    
+
     return () => {
       newsSubscription.unsubscribe();
       eventsSubscription.unsubscribe();
@@ -105,11 +117,7 @@ const Dashboard = () => {
   const loadNews = async () => {
     const { data, error } = await fetchNews();
     if (error) {
-      toast({
-        title: "Error loading news",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Error loading news", description: error.message, variant: "destructive" });
     } else {
       setNewsItems(data || []);
     }
@@ -118,11 +126,7 @@ const Dashboard = () => {
   const loadEvents = async () => {
     const { data, error } = await fetchEvents();
     if (error) {
-      toast({
-        title: "Error loading events",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Error loading events", description: error.message, variant: "destructive" });
     } else {
       setEvents(data || []);
     }
@@ -131,50 +135,17 @@ const Dashboard = () => {
   const loadStations = async () => {
     const { data, error } = await fetchStations();
     if (error) {
-      toast({
-        title: "Error loading stations",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Error loading stations", description: error.message, variant: "destructive" });
     } else {
       setStations(data || []);
     }
   };
 
-  // Auth handlers
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    
-    try {
-      const { data, error } = await signIn(email, password);
-      
-      if (error) throw error;
-      
-      setUser(data.user);
-      toast({
-        title: "Login successful",
-        description: "Welcome to Web3radio dashboard",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Login failed",
-        description: error.message || "Invalid email or password",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    const { error } = await signOut();
-    if (!error) {
-      setUser(null);
-      toast({
-        title: "Logged out",
-        description: "You have been logged out successfully",
-      });
+  const handleLogout = () => {
+    if (activeAccount) {
+      disconnect(activeAccount);
+      setIsAdmin(false);
+      toast({ title: "Disconnected", description: "Wallet disconnected successfully" });
     }
   };
 
@@ -183,356 +154,319 @@ const Dashboard = () => {
     loadAllData();
   };
 
-  // Delete handlers
   const handleDeleteNewsItem = async (id: number) => {
     const { error } = await deleteNewsItem(id);
-    
     if (error) {
-      toast({
-        title: "Error deleting news item",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Error deleting news item", description: error.message, variant: "destructive" });
     } else {
-      toast({
-        title: "News item deleted",
-        description: "The news item has been deleted successfully",
-      });
+      toast({ title: "News item deleted", description: "The news item has been deleted successfully" });
+      loadNews();
     }
   };
 
   const handleDeleteEvent = async (id: number) => {
     const { error } = await deleteEvent(id);
-    
     if (error) {
-      toast({
-        title: "Error deleting event",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Error deleting event", description: error.message, variant: "destructive" });
     } else {
-      toast({
-        title: "Event deleted",
-        description: "The event has been deleted successfully",
-      });
+      toast({ title: "Event deleted", description: "The event has been deleted successfully" });
+      loadEvents();
     }
   };
 
   const handleDeleteStation = async (id: number) => {
     const { error } = await deleteStation(id);
-    
     if (error) {
-      toast({
-        title: "Error deleting station",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Error deleting station", description: error.message, variant: "destructive" });
     } else {
-      toast({
-        title: "Station deleted",
-        description: "The radio station has been deleted successfully",
-      });
+      toast({ title: "Station deleted", description: "The radio station has been deleted successfully" });
+      loadStations();
     }
   };
 
-  if (loading) {
+  // Login page - Apple style wallet connect
+  if (!isAdmin) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Loader className="h-8 w-8 animate-spin text-green-500" />
-          <p className="text-green-400">Loading...</p>
-        </div>
-      </div>
-    );
-  }
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-6">
+        <div className="panel-float w-full max-w-md p-8 text-center">
+          {/* Logo */}
+          <img
+            src="/web3radio-logo.png"
+            alt="Web3Radio"
+            className="w-20 h-20 mx-auto mb-6 rounded-2xl shadow-apple-md"
+          />
 
-  // Login page
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
-        <NavBar />
-        <div className="flex justify-center items-center h-[calc(100vh-4rem)]">
-          <Card className="w-[350px] bg-gray-800 border-green-500 text-white">
-            <CardHeader>
-              <CardTitle className="text-green-400">Dashboard Login</CardTitle>
-              <CardDescription className="text-gray-300">Enter your credentials to access the content management system.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleLogin}>
-                <div className="grid w-full items-center gap-4">
-                  <div className="flex flex-col space-y-1.5">
-                    <Label htmlFor="email" className="text-white">Email</Label>
-                    <Input 
-                      id="email" 
-                      type="email"
-                      placeholder="your@email.com" 
-                      value={email} 
-                      onChange={(e) => setEmail(e.target.value)} 
-                      className="bg-gray-700 text-white border-gray-600 focus:border-green-500"
-                    />
-                  </div>
-                  <div className="flex flex-col space-y-1.5">
-                    <Label htmlFor="password" className="text-white">Password</Label>
-                    <Input 
-                      id="password" 
-                      type="password" 
-                      placeholder="Password" 
-                      value={password} 
-                      onChange={(e) => setPassword(e.target.value)} 
-                      className="bg-gray-700 text-white border-gray-600 focus:border-green-500"
-                    />
-                  </div>
-                </div>
-                <Button className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white" type="submit">Login</Button>
-              </form>
-              <div className="mt-4 text-sm text-center text-gray-300">
-                <p>Contact Admin For Login Access</p>
+          <h1 className="text-2xl font-semibold text-foreground mb-2">CMS Dashboard</h1>
+          <p className="text-muted-foreground mb-8">Connect your wallet to access the dashboard</p>
+
+          {activeAccount ? (
+            <div className="space-y-4">
+              <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20">
+                <ShieldCheck className="h-8 w-8 text-red-500 mx-auto mb-2" />
+                <p className="text-red-500 font-medium">Access Denied</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Wallet {activeAccount.address.slice(0, 6)}...{activeAccount.address.slice(-4)} is not authorized.
+                </p>
               </div>
-            </CardContent>
-          </Card>
+              <button
+                onClick={handleLogout}
+                className="w-full btn-apple-secondary text-red-500"
+              >
+                Disconnect Wallet
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <ConnectButton
+                client={client}
+                theme="light"
+                connectButton={{
+                  label: "Connect Wallet",
+                  style: {
+                    backgroundColor: "#3b82f6",
+                    color: "white",
+                    padding: "14px 32px",
+                    borderRadius: "12px",
+                    fontSize: "15px",
+                    fontWeight: "500",
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "center"
+                  }
+                }}
+              />
+              <p className="text-xs text-muted-foreground">
+                Only authorized wallets can access the CMS
+              </p>
+            </div>
+          )}
         </div>
       </div>
     );
   }
 
-  // Dashboard
+  // Render content based on active tab
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'overview':
+        return (
+          <DashboardOverview
+            newsCount={newsItems.length}
+            eventsCount={events.length}
+            stationsCount={stations.length}
+          />
+        );
+
+      case 'news':
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-semibold text-foreground">News Management</h2>
+              <button
+                onClick={() => setShowEditor(!showEditor)}
+                className="btn-apple-primary flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                {showEditor ? 'Hide Editor' : 'Add Article'}
+              </button>
+            </div>
+
+            {showEditor && <NewsEditor onSave={handleSaveComplete} />}
+
+            <div className="card-apple">
+              <div className="p-6 border-b border-border/30">
+                <h3 className="font-medium text-foreground">Published Articles</h3>
+                <p className="text-sm text-muted-foreground">Manage your news articles</p>
+              </div>
+              <div className="divide-y divide-border/30">
+                {newsItems.length > 0 ? (
+                  newsItems.map((item) => (
+                    <div key={item.id} className="flex items-center gap-4 p-4 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                      {item.image_url ? (
+                        <img src={item.image_url} alt={item.title} className="w-12 h-12 object-cover rounded-lg" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
+                          <Edit className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-foreground truncate">{item.title}</p>
+                        <p className="text-sm text-muted-foreground">{item.date}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={() => navigate(`/news`)} className="p-2 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground transition-colors">
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        <button onClick={() => handleDeleteNewsItem(item.id)} className="p-2 rounded-lg hover:bg-red-500/10 text-red-500 transition-colors">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-8 text-center text-muted-foreground">No news articles found</div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'events':
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-semibold text-foreground">Events Management</h2>
+              <button
+                onClick={() => setShowEditor(!showEditor)}
+                className="btn-apple-primary flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                {showEditor ? 'Hide Editor' : 'Add Event'}
+              </button>
+            </div>
+
+            {showEditor && <EventEditor onSave={handleSaveComplete} />}
+
+            <div className="card-apple">
+              <div className="p-6 border-b border-border/30">
+                <h3 className="font-medium text-foreground">Upcoming Events</h3>
+                <p className="text-sm text-muted-foreground">Manage your events</p>
+              </div>
+              <div className="divide-y divide-border/30">
+                {events.length > 0 ? (
+                  events.map((event) => (
+                    <div key={event.id} className="flex items-center gap-4 p-4 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                      {event.image_url ? (
+                        <img src={event.image_url} alt={event.title} className="w-12 h-12 object-cover rounded-lg" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
+                          <Edit className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-foreground truncate">{event.title}</p>
+                        <p className="text-sm text-muted-foreground">{event.date} • {event.location}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={() => navigate(`/events`)} className="p-2 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground transition-colors">
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        <button onClick={() => handleDeleteEvent(event.id)} className="p-2 rounded-lg hover:bg-red-500/10 text-red-500 transition-colors">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-8 text-center text-muted-foreground">No events found</div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'stations':
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-semibold text-foreground">Radio Stations Management</h2>
+              <button
+                onClick={() => setShowEditor(!showEditor)}
+                className="btn-apple-primary flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                {showEditor ? 'Hide Editor' : 'Add Station'}
+              </button>
+            </div>
+
+            {showEditor && <StationEditor onSave={handleSaveComplete} />}
+
+            <div className="card-apple">
+              <div className="p-6 border-b border-border/30">
+                <h3 className="font-medium text-foreground">Radio Stations</h3>
+                <p className="text-sm text-muted-foreground">Manage your radio stations</p>
+              </div>
+              <div className="divide-y divide-border/30">
+                {stations.length > 0 ? (
+                  stations.map((station) => (
+                    <div key={station.id} className="flex items-center gap-4 p-4 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                      {station.image_url ? (
+                        <img src={station.image_url} alt={station.name} className="w-12 h-12 object-cover rounded-lg" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
+                          <Radio className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-foreground truncate">{station.name}</p>
+                        <p className="text-sm text-muted-foreground">{station.genre}</p>
+                      </div>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${station.streaming ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                        {station.streaming ? 'Live' : 'Offline'}
+                      </span>
+                      <div className="flex gap-2">
+                        <button onClick={() => navigate(`/stations`)} className="p-2 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground transition-colors">
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        <button onClick={() => handleDeleteStation(station.id)} className="p-2 rounded-lg hover:bg-red-500/10 text-red-500 transition-colors">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-8 text-center text-muted-foreground">No radio stations found</div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'media':
+        return <MediaLibrary />;
+
+      default:
+        return null;
+    }
+  };
+
+  // Dashboard with Apple-style sidebar
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
-      <NavBar />
-      <div className="container py-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-green-400">Content Management Dashboard</h1>
-          <Button variant="outline" onClick={handleLogout} className="border-green-500 text-green-400 hover:bg-green-900 hover:text-white">Logout</Button>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex">
+      {/* Sidebar */}
+      <CMSSidebar
+        onLogout={handleLogout}
+        activeTab={activeTab}
+        onTabChange={(tab) => {
+          setActiveTab(tab);
+          setShowEditor(false);
+        }}
+      />
+
+      {/* Main Content */}
+      <div className="flex-1 overflow-auto">
+        {/* Top Bar */}
+        <div className="glass-subtle sticky top-0 z-10 border-b border-border/30 px-6 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full" />
+            <span className="text-sm font-medium text-foreground">Super Admin</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-muted-foreground">
+              {activeAccount?.address.slice(0, 6)}...{activeAccount?.address.slice(-4)}
+            </span>
+            <button
+              onClick={handleLogout}
+              className="btn-apple-secondary text-sm"
+            >
+              Disconnect
+            </button>
+          </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="mb-4 bg-gray-800 border-green-500 border">
-            <TabsTrigger value="news" className="flex gap-2 items-center text-white data-[state=active]:bg-green-700 data-[state=active]:text-white">
-              <Newspaper className="h-4 w-4" />
-              News
-            </TabsTrigger>
-            <TabsTrigger value="events" className="flex gap-2 items-center text-white data-[state=active]:bg-green-700 data-[state=active]:text-white">
-              <Calendar className="h-4 w-4" />
-              Events
-            </TabsTrigger>
-            <TabsTrigger value="stations" className="flex gap-2 items-center text-white data-[state=active]:bg-green-700 data-[state=active]:text-white">
-              <Radio className="h-4 w-4" />
-              Radio Stations
-            </TabsTrigger>
-          </TabsList>
-
-          {/* News Management */}
-          <TabsContent value="news">
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-semibold text-green-400">News Management</h2>
-                <Button 
-                  onClick={() => setShowEditor(!showEditor)}
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  {showEditor ? 'Hide Editor' : 'Add Article'}
-                </Button>
-              </div>
-
-              {showEditor && (
-                <NewsEditor onSave={handleSaveComplete} />
-              )}
-
-              <Card className="bg-gray-800 border-green-500">
-                <CardHeader>
-                  <CardTitle className="text-green-400">Published Articles</CardTitle>
-                  <CardDescription className="text-gray-300">Manage your news articles</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="border-green-700">
-                        <TableHead className="text-green-300">Image</TableHead>
-                        <TableHead className="text-green-300">Title</TableHead>
-                        <TableHead className="text-green-300">Date</TableHead>
-                        <TableHead className="text-green-300">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {newsItems.length > 0 ? (
-                        newsItems.map((item) => (
-                          <TableRow key={item.id} className="border-green-900/30">
-                            <TableCell>
-                              {item.image_url && (
-                                <img src={item.image_url} alt={item.title} className="w-12 h-12 object-cover rounded" />
-                              )}
-                            </TableCell>
-                            <TableCell className="text-white">{item.title}</TableCell>
-                            <TableCell className="text-gray-300">{item.date}</TableCell>
-                            <TableCell>
-                              <div className="flex gap-2">
-                                <Button variant="outline" size="sm" onClick={() => navigate(`/news`)}>
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                                <Button variant="destructive" size="sm" onClick={() => handleDeleteNewsItem(item.id)}>
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={4} className="text-center text-gray-400 py-4">No news articles found</TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Events Management */}
-          <TabsContent value="events">
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-semibold text-green-400">Events Management</h2>
-                <Button 
-                  onClick={() => setShowEditor(!showEditor)}
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  {showEditor ? 'Hide Editor' : 'Add Event'}
-                </Button>
-              </div>
-
-              {showEditor && (
-                <EventEditor onSave={handleSaveComplete} />
-              )}
-
-              <Card className="bg-gray-800 border-green-500">
-                <CardHeader>
-                  <CardTitle className="text-green-400">Published Events</CardTitle>
-                  <CardDescription className="text-gray-300">Manage your events</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="border-green-700">
-                        <TableHead className="text-green-300">Image</TableHead>
-                        <TableHead className="text-green-300">Title</TableHead>
-                        <TableHead className="text-green-300">Date</TableHead>
-                        <TableHead className="text-green-300">Location</TableHead>
-                        <TableHead className="text-green-300">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {events.length > 0 ? (
-                        events.map((event) => (
-                          <TableRow key={event.id} className="border-green-900/30">
-                            <TableCell>
-                              {event.image_url && (
-                                <img src={event.image_url} alt={event.title} className="w-12 h-12 object-cover rounded" />
-                              )}
-                            </TableCell>
-                            <TableCell className="text-white">{event.title}</TableCell>
-                            <TableCell className="text-gray-300">{event.date}</TableCell>
-                            <TableCell className="text-white">{event.location}</TableCell>
-                            <TableCell>
-                              <div className="flex gap-2">
-                                <Button variant="outline" size="sm" onClick={() => navigate(`/events`)}>
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                                <Button variant="destructive" size="sm" onClick={() => handleDeleteEvent(event.id)}>
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={5} className="text-center text-gray-400 py-4">No events found</TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Stations Management */}
-          <TabsContent value="stations">
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-semibold text-green-400">Radio Stations Management</h2>
-                <Button 
-                  onClick={() => setShowEditor(!showEditor)}
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  {showEditor ? 'Hide Editor' : 'Add Station'}
-                </Button>
-              </div>
-
-              {showEditor && (
-                <StationEditor onSave={handleSaveComplete} />
-              )}
-
-              <Card className="bg-gray-800 border-green-500">
-                <CardHeader>
-                  <CardTitle className="text-green-400">Radio Stations</CardTitle>
-                  <CardDescription className="text-gray-300">Manage your radio stations</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="border-green-700">
-                        <TableHead className="text-green-300">Image</TableHead>
-                        <TableHead className="text-green-300">Name</TableHead>
-                        <TableHead className="text-green-300">Genre</TableHead>
-                        <TableHead className="text-green-300">Status</TableHead>
-                        <TableHead className="text-green-300">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {stations.length > 0 ? (
-                        stations.map((station) => (
-                          <TableRow key={station.id} className="border-green-900/30">
-                            <TableCell>
-                              {station.image_url && (
-                                <img src={station.image_url} alt={station.name} className="w-12 h-12 object-cover rounded" />
-                              )}
-                            </TableCell>
-                            <TableCell className="text-white">{station.name}</TableCell>
-                            <TableCell className="text-gray-300">{station.genre}</TableCell>
-                            <TableCell>
-                              <span className={`px-2 py-1 rounded text-xs ${station.streaming ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>
-                                {station.streaming ? 'Live' : 'Offline'}
-                              </span>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex gap-2">
-                                <Button variant="outline" size="sm" onClick={() => navigate(`/stations`)}>
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                                <Button variant="destructive" size="sm" onClick={() => handleDeleteStation(station.id)}>
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={5} className="text-center text-gray-400 py-4">No radio stations found</TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-        </Tabs>
+        <div className="p-6">
+          {renderContent()}
+        </div>
       </div>
     </div>
   );

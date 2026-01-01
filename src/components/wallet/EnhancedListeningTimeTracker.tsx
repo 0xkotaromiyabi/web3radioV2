@@ -35,7 +35,7 @@ const EnhancedListeningTimeTracker: React.FC<EnhancedListeningTimeTrackerProps> 
         setLocalListeningTime(prevTime => {
           const newTime = prevTime + 1;
           updateListeningTime(newTime);
-          
+
           // Submit session periodically
           const sessionDuration = newTime - lastSubmission;
           if (sessionDuration >= SUBMISSION_INTERVAL) {
@@ -43,20 +43,20 @@ const EnhancedListeningTimeTracker: React.FC<EnhancedListeningTimeTrackerProps> 
             submitListeningSession(sessionDuration);
             setLastSubmission(newTime);
           }
-          
+
           // Also save to localStorage for backup
           localStorage.setItem(`w3r-listening-time-${address}`, newTime.toString());
           return newTime;
         });
       }, 1000);
-      
+
       setTimer(interval);
     } else {
       // Stop the timer and submit final session if there's accumulated time
       if (timer) {
         clearInterval(timer);
         setTimer(null);
-        
+
         // Submit any remaining listening time when stopping
         const sessionDuration = localListeningTime - lastSubmission;
         if (sessionDuration >= 30) { // Minimum 30 seconds
@@ -80,7 +80,7 @@ const EnhancedListeningTimeTracker: React.FC<EnhancedListeningTimeTrackerProps> 
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    
+
     return [
       hours.toString().padStart(2, '0'),
       minutes.toString().padStart(2, '0'),
@@ -91,17 +91,17 @@ const EnhancedListeningTimeTracker: React.FC<EnhancedListeningTimeTrackerProps> 
   if (!address) return null;
 
   return (
-    <div className="mt-2 flex items-center gap-2">
-      <Clock size={14} className="text-[#00ff00]" />
-      <span className="text-xs text-gray-400">Listening Time:</span>
-      <Badge variant="outline" className={`bg-[#111] border-[#333] font-mono ${rewardEligible ? 'text-yellow-400 border-yellow-400' : 'text-[#00ff00]'}`}>
+    <div className="mt-2 flex items-center gap-2 justify-center">
+      <Clock size={14} className="text-blue-500" />
+      <span className="text-xs text-gray-500 font-medium">Listening Time:</span>
+      <Badge variant="outline" className={`bg-white shadow-sm border font-mono ${rewardEligible ? 'text-yellow-600 border-yellow-400 bg-yellow-50' : 'text-gray-900 border-gray-200'}`}>
         {formatTime(localListeningTime)}
       </Badge>
       {rewardEligible && (
-        <Zap size={14} className="text-yellow-400 animate-pulse" />
+        <Zap size={14} className="text-yellow-500 animate-pulse" />
       )}
       {isPlaying && (
-        <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
       )}
     </div>
   );
