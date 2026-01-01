@@ -18,9 +18,9 @@ export default defineConfig(() => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  base: "/",
   define: {
     global: "globalThis",
-    "process.env": {},
   },
   optimizeDeps: {
     include: ["@coinbase/onchainkit"],
