@@ -1,6 +1,7 @@
 
 import React from 'react';
 import RadioPlayer from './radio/RadioPlayer';
+import logo from '@/assets/web3radio-logo.png';
 
 const RadioComponent = () => {
   return (
@@ -9,7 +10,7 @@ const RadioComponent = () => {
         {/* Logo Header */}
         <div className="mb-8 flex flex-col items-center">
           <img
-            src="/web3radio-logo.png"
+            src={logo}
             alt="Web3Radio"
             className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl shadow-apple-lg mb-4"
           />

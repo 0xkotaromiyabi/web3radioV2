@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Home, Newspaper, Calendar, Radio, Menu, X, Shield, LogIn } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import logo from '@/assets/web3radio-logo.png';
 
 const NavBar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -45,7 +46,7 @@ const NavBar = () => {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 group">
           <img
-            src="/web3radio-logo.png"
+            src={logo}
             alt="Web3Radio"
             className="w-10 h-10 rounded-xl shadow-apple transition-all duration-300 group-hover:scale-105 group-hover:shadow-apple-md"
           />
