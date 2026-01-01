@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart } from "lucide-react";
 import { useActiveAccount } from "thirdweb/react";
+import placeholderData from '@/assets/placeholder.svg';
 
 interface NFTData {
   id: string;
@@ -28,20 +29,20 @@ const NFTCard = ({ nft, onBuy }: NFTCardProps) => {
 
   // Function to get IPFS image URL
   const getImageUrl = (imageUri: string) => {
-    if (!imageUri) return '/placeholder.svg';
-    
+    if (!imageUri) return placeholderData;
+
     // Handle IPFS URLs
     if (imageUri.startsWith('ipfs://')) {
       return `https://ipfs.io/ipfs/${imageUri.replace('ipfs://', '')}`;
     }
-    
+
     // Handle HTTP URLs
     if (imageUri.startsWith('http')) {
       return imageUri;
     }
-    
+
     // Fallback
-    return '/placeholder.svg';
+    return placeholderData;
   };
 
   return (
@@ -55,14 +56,14 @@ const NFTCard = ({ nft, onBuy }: NFTCardProps) => {
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             onError={(e) => {
               console.log('Image failed to load:', nft.image);
-              e.currentTarget.src = '/placeholder.svg';
+              e.currentTarget.src = placeholderData;
             }}
             loading="lazy"
           />
           <div className="absolute top-2 right-2">
             <Badge className="bg-green-600 text-white shadow-lg">Available</Badge>
           </div>
-          
+
           {/* Overlay on hover */}
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300" />
         </div>

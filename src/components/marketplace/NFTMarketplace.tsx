@@ -11,6 +11,7 @@ import { Loader2, ShoppingCart, Wallet, Coins } from "lucide-react";
 import NFTCard from './NFTCard';
 import BuyNFTDialog from './BuyNFTDialog';
 import WalletConnectButton from './WalletConnectButton';
+import placeholderData from '@/assets/placeholder.svg';
 
 interface NFTData {
   id: string;
@@ -40,7 +41,7 @@ const NFTMarketplace = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedNft, setSelectedNft] = useState<NFTData | null>(null);
   const [showBuyDialog, setShowBuyDialog] = useState(false);
-  
+
   const { toast } = useToast();
 
   // Get NFTs using thirdweb v5
@@ -54,21 +55,21 @@ const NFTMarketplace = () => {
   React.useEffect(() => {
     if (nfts && nfts.length > 0) {
       console.log('Raw NFT data:', nfts);
-      
+
       const formattedNfts: NFTData[] = nfts.map((nft, index) => {
         console.log(`NFT ${index}:`, nft);
-        
+
         return {
           id: nft.id.toString(),
           name: nft.metadata?.name?.toString() || `NFT #${nft.id}`,
           description: nft.metadata?.description?.toString() || 'Digital collectible NFT',
-          image: nft.metadata?.image?.toString() || '/placeholder.svg',
+          image: nft.metadata?.image?.toString() || placeholderData,
           tokenId: nft.id.toString(),
           isListed: true,
           price: "0.005", // Fixed price of 0.005 ETH
         };
       });
-      
+
       console.log('Formatted NFTs:', formattedNfts);
       setFilteredNfts(formattedNfts);
     }
@@ -77,19 +78,19 @@ const NFTMarketplace = () => {
   // Filter NFTs based on search
   React.useEffect(() => {
     if (!nfts) return;
-    
+
     let filtered = nfts.map((nft) => ({
       id: nft.id.toString(),
       name: nft.metadata?.name?.toString() || `NFT #${nft.id}`,
       description: nft.metadata?.description?.toString() || 'Digital collectible NFT',
-      image: nft.metadata?.image?.toString() || '/placeholder.svg',
+      image: nft.metadata?.image?.toString() || placeholderData,
       tokenId: nft.id.toString(),
       isListed: true,
       price: "0.005", // Fixed price of 0.005 ETH
     }));
 
     if (searchTerm) {
-      filtered = filtered.filter(nft => 
+      filtered = filtered.filter(nft =>
         nft.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         nft.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         nft.tokenId.includes(searchTerm)
@@ -182,8 +183,8 @@ const NFTMarketplace = () => {
             <ShoppingCart className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-white mb-2">No NFTs Found</h3>
             <p className="text-gray-400">
-              {searchTerm 
-                ? 'Try adjusting your search terms' 
+              {searchTerm
+                ? 'Try adjusting your search terms'
                 : 'No NFTs available in this collection yet'}
             </p>
           </CardContent>

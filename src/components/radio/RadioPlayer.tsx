@@ -9,6 +9,7 @@ import AudioVisualizer from './AudioVisualizer';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useToast } from '@/components/ui/use-toast';
 import { Music, Radio } from 'lucide-react';
+import logo from '@/assets/web3radio-logo.png';
 
 interface Song {
   title: string;
@@ -223,7 +224,7 @@ const RadioPlayer = () => {
         <div className="px-6 py-4 border-b border-gray-200/30 flex items-center justify-between bg-white/40">
           <div className="flex items-center gap-3">
             <img
-              src="/web3radio-logo.png"
+              src={logo}
               alt="Web3Radio"
               className="w-10 h-10 rounded-xl"
             />
