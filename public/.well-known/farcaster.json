@@ -1,33 +1,18 @@
-
 {
-  "accountAssociation": {
-    "header": "eyJmaWQiOjM1NjM4MiwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweGM2MzBjYTMzMDBlYzA3QTU3MmQ3MjU2QUQ0RENkODMxN2M1NTc2ODgifQ",
-    "payload": "eyJkb21haW4iOiJ3ZWIzcmFkaW8ueHl6In0",
-    "signature": "MHhlMjA2YzllYWRlZGY0ZDcxMmI5ZmNlNDc4ZTIzOWIyZGU3YjA1M2FiZGU1MDM1NjU2OTBkZGEzMWYxZWE3MGQ4N2JkYTdhYWExZTJkNjdhMGE2NTAxYTk1MDFjMmEwN2RlODliYmMyNTA1Y2M3NjNkZjZiOGZmYmZlYzMwNWM4YjFi"
-  },
   "frame": {
     "version": "1",
     "name": "Web3Radio",
-    "iconUrl": "https://www.web3radio.xyz/web3radio-logo.png",
-    "splashImageUrl": "https://www.web3radio.xyz/web3radio-logo.png",
-    "splashBackgroundColor": "#000000",
-    "homeUrl": "https://web3radio.xyz",
     "subtitle": "Decentralized Radio Station",
-    "description": "Live stations, curated news, and upcoming events for the on-chain world.",
-    "primaryCategory": "music",
-    "tags": [
-      "radio",
-      "web3",
-      "farcaster",
-      "events"
-    ],
-    "heroImageUrl": "https://i.imgur.com/emXbMkd.png",
-    "ogTitle": "Web3Radio",
-    "ogDescription": "Explore the sound of on-chain culture with Web3Radio.",
-    "ogImageUrl": "https://i.imgur.com/emXbMkd.png"
+    "description": "Listen to your favorite web3 radio stations",
+    "iconUrl": "https://web3radio-v2.vercel.app/assets/web3radio-logo.png",
+    "splashImageUrl": "https://web3radio-v2.vercel.app/assets/web3radio-logo.png",
+    "splashBackgroundColor": "#000000",
+    "homeUrl": "https://web3radio-v2.vercel.app",
+    "webhookUrl": "https://web3radio-v2.vercel.app/api/webhook"
   },
-  "miniApp": {
-    "manifestUrl": "https://web3radio.xyz/.well-known/farcaster.json",
-    "url": "https://web3radio.xyz"
+  "accountAssociation": {
+    "header": "",
+    "payload": "",
+    "signature": ""
   }
 }
