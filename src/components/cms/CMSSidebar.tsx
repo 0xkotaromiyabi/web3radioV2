@@ -10,6 +10,7 @@ import {
     LogOut,
     ChevronRight
 } from 'lucide-react';
+import logo from '@/assets/web3radio-logo.png';
 
 interface CMSSidebarProps {
     onLogout: () => void;
@@ -32,7 +33,7 @@ const CMSSidebar: React.FC<CMSSidebarProps> = ({ onLogout, activeTab, onTabChang
             <div className="p-5 border-b border-border/30">
                 <Link to="/" className="flex items-center gap-3 group">
                     <img
-                        src="/web3radio-logo.png"
+                        src={logo}
                         alt="Web3Radio"
                         className="w-10 h-10 rounded-xl shadow-apple transition-all duration-300 group-hover:scale-105"
                     />

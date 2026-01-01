@@ -47,11 +47,7 @@
     "tsparticles": "^3.9.1",
     "viem": "^2.21.53",
     "wagmi": "^2.13.3",
-<<<<<<< HEAD
-    "zod": "3.25.76"
-=======
     "zod": "^3.23.8"
->>>>>>> 25da417 (chore: update package.json)
   },
   "devDependencies": {
     "@types/node": "22.5.5",
