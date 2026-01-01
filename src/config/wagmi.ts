@@ -7,6 +7,7 @@ export const config = createConfig({
   chains: [base, mainnet],
   transports: {
     [base.id]: http(),
+    [mainnet.id]: http(),
   },
   connectors: [
     miniAppConnector()
