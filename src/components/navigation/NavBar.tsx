@@ -1,168 +1,128 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Newspaper, Calendar, Radio, Mic, Menu, X, Settings, Shield } from 'lucide-react';
-import { 
-  NavigationMenu,
-  NavigationMenuList,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  navigationMenuTriggerStyle
-} from "@/components/ui/navigation-menu";
+import { Home, Newspaper, Calendar, Radio, Menu, X, Shield, LogIn } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { getCurrentUser } from '@/lib/supabase';
 
 const NavBar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
-    const checkAdmin = async () => {
-      const user = await getCurrentUser();
-      setIsAdmin(!!user);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
     };
-    
-    checkAdmin();
-  }, [location]);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
-  return (
-    <header className="sticky top-0 z-40 w-full border-b border-[#444] bg-gray-900/95 backdrop-blur">
-      <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link to="/" className="flex items-center gap-2">
-            <img 
-              src="/web3radio-logo.png" 
-              alt="Web3Radio" 
-              className="h-8 w-8" 
-            />
-            <span className="font-bold text-white sm:inline-block">Web3Radio</span>
-          </Link>
-          
-          {/* Desktop Navigation */}
-          <NavigationMenu className="hidden md:flex">
-            <NavigationMenuList className="gap-1">
-              <NavigationMenuItem>
-                <Link to="/">
-                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1")}>
-                    <Home className="h-4 w-4" />
-                    <span>Home</span>
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link to="/news">
-                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1")}>
-                    <Newspaper className="h-4 w-4" />
-                    <span>News</span>
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link to="/events">
-                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1")}>
-                    <Calendar className="h-4 w-4" />
-                    <span>Events</span>
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link to="/stations">
-                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1")}>
-                    <Radio className="h-4 w-4" />
-                    <span>Radio Stations</span>
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link to="/17an-onchain">
-                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "group flex gap-1")}>
-                    <Shield className="h-4 w-4" />
-                    <span>17an Onchain</span>
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
-        </div>
+  const navLinks = [
+    { to: '/', label: 'Home', icon: Home },
+    { to: '/news', label: 'News', icon: Newspaper },
+    { to: '/events', label: 'Events', icon: Calendar },
+    { to: '/stations', label: 'Radio Stations', icon: Radio },
+    { to: '/17an-onchain', label: '17an Onchain', icon: Shield },
+  ];
 
-        {/* Broadcaster Button - Desktop */}
-        <Button 
-          variant="outline" 
-          className="hidden md:flex gap-1 bg-gradient-to-r from-purple-600 to-blue-500 border-none text-white hover:from-purple-700 hover:to-blue-600"
-        >
-          <Mic className="h-4 w-4" />
-          <span>Become a Broadcaster</span>
-        </Button>
+  const isActive = (path: string) => location.pathname === path;
+
+  return (
+    <header
+      className={cn(
+        "w-full border-b border-border/50 transition-all duration-300",
+        scrolled
+          ? "glass shadow-apple py-2"
+          : "bg-background py-4"
+      )}
+    >
+      <div className="container mx-auto px-4 flex items-center justify-between">
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-3 group">
+          <img
+            src="/web3radio-logo.png"
+            alt="Web3Radio"
+            className="w-10 h-10 rounded-xl shadow-apple transition-all duration-300 group-hover:scale-105 group-hover:shadow-apple-md"
+          />
+          <span className="font-semibold text-lg text-foreground hidden sm:block">
+            Web3Radio
+          </span>
+        </Link>
+
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-1">
+          {navLinks.map((link) => (
+            <Link key={link.to} to={link.to}>
+              <button
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200",
+                  isActive(link.to)
+                    ? "bg-black/5 dark:bg-white/10 text-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5"
+                )}
+              >
+                <link.icon className="h-4 w-4" />
+                <span>{link.label}</span>
+              </button>
+            </Link>
+          ))}
+        </nav>
+
+        {/* Login Button - Desktop */}
+        <Link to="/dashboard" className="hidden md:block">
+          <Button
+            className="btn-apple-primary flex items-center gap-2"
+          >
+            <LogIn className="h-4 w-4" />
+            <span>Login</span>
+          </Button>
+        </Link>
 
         {/* Mobile Menu Toggle */}
         <button
-          className="flex md:hidden items-center justify-center rounded-md p-2 text-white"
+          className="flex md:hidden items-center justify-center w-10 h-10 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
           onClick={toggleMobileMenu}
         >
-          {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          {mobileMenuOpen ? (
+            <X className="h-5 w-5 text-foreground" />
+          ) : (
+            <Menu className="h-5 w-5 text-foreground" />
+          )}
         </button>
       </div>
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <div className="md:hidden px-4 pb-3 pt-2 bg-gray-900 border-b border-[#444]">
-          <nav className="flex flex-col space-y-3">
-            <Link 
-              to="/" 
-              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <Home className="h-4 w-4" />
-              <span>Home</span>
-            </Link>
-            <Link 
-              to="/news" 
-              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <Newspaper className="h-4 w-4" />
-              <span>News</span>
-            </Link>
-            <Link 
-              to="/events" 
-              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <Calendar className="h-4 w-4" />
-              <span>Events</span>
-            </Link>
-            <Link 
-              to="/stations" 
-              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <Radio className="h-4 w-4" />
-              <span>Radio Stations</span>
-            </Link>
-            <Link 
-              to="/17an-onchain" 
-              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-white hover:bg-gray-800"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <Shield className="h-4 w-4" />
-              <span>17an Onchain</span>
-            </Link>
-            <div className="pt-2 border-t border-gray-800">
-              <Button 
-                variant="outline" 
-                className="w-full flex gap-1 justify-center bg-gradient-to-r from-purple-600 to-blue-500 border-none text-white hover:from-purple-700 hover:to-blue-600"
+        <div className="md:hidden absolute top-full left-0 right-0 glass border-t border-border/50">
+          <nav className="container mx-auto py-4 px-4 flex flex-col gap-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={cn(
+                  "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200",
+                  isActive(link.to)
+                    ? "bg-black/5 dark:bg-white/10 text-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5"
+                )}
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <Mic className="h-4 w-4" />
-                <span>Become a Broadcaster</span>
+                <link.icon className="h-4 w-4" />
+                <span>{link.label}</span>
+              </Link>
+            ))}
+            <div className="divider-apple my-2" />
+            <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+              <Button className="w-full btn-apple-primary justify-center">
+                <LogIn className="h-4 w-4 mr-2" />
+                <span>Login</span>
               </Button>
-            </div>
+            </Link>
           </nav>
         </div>
       )}

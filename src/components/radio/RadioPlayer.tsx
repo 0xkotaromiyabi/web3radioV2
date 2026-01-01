@@ -3,12 +3,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import WalletConnection from '../wallet/WalletConnection';
 import RadioControls from './RadioControls';
 import StationSelector from './StationSelector';
-
 import EventsTicker from './EventsTicker';
 import CryptoPriceTicker from './CryptoPriceTicker';
 import AudioVisualizer from './AudioVisualizer';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useToast } from '@/components/ui/use-toast';
+import { Music, Radio } from 'lucide-react';
 
 interface Song {
   title: string;
@@ -39,7 +39,7 @@ const RadioPlayer = () => {
   const isMobile = useIsMobile();
   const { toast } = useToast();
 
-  const stations = {
+  const stations: Record<string, string> = {
     web3: 'https://web3radio.cloud/stream',
     Venus: 'https://stream.zeno.fm/3wiuocujuobtv',
     iradio: 'https://n04.radiojar.com/4ywdgup3bnzuv?1744076195=&rj-tok=AAABlhMxTIcARnjabAV4uyOIpA&rj-ttl=5',
@@ -48,14 +48,23 @@ const RadioPlayer = () => {
     longplayer: 'http://icecast.spc.org:8000/longplayer'
   };
 
+  const stationNames: Record<string, string> = {
+    web3: 'Web3 Radio',
+    Venus: 'Venus FM',
+    iradio: 'i-Radio',
+    female: 'Female Radio',
+    delta: 'Delta FM',
+    longplayer: 'Longplayer'
+  };
+
   const addToPlaylist = (station: string, song: Song) => {
     if (!song.title || !song.artist) return;
-    
+
     const existingSongs = playlist[station] || [];
     const isDuplicate = existingSongs.some(
       existing => existing.title === song.title && existing.artist === song.artist
     );
-    
+
     if (!isDuplicate) {
       setPlaylist(prev => ({
         ...prev,
@@ -66,13 +75,13 @@ const RadioPlayer = () => {
 
   const fetchOnlineRadioBoxInfo = async (station: string) => {
     setIsLoadingSong(true);
-    
+
     try {
       if (!['female', 'delta', 'iradio', 'longplayer'].includes(station)) {
         setDefaultSongInfo(station);
         return;
       }
-      
+
       mockOnlineRadioBoxResponse(station);
     } catch (error) {
       console.error('Error fetching song info:', error);
@@ -82,73 +91,46 @@ const RadioPlayer = () => {
 
   const mockOnlineRadioBoxResponse = (station: string) => {
     setTimeout(() => {
-      let songInfo;
-      
-      const femaleSongs = [
-        { title: 'Beautiful Life', artist: 'Dipha Barus feat. Afgan', album: 'Female Radio Top Hits' },
-        { title: 'Love Story', artist: 'Taylor Swift', album: 'Fearless' },
-        { title: 'You Belong With Me', artist: 'Taylor Swift', album: 'Fearless' },
-        { title: 'Wildest Dreams', artist: 'Taylor Swift', album: '1989' },
-        { title: 'Hati-Hati di Jalan', artist: 'Tulus', album: 'Monokrom' }
-      ];
-      
-      const deltaSongs = [
-        { title: 'Kau Yang Sempurna', artist: 'Rizky Febian', album: 'Delta FM Showcase' },
-        { title: 'Tak Pernah Padam', artist: 'Afgan', album: 'Delta Top 40' },
-        { title: 'Waktuku Hampa', artist: 'Ari Lasso', album: 'Best of Delta' },
-        { title: 'Separuh Nafas', artist: 'Dewa 19', album: 'Bintang Lima' },
-        { title: 'Bintang di Surga', artist: 'Peterpan', album: 'Bintang di Surga' }
-      ];
-      
-      const iRadioSongs = [
-        { title: 'Pergilah Kasih', artist: 'Chrisye', album: 'i-Radio Indonesian Hits' },
-        { title: 'Harusnya Aku', artist: 'Armada', album: 'Top 40 Indonesia' },
-        { title: 'Adu Rayu', artist: 'Yovie Tulus Glenn', album: 'Indonesian Collaboration' },
-        { title: 'Anganku Anganmu', artist: 'Raisa & Isyana', album: 'Duet Hits' },
-        { title: 'Sebatas Mimpi', artist: 'Nano', album: 'i-Radio Playlist' }
-      ];
+      const songs: Record<string, Song[]> = {
+        female: [
+          { title: 'Beautiful Life', artist: 'Dipha Barus feat. Afgan', album: 'Female Radio Top Hits' },
+          { title: 'Love Story', artist: 'Taylor Swift', album: 'Fearless' },
+          { title: 'Wildest Dreams', artist: 'Taylor Swift', album: '1989' },
+        ],
+        delta: [
+          { title: 'Kau Yang Sempurna', artist: 'Rizky Febian', album: 'Delta FM Showcase' },
+          { title: 'Tak Pernah Padam', artist: 'Afgan', album: 'Delta Top 40' },
+        ],
+        iradio: [
+          { title: 'Pergilah Kasih', artist: 'Chrisye', album: 'i-Radio Indonesian Hits' },
+          { title: 'Harusnya Aku', artist: 'Armada', album: 'Top 40 Indonesia' },
+        ],
+        longplayer: [
+          { title: 'Millennium Composition', artist: 'Jem Finer', album: 'Longplayer' },
+          { title: 'Tibetan Singing Bowls', artist: 'Various Artists', album: 'Longplayer Session' },
+        ],
+      };
 
-      const longplayerSongs = [
-        { title: 'Millennium Composition', artist: 'Jem Finer', album: 'Longplayer' },
-        { title: 'Tibetan Singing Bowls', artist: 'Various Artists', album: 'Longplayer Session' },
-        { title: 'Eternal Fragment', artist: 'Longplayer Project', album: 'Continuous Play' },
-        { title: 'Thousand Year Echo', artist: 'Jem Finer', album: 'Trinity Buoy Wharf' },
-        { title: 'Infinite Loop', artist: 'Longplayer Collective', album: 'Ambient Millennium' }
-      ];
-      
-      if (station === 'female') {
-        songInfo = femaleSongs[Math.floor(Math.random() * femaleSongs.length)];
-      } else if (station === 'delta') {
-        songInfo = deltaSongs[Math.floor(Math.random() * deltaSongs.length)];
-      } else if (station === 'iradio') {
-        songInfo = iRadioSongs[Math.floor(Math.random() * iRadioSongs.length)];
-      } else if (station === 'longplayer') {
-        songInfo = longplayerSongs[Math.floor(Math.random() * longplayerSongs.length)];
+      const stationSongs = songs[station];
+      if (stationSongs) {
+        const songInfo = stationSongs[Math.floor(Math.random() * stationSongs.length)];
+        setCurrentSong(songInfo);
+        addToPlaylist(station, songInfo);
+        setLastUpdated(new Date().toLocaleTimeString());
       } else {
         setDefaultSongInfo(station);
-        return;
       }
-      
-      setCurrentSong(songInfo);
-      addToPlaylist(station, songInfo);
-      setLastUpdated(new Date().toLocaleTimeString());
       setIsLoadingSong(false);
-      
-      console.log(`Updated song info for ${station}:`, songInfo);
     }, 1000);
   };
 
   const setDefaultSongInfo = (station: string) => {
     const stationInfo = {
       title: 'Live Broadcast',
-      artist: station === 'web3' ? 'Web3 Radio' :
-              station === 'Venus' ? 'Venus FM' :
-              station === 'iradio' ? 'i-Radio' :
-              station === 'female' ? 'Female Radio' :
-              station === 'longplayer' ? 'Longplayer' : 'Delta FM',
+      artist: stationNames[station] || station,
       album: 'Live Stream'
     };
-    
+
     setCurrentSong(stationInfo);
     setLastUpdated(new Date().toLocaleTimeString());
     setIsLoadingSong(false);
@@ -166,14 +148,13 @@ const RadioPlayer = () => {
 
   useEffect(() => {
     if (!isPlaying) return;
-    
+
     if (!['female', 'delta', 'iradio', 'longplayer'].includes(currentStation)) return;
-    
+
     const refreshInterval = setInterval(() => {
-      console.log(`Auto-refreshing song info for ${currentStation}`);
       fetchOnlineRadioBoxInfo(currentStation);
     }, 30000);
-    
+
     return () => clearInterval(refreshInterval);
   }, [isPlaying, currentStation]);
 
@@ -181,11 +162,11 @@ const RadioPlayer = () => {
     const audio = new Audio(stations[currentStation]);
     audioRef.current = audio;
     audio.volume = volume / 100;
-    
+
     audio.addEventListener('play', () => {
       fetchOnlineRadioBoxInfo(currentStation);
     });
-    
+
     return () => {
       audio.pause();
       audio.src = '';
@@ -198,21 +179,6 @@ const RadioPlayer = () => {
     }
   }, [volume]);
 
-  const refreshSongInfo = () => {
-    toast({
-      title: "Refreshing song info",
-      description: `Updating current song information for ${
-        currentStation === 'web3' ? 'Web3 Radio' :
-        currentStation === 'Venus' ? 'Venus FM' :
-        currentStation === 'iradio' ? 'i-Radio' :
-        currentStation === 'female' ? 'Female Radio' :
-        currentStation === 'longplayer' ? 'Longplayer' : 'Delta FM'
-      }`,
-      duration: 1500,
-    });
-    fetchOnlineRadioBoxInfo(currentStation);
-  };
-
   const togglePlay = () => {
     if (audioRef.current) {
       if (isPlaying) {
@@ -223,21 +189,15 @@ const RadioPlayer = () => {
           .then(() => {
             fetchOnlineRadioBoxInfo(currentStation);
             toast({
-              title: "Radio playing",
-              description: `Now playing ${
-                currentStation === 'web3' ? 'Web3 Radio' :
-                currentStation === 'Venus' ? 'Venus FM' :
-                currentStation === 'iradio' ? 'i-Radio' :
-                currentStation === 'female' ? 'Female Radio' :
-                currentStation === 'longplayer' ? 'Longplayer' : 'Delta FM'
-              }`,
+              title: "Now Playing",
+              description: stationNames[currentStation],
             });
           })
           .catch((error) => {
             console.error("Error playing audio:", error);
             toast({
               title: "Playback error",
-              description: "There was an error playing this station. Please try again.",
+              description: "There was an error playing this station.",
               variant: "destructive"
             });
           });
@@ -247,45 +207,77 @@ const RadioPlayer = () => {
   };
 
   return (
-    <>
-      <StationSelector 
+    <div className="space-y-6">
+      {/* Station Selector */}
+      <StationSelector
         currentStation={currentStation}
         onStationChange={changeStation}
       />
-      
+
+      {/* Events Ticker */}
       <EventsTicker isMobile={isMobile} />
 
-      <div className="bg-[#232323] rounded-lg shadow-xl border border-[#444] select-none max-w-full overflow-hidden">
-        <div className="bg-gradient-to-r from-[#1a1a1a] to-[#333] p-2 sm:p-3 flex justify-between items-center">
-          <div className="text-[#00ff00] text-xs sm:text-sm font-bold truncate">
-            {currentStation === 'web3' ? 'Web3 Radio' : 
-             currentStation === 'Venus' ? 'Venus FM' : 
-             currentStation === 'iradio' ? 'i-Radio' : 
-             currentStation === 'female' ? 'Female Radio' :
-             currentStation === 'longplayer' ? 'Longplayer' : 'Delta FM'}
+      {/* Main Player Card - Frosted Glass Style */}
+      <div className="rounded-3xl overflow-hidden backdrop-blur-xl bg-white/70 border border-white/50 shadow-[0_12px_48px_rgba(0,0,0,0.15),0_4px_12px_rgba(0,0,0,0.1)]">
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-gray-200/30 flex items-center justify-between bg-white/40">
+          <div className="flex items-center gap-3">
+            <img
+              src="/web3radio-logo.png"
+              alt="Web3Radio"
+              className="w-10 h-10 rounded-xl"
+            />
+            <div>
+              <h2 className="font-semibold text-gray-900">{stationNames[currentStation]}</h2>
+              <p className="text-sm text-gray-500">
+                {isPlaying ? 'Playing' : 'Paused'}
+              </p>
+            </div>
           </div>
-          <div className="flex gap-1 sm:gap-2">
-            <button className="text-gray-400 hover:text-white text-xs">_</button>
-            <button className="text-gray-400 hover:text-white text-xs">□</button>
-            <button className="text-gray-400 hover:text-white text-xs">×</button>
+          {/* Window Controls - Apple Style */}
+          <div className="flex gap-2">
+            <div className="w-3 h-3 rounded-full bg-red-400 hover:bg-red-500 transition-colors cursor-pointer" />
+            <div className="w-3 h-3 rounded-full bg-yellow-400 hover:bg-yellow-500 transition-colors cursor-pointer" />
+            <div className="w-3 h-3 rounded-full bg-green-400 hover:bg-green-500 transition-colors cursor-pointer" />
           </div>
         </div>
 
-        <div className="bg-[#000] p-2 sm:p-3 md:p-4 space-y-2">
+        {/* Visualizer & Ticker */}
+        <div className="p-6 space-y-4 bg-white/30">
           <CryptoPriceTicker isMobile={isMobile} />
           <AudioVisualizer />
+
+          {/* Now Playing Info */}
+          {currentSong && (
+            <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/50 shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center flex-shrink-0">
+                <Music className="w-6 h-6 text-blue-500" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-medium text-gray-900 truncate">{currentSong.title}</h3>
+                <p className="text-sm text-gray-500 truncate">{currentSong.artist}</p>
+                <p className="text-xs text-gray-400 truncate">{currentSong.album}</p>
+              </div>
+            </div>
+          )}
         </div>
 
-        <RadioControls 
-          isPlaying={isPlaying}
-          volume={volume}
-          togglePlay={togglePlay}
-          setVolume={setVolume}
-        />
+        {/* Controls */}
+        <div className="border-t border-gray-200/30 bg-white/40">
+          <RadioControls
+            isPlaying={isPlaying}
+            volume={volume}
+            togglePlay={togglePlay}
+            setVolume={setVolume}
+          />
+        </div>
 
-        <WalletConnection isPlaying={isPlaying} />
+        {/* Wallet Connection */}
+        <div className="border-t border-gray-200/30 bg-white/40">
+          <WalletConnection isPlaying={isPlaying} />
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 

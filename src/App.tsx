@@ -16,17 +16,16 @@ import Marketplace from "./pages/Marketplace";
 import News from "./pages/News";
 import Events from "./pages/Events";
 import Stations from "./pages/Stations";
-import CMS from "./pages/CMS";
 import Dashboard from "./pages/Dashboard";
 import VerificationOnchain from "./pages/VerificationOnchain";
+import PremiumContent from "./pages/PremiumContent";
+import DynamicPage from "./pages/DynamicPage";
 
 import "./App.css";
 
 const queryClient = new QueryClient();
 
-const thirdwebClient = createThirdwebClient({
-  clientId: "ac0e7bf99e676e48fa3a2d9f4c33089c",
-});
+
 
 function App() {
   return (
@@ -42,10 +41,12 @@ function App() {
                   <Route path="/news" element={<News />} />
                   <Route path="/events" element={<Events />} />
                   <Route path="/stations" element={<Stations />} />
-                  <Route path="/cms" element={<CMS />} />
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/17an-onchain" element={<VerificationOnchain />} />
-                  
+                  <Route path="/premium" element={<PremiumContent />} />
+                  <Route path="/p/:slug" element={<DynamicPage />} />
+
+
                 </Routes>
                 <Toaster />
               </BrowserRouter>

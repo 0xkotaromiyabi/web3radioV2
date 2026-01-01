@@ -11,83 +11,36 @@ interface StationSelectorProps {
 const StationSelector = ({ currentStation, onStationChange }: StationSelectorProps) => {
   const isMobile = useIsMobile();
 
+  const stations = [
+    { id: 'web3', name: 'Web3 Radio', shortName: 'Web3' },
+    { id: 'Venus', name: 'Venus FM', shortName: 'Venus' },
+    { id: 'iradio', name: 'i-Radio', shortName: 'iRadio' },
+    { id: 'female', name: 'Female Radio', shortName: 'Female' },
+    { id: 'delta', name: 'Delta FM', shortName: 'Delta' },
+    { id: 'longplayer', name: 'Longplayer', shortName: 'Long' },
+  ];
+
   return (
-    <div className="mb-4 flex flex-wrap gap-2 justify-center">
-      <button
-        onClick={() => onStationChange('web3')}
-        className={`px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-full flex items-center gap-1 sm:gap-2 text-xs sm:text-sm ${
-          currentStation === 'web3'
-            ? 'bg-[#00ff00] text-black'
-            : 'bg-[#333] text-gray-300'
-        } transition-all duration-200 hover:scale-105`}
-      >
-        <RadioIcon size={14} className="sm:w-4 sm:h-4" />
-        <span className="hidden xs:inline sm:inline">Web3 Radio</span>
-        <span className="xs:hidden">Web3</span>
-      </button>
-      <button
-        onClick={() => onStationChange('Venus')}
-        className={`px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-full flex items-center gap-1 sm:gap-2 text-xs sm:text-sm ${
-          currentStation === 'Venus'
-            ? 'bg-[#00ff00] text-black'
-            : 'bg-[#333] text-gray-300'
-        } transition-all duration-200 hover:scale-105`}
-      >
-        <RadioIcon size={14} className="sm:w-4 sm:h-4" />
-        <span className="hidden xs:inline sm:inline">Venus FM</span>
-        <span className="xs:hidden">Venus</span>
-      </button>
-      <button
-        onClick={() => onStationChange('iradio')}
-        className={`px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-full flex items-center gap-1 sm:gap-2 text-xs sm:text-sm ${
-          currentStation === 'iradio'
-            ? 'bg-[#00ff00] text-black'
-            : 'bg-[#333] text-gray-300'
-        } transition-all duration-200 hover:scale-105`}
-      >
-        <RadioIcon size={14} className="sm:w-4 sm:h-4" />
-        <span className="hidden xs:inline sm:inline">i-Radio</span>
-        <span className="xs:hidden">iRadio</span>
-      </button>
-      <button
-        onClick={() => onStationChange('female')}
-        className={`px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-full flex items-center gap-1 sm:gap-2 text-xs sm:text-sm ${
-          currentStation === 'female'
-            ? 'bg-[#00ff00] text-black'
-            : 'bg-[#333] text-gray-300'
-        } transition-all duration-200 hover:scale-105`}
-      >
-        <RadioIcon size={14} className="sm:w-4 sm:h-4" />
-        <span className="hidden xs:inline sm:inline">Female Radio</span>
-        <span className="xs:hidden">Female</span>
-      </button>
-      <button
-        onClick={() => onStationChange('delta')}
-        className={`px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-full flex items-center gap-1 sm:gap-2 text-xs sm:text-sm ${
-          currentStation === 'delta'
-            ? 'bg-[#00ff00] text-black'
-            : 'bg-[#333] text-gray-300'
-        } transition-all duration-200 hover:scale-105`}
-      >
-        <RadioIcon size={14} className="sm:w-4 sm:h-4" />
-        <span className="hidden xs:inline sm:inline">Delta FM</span>
-        <span className="xs:hidden">Delta</span>
-      </button>
-      <button
-        onClick={() => onStationChange('longplayer')}
-        className={`px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-full flex items-center gap-1 sm:gap-2 text-xs sm:text-sm ${
-          currentStation === 'longplayer'
-            ? 'bg-[#00ff00] text-black'
-            : 'bg-[#333] text-gray-300'
-        } transition-all duration-200 hover:scale-105`}
-      >
-        <RadioIcon size={14} className="sm:w-4 sm:h-4" />
-        <span className="hidden xs:inline sm:inline">Longplayer</span>
-        <span className="xs:hidden">Long</span>
-      </button>
+    <div className="mb-6">
+      <div className="flex flex-wrap gap-2 justify-center">
+        {stations.map((station) => (
+          <button
+            key={station.id}
+            onClick={() => onStationChange(station.id as any)}
+            className={`px-4 py-2 rounded-full flex items-center gap-2 text-sm font-medium transition-all duration-200 
+              ${currentStation === station.id
+                ? 'bg-gradient-to-b from-blue-400 to-blue-600 text-white shadow-[0_4px_12px_rgba(59,130,246,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] transform scale-105'
+                : 'bg-white text-gray-700 shadow-[0_2px_8px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.8)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:scale-105 active:scale-95'
+              }`}
+          >
+            <RadioIcon className="w-4 h-4" />
+            <span className="hidden sm:inline">{station.name}</span>
+            <span className="sm:hidden">{station.shortName}</span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 };
 
 export default StationSelector;
-

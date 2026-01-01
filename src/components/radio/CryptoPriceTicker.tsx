@@ -1,12 +1,19 @@
 
 import React, { useState, useEffect } from 'react';
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 interface CryptoPriceTickerProps {
   isMobile: boolean;
 }
 
+interface CryptoPrice {
+  symbol: string;
+  price: number;
+  change?: number;
+}
+
 const CryptoPriceTicker = ({ isMobile }: CryptoPriceTickerProps) => {
-  const [cryptoPrices, setCryptoPrices] = useState<string[]>([]);
+  const [cryptoPrices, setCryptoPrices] = useState<CryptoPrice[]>([]);
 
   useEffect(() => {
     const fetchPrices = async () => {
@@ -15,31 +22,13 @@ const CryptoPriceTicker = ({ isMobile }: CryptoPriceTickerProps) => {
           "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,binancecoin,cardano,polkadot&vs_currencies=usd"
         );
         const data = await response.json();
-        const prices = [
-          `BTC $${data.bitcoin.usd.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`,
-          `ETH $${data.ethereum.usd.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`,
-          `SOL $${data.solana.usd.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`,  
-          `BNB $${data.binancecoin.usd.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`,
-          `ADA $${data.cardano.usd.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`,
-          `DOT $${data.polkadot.usd.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`,
+        const prices: CryptoPrice[] = [
+          { symbol: 'BTC', price: data.bitcoin.usd },
+          { symbol: 'ETH', price: data.ethereum.usd },
+          { symbol: 'SOL', price: data.solana.usd },
+          { symbol: 'BNB', price: data.binancecoin.usd },
+          { symbol: 'ADA', price: data.cardano.usd },
+          { symbol: 'DOT', price: data.polkadot.usd },
         ];
         setCryptoPrices(prices);
       } catch (error) {
@@ -48,20 +37,44 @@ const CryptoPriceTicker = ({ isMobile }: CryptoPriceTickerProps) => {
     };
 
     fetchPrices();
-    const interval = setInterval(fetchPrices, 10000);
+    const interval = setInterval(fetchPrices, 30000);
 
     return () => clearInterval(interval);
   }, []);
 
-  return (
-    <div className="h-6 sm:h-8 md:h-10 bg-[#0a0a0a] border border-[#333] mb-2 overflow-hidden rounded">
-      <div className="animate-marquee whitespace-nowrap h-full flex items-center">
-        {cryptoPrices.map((price, index) => (
-          <span key={index} className="text-[#00ff00] font-mono text-xs sm:text-sm mx-2 sm:mx-4">
-            {price}
-          </span>
+  const formatPrice = (price: number) => {
+    if (price >= 1000) {
+      return price.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    } else if (price >= 1) {
+      return price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    } else {
+      return price.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+    }
+  };
+
+  if (cryptoPrices.length === 0) {
+    return (
+      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="flex-shrink-0 px-4 py-2 rounded-xl bg-gray-100 animate-pulse w-24 h-10" />
         ))}
       </div>
+    );
+  }
+
+  return (
+    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+      {cryptoPrices.map((crypto) => (
+        <div
+          key={crypto.symbol}
+          className="flex-shrink-0 px-4 py-2 rounded-xl bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.5)] border border-gray-100 flex items-center gap-2"
+        >
+          <span className="text-sm font-medium text-foreground">{crypto.symbol}</span>
+          <span className="text-sm text-muted-foreground tabular-nums">
+            ${formatPrice(crypto.price)}
+          </span>
+        </div>
+      ))}
     </div>
   );
 };

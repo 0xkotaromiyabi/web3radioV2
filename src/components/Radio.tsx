@@ -2,20 +2,25 @@
 import React from 'react';
 import RadioPlayer from './radio/RadioPlayer';
 
-const Radio = () => {
+const RadioComponent = () => {
   return (
-    <div className="max-w-6xl mx-auto p-2 sm:p-4 md:p-6">
-      <div className="mb-4 sm:mb-6 md:mb-8 flex justify-center">
-        <img 
-          src="/web3radio-logo.png" 
-          alt="Web3 Radio" 
-          className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full shadow-lg"
-        />
+    <div className="min-h-screen bg-white">
+      <div className="max-w-4xl mx-auto p-4 sm:p-6 md:p-8">
+        {/* Logo Header */}
+        <div className="mb-8 flex flex-col items-center">
+          <img
+            src="/web3radio-logo.png"
+            alt="Web3Radio"
+            className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl shadow-apple-lg mb-4"
+          />
+          <h1 className="text-2xl font-semibold text-gray-900">Web3Radio</h1>
+          <p className="text-gray-500 text-sm">Listen to your favorite stations</p>
+        </div>
+
+        <RadioPlayer />
       </div>
-      
-      <RadioPlayer />
     </div>
   );
 };
 
-export default Radio;
+export default RadioComponent;
