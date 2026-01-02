@@ -1,14 +1,31 @@
 {
   "frame": {
+    "name": "web3radi v2",
     "version": "1",
-    "name": "Web3Radio",
+    "iconUrl": "https://web3radio-v2-3u0rldsdo-wahyudieko87s-projects.vercel.app/assets/web3radio-logo-QlWPnHjq.png",
+    "homeUrl": "https://web3radio-v2.vercel.app/",
+    "imageUrl": "https://i.imgur.com/emXbMkd.png",
+    "splashImageUrl": "https://i.imgur.com/emXbMkd.png",
+    "splashBackgroundColor": "#ADEBB3",
     "subtitle": "Decentralized Radio Station",
-    "description": "Listen to your favorite web3 radio stations",
-    "iconUrl": "https://web3radio-v2.vercel.app/assets/web3radio-logo.png",
-    "splashImageUrl": "https://web3radio-v2.vercel.app/assets/web3radio-logo.png",
-    "splashBackgroundColor": "#000000",
-    "homeUrl": "https://web3radio-v2.vercel.app",
-    "webhookUrl": "https://web3radio-v2.vercel.app/api/webhook"
+    "description": "Decentralized Radio Station",
+    "screenshotUrls": [
+      "https://imgur.com/a/995blzL.png"
+    ],
+    "primaryCategory": "music",
+    "ogImageUrl": "https://i.imgur.com/emXbMkd.png",
+    "tags": [
+      "music",
+      "radio",
+      "broadcast",
+      "audio",
+      "nft"
+    ],
+    "tagline": "Decentralized Radio Station",
+    "buttonTitle": "Play",
+    "ogTitle": "web3radio - ",
+    "ogDescription": "Decentralized Radio Station",
+    "castShareUrl": "https://imgur.com/a/995blzL.png"
   },
   "accountAssociation": {
     "header": "eyJmaWQiOi0xLCJ0eXBlIjoiYXV0aCIsImtleSI6IjB4Qzc4NTFhRUEwNjYyRjJGY2NFMzhiOTBGOUEzNTI2NGI1RDZmNDI1OSJ9",
