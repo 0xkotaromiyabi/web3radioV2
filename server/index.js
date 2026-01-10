@@ -8,6 +8,7 @@ const newsRoutes = require('./routes/news');
 const eventsRoutes = require('./routes/events');
 const stationsRoutes = require('./routes/stations');
 const uploadRoutes = require('./routes/upload');
+const streamMetadataRoutes = require('./routes/stream-metadata');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -33,6 +34,7 @@ app.use('/api/news', newsRoutes);
 app.use('/api/events', eventsRoutes);
 app.use('/api/stations', stationsRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/stream-metadata', streamMetadataRoutes);
 
 // Error handler
 app.use((err, req, res, next) => {

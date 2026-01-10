@@ -15,6 +15,7 @@ interface Song {
   title: string;
   artist: string;
   album: string;
+  artwork?: string;
 }
 
 interface Playlist {
@@ -34,7 +35,7 @@ const RadioPlayer = () => {
     iradio: [],
     web3: [],
     Venus: [],
-    longplayer: []
+    prambors: []
   });
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const isMobile = useIsMobile();
@@ -46,7 +47,7 @@ const RadioPlayer = () => {
     iradio: 'https://n04.radiojar.com/4ywdgup3bnzuv?1744076195=&rj-tok=AAABlhMxTIcARnjabAV4uyOIpA&rj-ttl=5',
     female: 'https://s1.cloudmu.id/listen/female_radio/radio.mp3',
     delta: 'https://s1.cloudmu.id/listen/delta_fm/radio.mp3',
-    longplayer: 'http://icecast.spc.org:8000/longplayer'
+    prambors: 'https://s2.cloudmu.id/listen/prambors/stream'
   };
 
   const stationNames: Record<string, string> = {
@@ -55,7 +56,7 @@ const RadioPlayer = () => {
     iradio: 'i-Radio',
     female: 'Female Radio',
     delta: 'Delta FM',
-    longplayer: 'Longplayer'
+    prambors: 'Prambors FM'
   };
 
   const addToPlaylist = (station: string, song: Song) => {
@@ -74,19 +75,38 @@ const RadioPlayer = () => {
     }
   };
 
-  const fetchOnlineRadioBoxInfo = async (station: string) => {
+  const fetchStreamMetadata = async (station: string) => {
     setIsLoadingSong(true);
 
     try {
-      if (!['female', 'delta', 'iradio', 'longplayer'].includes(station)) {
+      const response = await fetch(`/api/stream-metadata/${station}`);
+
+      if (!response.ok) {
+        console.error('Failed to fetch stream metadata');
         setDefaultSongInfo(station);
         return;
       }
 
-      mockOnlineRadioBoxResponse(station);
+      const data = await response.json();
+
+      if (data.nowPlaying) {
+        const songInfo: Song = {
+          title: data.nowPlaying.title || 'Unknown Title',
+          artist: data.nowPlaying.artist || 'Unknown Artist',
+          album: data.nowPlaying.album || 'Live Stream',
+          artwork: data.nowPlaying.artwork
+        };
+        setCurrentSong(songInfo);
+        addToPlaylist(station, songInfo);
+        setLastUpdated(new Date().toLocaleTimeString());
+      } else {
+        setDefaultSongInfo(station);
+      }
     } catch (error) {
-      console.error('Error fetching song info:', error);
+      console.error('Error fetching stream metadata:', error);
       setDefaultSongInfo(station);
+    } finally {
+      setIsLoadingSong(false);
     }
   };
 
@@ -106,7 +126,7 @@ const RadioPlayer = () => {
           { title: 'Pergilah Kasih', artist: 'Chrisye', album: 'i-Radio Indonesian Hits' },
           { title: 'Harusnya Aku', artist: 'Armada', album: 'Top 40 Indonesia' },
         ],
-        longplayer: [
+        prambors: [
           { title: 'Millennium Composition', artist: 'Jem Finer', album: 'Longplayer' },
           { title: 'Tibetan Singing Bowls', artist: 'Various Artists', album: 'Longplayer Session' },
         ],
@@ -137,7 +157,7 @@ const RadioPlayer = () => {
     setIsLoadingSong(false);
   };
 
-  const changeStation = (station: 'web3' | 'Venus' | 'iradio' | 'female' | 'delta' | 'longplayer') => {
+  const changeStation = (station: 'web3' | 'Venus' | 'iradio' | 'female' | 'delta' | 'prambors') => {
     if (audioRef.current) {
       audioRef.current.pause();
     }
@@ -150,10 +170,10 @@ const RadioPlayer = () => {
   useEffect(() => {
     if (!isPlaying) return;
 
-    if (!['female', 'delta', 'iradio', 'longplayer'].includes(currentStation)) return;
+    if (!['female', 'delta', 'iradio', 'prambors'].includes(currentStation)) return;
 
     const refreshInterval = setInterval(() => {
-      fetchOnlineRadioBoxInfo(currentStation);
+      fetchStreamMetadata(currentStation);
     }, 30000);
 
     return () => clearInterval(refreshInterval);
@@ -165,7 +185,7 @@ const RadioPlayer = () => {
     audio.volume = volume / 100;
 
     audio.addEventListener('play', () => {
-      fetchOnlineRadioBoxInfo(currentStation);
+      fetchStreamMetadata(currentStation);
     });
 
     return () => {
@@ -188,7 +208,7 @@ const RadioPlayer = () => {
       } else {
         audioRef.current.play()
           .then(() => {
-            fetchOnlineRadioBoxInfo(currentStation);
+            fetchStreamMetadata(currentStation);
             toast({
               title: "Now Playing",
               description: stationNames[currentStation],
@@ -251,9 +271,17 @@ const RadioPlayer = () => {
           {/* Now Playing Info */}
           {currentSong && (
             <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/50 shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
-              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center flex-shrink-0">
-                <Music className="w-6 h-6 text-blue-500" />
-              </div>
+              {currentSong.artwork ? (
+                <img
+                  src={currentSong.artwork}
+                  alt={currentSong.album}
+                  className="w-16 h-16 rounded-xl object-cover flex-shrink-0 shadow-lg"
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center flex-shrink-0">
+                  <Music className="w-6 h-6 text-blue-500" />
+                </div>
+              )}
               <div className="flex-1 min-w-0">
                 <h3 className="font-medium text-gray-900 truncate">{currentSong.title}</h3>
                 <p className="text-sm text-gray-500 truncate">{currentSong.artist}</p>

@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { useActiveAccount } from "thirdweb/react";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Zap } from 'lucide-react';
@@ -13,70 +12,81 @@ const EnhancedListeningTimeTracker: React.FC<EnhancedListeningTimeTrackerProps> 
   const account = useActiveAccount();
   const address = account?.address;
   const { listeningTime, updateListeningTime, rewardEligible, submitListeningSession } = useW3RToken();
-  const [localListeningTime, setLocalListeningTime] = React.useState<number>(0);
-  const [timer, setTimer] = React.useState<NodeJS.Timeout | null>(null);
-  const [lastSubmission, setLastSubmission] = React.useState<number>(0);
 
-  // Initialize local listening time from context
-  React.useEffect(() => {
+  const [localListeningTime, setLocalListeningTime] = useState<number>(0);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastSubmissionRef = useRef<number>(0);
+  const localTimeRef = useRef<number>(0);
+
+  // Submission interval: 5 minutes
+  const SUBMISSION_INTERVAL = 300;
+
+  // Sync local listening time with context on mount
+  useEffect(() => {
     setLocalListeningTime(listeningTime);
+    localTimeRef.current = listeningTime;
   }, [listeningTime]);
 
-  // Submit session every 5 minutes of continuous listening
-  const SUBMISSION_INTERVAL = 300; // 5 minutes
+  // Stable callbacks using refs
+  const updateTimeRef = useRef(updateListeningTime);
+  const submitSessionRef = useRef(submitListeningSession);
 
-  // Start/stop timer based on isPlaying state and update W3R context
-  React.useEffect(() => {
+  useEffect(() => {
+    updateTimeRef.current = updateListeningTime;
+    submitSessionRef.current = submitListeningSession;
+  }, [updateListeningTime, submitListeningSession]);
+
+  // Start/stop timer based on isPlaying
+  useEffect(() => {
     if (!address) return;
 
     if (isPlaying) {
       // Start the timer
-      const interval = setInterval(() => {
-        setLocalListeningTime(prevTime => {
-          const newTime = prevTime + 1;
-          updateListeningTime(newTime);
+      timerRef.current = setInterval(() => {
+        localTimeRef.current += 1;
+        const newTime = localTimeRef.current;
 
-          // Submit session periodically
-          const sessionDuration = newTime - lastSubmission;
-          if (sessionDuration >= SUBMISSION_INTERVAL) {
-            console.log(`Submitting listening session: ${sessionDuration} seconds`);
-            submitListeningSession(sessionDuration);
-            setLastSubmission(newTime);
-          }
+        setLocalListeningTime(newTime);
+        updateTimeRef.current(newTime);
 
-          // Also save to localStorage for backup
-          localStorage.setItem(`w3r-listening-time-${address}`, newTime.toString());
-          return newTime;
-        });
+        // Submit session periodically
+        const sessionDuration = newTime - lastSubmissionRef.current;
+        if (sessionDuration >= SUBMISSION_INTERVAL) {
+          console.log(`Submitting listening session: ${sessionDuration} seconds`);
+          submitSessionRef.current(sessionDuration);
+          lastSubmissionRef.current = newTime;
+        }
+
+        // Save to localStorage
+        localStorage.setItem(`w3r-listening-time-${address}`, newTime.toString());
       }, 1000);
-
-      setTimer(interval);
     } else {
-      // Stop the timer and submit final session if there's accumulated time
-      if (timer) {
-        clearInterval(timer);
-        setTimer(null);
+      // Stop the timer
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
 
-        // Submit any remaining listening time when stopping
-        const sessionDuration = localListeningTime - lastSubmission;
-        if (sessionDuration >= 30) { // Minimum 30 seconds
+        // Submit remaining time when stopping (minimum 30 seconds)
+        const sessionDuration = localTimeRef.current - lastSubmissionRef.current;
+        if (sessionDuration >= 30) {
           console.log(`Submitting final listening session: ${sessionDuration} seconds`);
-          submitListeningSession(sessionDuration);
-          setLastSubmission(localListeningTime);
+          submitSessionRef.current(sessionDuration);
+          lastSubmissionRef.current = localTimeRef.current;
         }
       }
     }
 
-    // Cleanup
+    // Cleanup on unmount
     return () => {
-      if (timer) {
-        clearInterval(timer);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
       }
     };
-  }, [isPlaying, address, localListeningTime, lastSubmission, updateListeningTime, submitListeningSession, timer]);
+  }, [isPlaying, address]);
 
   // Format time as HH:MM:SS
-  const formatTime = (seconds: number): string => {
+  const formatTime = useCallback((seconds: number): string => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
@@ -86,7 +96,7 @@ const EnhancedListeningTimeTracker: React.FC<EnhancedListeningTimeTrackerProps> 
       minutes.toString().padStart(2, '0'),
       secs.toString().padStart(2, '0')
     ].join(':');
-  };
+  }, []);
 
   if (!address) return null;
 

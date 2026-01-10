@@ -5,7 +5,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 interface StationSelectorProps {
   currentStation: string;
-  onStationChange: (station: 'web3' | 'Venus' | 'iradio' | 'female' | 'delta' | 'longplayer') => void;
+  onStationChange: (station: 'web3' | 'Venus' | 'iradio' | 'female' | 'delta' | 'prambors') => void;
 }
 
 const StationSelector = ({ currentStation, onStationChange }: StationSelectorProps) => {
@@ -17,7 +17,7 @@ const StationSelector = ({ currentStation, onStationChange }: StationSelectorPro
     { id: 'iradio', name: 'i-Radio', shortName: 'iRadio' },
     { id: 'female', name: 'Female Radio', shortName: 'Female' },
     { id: 'delta', name: 'Delta FM', shortName: 'Delta' },
-    { id: 'longplayer', name: 'Longplayer', shortName: 'Long' },
+    { id: 'prambors', name: 'Prambors FM', shortName: 'Prambors' },
   ];
 
   return (
