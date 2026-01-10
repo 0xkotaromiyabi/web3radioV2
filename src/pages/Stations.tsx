@@ -23,7 +23,7 @@ const stationUrls: { [key: string]: string } = {
   'i-Radio': 'https://n04.radiojar.com/4ywdgup3bnzuv?1744076195=&rj-tok=AAABlhMxTIcARnjabAV4uyOIpA&rj-ttl=5',
   'Female Radio': 'https://s1.cloudmu.id/listen/female_radio/radio.mp3',
   'Delta FM': 'https://s1.cloudmu.id/listen/delta_fm/radio.mp3',
-  'Longplayer': 'http://icecast.spc.org:8000/longplayer'
+  'Prambors FM': 'https://s2.cloudmu.id/listen/prambors/stream'
 };
 
 const stationWebsites: { [key: string]: string } = {
@@ -84,7 +84,7 @@ const Stations = () => {
         if (audioRef.current) {
           audioRef.current.pause();
         }
-        
+
         const streamUrl = stationUrls[station.name];
         if (!streamUrl) {
           toast({
@@ -98,7 +98,7 @@ const Stations = () => {
         const audio = new Audio(streamUrl);
         audioRef.current = audio;
         audio.volume = volume / 100;
-        
+
         await audio.play();
         setPlayingStationId(station.id);
         toast({
@@ -155,15 +155,15 @@ const Stations = () => {
             </div>
           )}
         </div>
-        
+
         {stations.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {stations.map((station) => (
               <Card key={station.id} className="bg-gray-800 border-green-500 overflow-hidden flex flex-col">
                 {station.image_url && (
                   <div className="w-full h-48 overflow-hidden">
-                    <img 
-                      src={station.image_url} 
+                    <img
+                      src={station.image_url}
                       alt={station.name}
                       className="w-full h-full object-cover"
                     />
@@ -197,9 +197,9 @@ const Stations = () => {
                   <div className="text-sm text-gray-300">
                     {station.streaming ? 'Live' : 'Offline'}
                   </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     className={`${station.streaming ? 'border-green-500 text-green-400 hover:bg-green-900' : 'border-gray-600 text-gray-400'}`}
                     disabled={!station.streaming}
                     onClick={() => station.streaming && togglePlay(station)}
