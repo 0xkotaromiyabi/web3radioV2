@@ -1,3 +1,9 @@
 {
+    "rewrites": [
+        {
+            "source": "/api/stream-metadata/:station",
+            "destination": "/api/stream-metadata/[station]"
+        }
+    ],
     "redirects": []
 }
