@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Mic, Play, Pause, Square, Upload, Volume2, Radio, Info } from 'lucide-react';
+import { Mic, Play, Pause, Square, Upload, Volume2, Radio, Info, Laptop } from 'lucide-react';
 import * as Slider from '@radix-ui/react-slider';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ interface BroadcastControlsProps {
 export default function BroadcastControls({ onStatusChange }: BroadcastControlsProps) {
     // --- Audio State ---
     const [isMicActive, setIsMicActive] = useState(false);
+    const [isSysAudioActive, setIsSysAudioActive] = useState(false);
     const [isPlayingFile, setIsPlayingFile] = useState(false);
     const [isBroadcasting, setIsBroadcasting] = useState(false);
     const [status, setStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
@@ -21,18 +22,26 @@ export default function BroadcastControls({ onStatusChange }: BroadcastControlsP
     // --- Volumes ---
     const [masterVolume, setMasterVolume] = useState(0.8);
     const [micVolume, setMicVolume] = useState(1.0);
+    const [sysVolume, setSysVolume] = useState(0.8);
     const [fileVolume, setFileVolume] = useState(0.7);
 
     // --- Refs for Audio Engine ---
     const audioContextRef = useRef<AudioContext | null>(null);
+
+    // Input Sources
     const micStreamRef = useRef<MediaStream | null>(null);
     const micSourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
+
+    const sysStreamRef = useRef<MediaStream | null>(null);
+    const sysSourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
+
     const fileSourceRef = useRef<AudioBufferSourceNode | null>(null);
     const fileBufferRef = useRef<AudioBuffer | null>(null);
 
     // Gain Nodes
     const masterGainRef = useRef<GainNode | null>(null);
     const micGainRef = useRef<GainNode | null>(null);
+    const sysGainRef = useRef<GainNode | null>(null);
     const fileGainRef = useRef<GainNode | null>(null);
 
     // Worklet / Processor for Streaming
@@ -42,7 +51,6 @@ export default function BroadcastControls({ onStatusChange }: BroadcastControlsP
     // --- UI State ---
     const [currentTrack, setCurrentTrack] = useState<string>('No track loaded');
     const [fileDuration, setFileDuration] = useState<number>(0);
-    const [fileProgress, setFileProgress] = useState<number>(0); // 0-100
 
     // --- Initialize Audio Context ---
     useEffect(() => {
@@ -62,6 +70,12 @@ export default function BroadcastControls({ onStatusChange }: BroadcastControlsP
             micGain.gain.value = 0; // Start muted
             micGain.connect(masterGain);
             micGainRef.current = micGain;
+
+            // System Audio Gain
+            const sysGain = ctx.createGain();
+            sysGain.gain.value = 0; // Start muted
+            sysGain.connect(masterGain);
+            sysGainRef.current = sysGain;
 
             // File Gain
             const fileGain = ctx.createGain();
@@ -96,6 +110,10 @@ export default function BroadcastControls({ onStatusChange }: BroadcastControlsP
     useEffect(() => {
         if (micGainRef.current) micGainRef.current.gain.value = isMicActive ? micVolume : 0;
     }, [micVolume, isMicActive]);
+
+    useEffect(() => {
+        if (sysGainRef.current) sysGainRef.current.gain.value = isSysAudioActive ? sysVolume : 0;
+    }, [sysVolume, isSysAudioActive]);
 
     useEffect(() => {
         if (fileGainRef.current) fileGainRef.current.gain.value = fileVolume;
@@ -192,7 +210,6 @@ export default function BroadcastControls({ onStatusChange }: BroadcastControlsP
 
         if (isMicActive) {
             setIsMicActive(false);
-            // We don't necessarily stop the stream, just mute the gain (handled in useEffect)
         } else {
             try {
                 if (!micStreamRef.current) {
@@ -206,6 +223,47 @@ export default function BroadcastControls({ onStatusChange }: BroadcastControlsP
             } catch (err) {
                 console.error("Error accessing microphone:", err);
                 alert("Could not access microphone.");
+            }
+        }
+    };
+
+    // --- System Audio Handling ---
+    const toggleSysAudio = async () => {
+        if (!audioContextRef.current || !sysGainRef.current) return;
+
+        if (isSysAudioActive) {
+            // Stop system audio
+            if (sysStreamRef.current) {
+                sysStreamRef.current.getTracks().forEach(track => track.stop());
+                sysStreamRef.current = null;
+            }
+            setIsSysAudioActive(false);
+            if (sysSourceRef.current) {
+                sysSourceRef.current.disconnect();
+                sysSourceRef.current = null;
+            }
+        } else {
+            try {
+                // @ts-ignore - getDisplayMedia exists
+                const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+
+                // We only need audio, so we can stop the video track immediately to save resources/not show preview
+                // However, some browsers might stop the audio if video is stopped too early.
+                // For now, let's keep it but just ignore it.
+
+                sysStreamRef.current = stream;
+                const source = audioContextRef.current.createMediaStreamSource(stream);
+                sysSourceRef.current = source;
+                source.connect(sysGainRef.current);
+                setIsSysAudioActive(true);
+
+                // Handle user stopping stream via browser UI
+                stream.getVideoTracks()[0].onended = () => {
+                    setIsSysAudioActive(false);
+                };
+            } catch (err) {
+                console.error("Error accessing system audio", err);
+                alert("Could not capture system audio. Make sure to share 'Tab Audio' or 'System Audio'.");
             }
         }
     };
@@ -248,7 +306,7 @@ export default function BroadcastControls({ onStatusChange }: BroadcastControlsP
 
 
     return (
-        <Card className="w-full h-full border-zinc-800 bg-black/40 backdrop-blur-xl text-white shadow-2xl">
+        <Card className="w-full h-full border-zinc-800 bg-black/40 backdrop-blur-xl text-white shadow-2xl overflow-y-auto">
             <CardHeader className="pb-2 border-b border-zinc-800/50">
                 <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
@@ -291,25 +349,29 @@ export default function BroadcastControls({ onStatusChange }: BroadcastControlsP
 
                     {/* Left Column: Mixer */}
                     <div className="space-y-6 p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-sm font-semibold text-zinc-400">MASTER OUTPUT</h3>
-                            <span className="text-xs font-mono text-cyan-400">{Math.round(masterVolume * 100)}%</span>
+
+                        {/* Master */}
+                        <div>
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-sm font-semibold text-zinc-400">MASTER OUTPUT</h3>
+                                <span className="text-xs font-mono text-cyan-400">{Math.round(masterVolume * 100)}%</span>
+                            </div>
+                            <Slider.Root
+                                className="relative flex items-center select-none touch-none w-full h-5"
+                                value={[masterVolume]}
+                                max={1}
+                                step={0.01}
+                                onValueChange={(val) => setMasterVolume(val[0])}
+                            >
+                                <Slider.Track className="bg-zinc-800 relative grow rounded-full h-[3px]">
+                                    <Slider.Range className="absolute bg-cyan-500 rounded-full h-full" />
+                                </Slider.Track>
+                                <Slider.Thumb
+                                    className="block w-5 h-5 bg-white border-2 border-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)] rounded-full hover:scale-110 focus:outline-none transition-transform"
+                                    aria-label="Master Volume"
+                                />
+                            </Slider.Root>
                         </div>
-                        <Slider.Root
-                            className="relative flex items-center select-none touch-none w-full h-5"
-                            value={[masterVolume]}
-                            max={1}
-                            step={0.01}
-                            onValueChange={(val) => setMasterVolume(val[0])}
-                        >
-                            <Slider.Track className="bg-zinc-800 relative grow rounded-full h-[3px]">
-                                <Slider.Range className="absolute bg-cyan-500 rounded-full h-full" />
-                            </Slider.Track>
-                            <Slider.Thumb
-                                className="block w-5 h-5 bg-white border-2 border-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)] rounded-full hover:scale-110 focus:outline-none transition-transform"
-                                aria-label="Master Volume"
-                            />
-                        </Slider.Root>
 
                         {/* Mic Control */}
                         <div className="space-y-2 mt-4">
@@ -338,6 +400,36 @@ export default function BroadcastControls({ onStatusChange }: BroadcastControlsP
                                     <Slider.Range className="absolute bg-green-500 rounded-full h-full" />
                                 </Slider.Track>
                                 <Slider.Thumb className="block w-4 h-4 bg-zinc-200 border border-green-500 rounded-full focus:outline-none" />
+                            </Slider.Root>
+                        </div>
+
+                        {/* System Audio Control */}
+                        <div className="space-y-2 mt-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <Laptop className={cn("w-4 h-4", isSysAudioActive ? "text-orange-400" : "text-zinc-500")} />
+                                    <span className="text-sm font-medium">AUDIO CAPTURE</span>
+                                </div>
+                                <Button
+                                    size="sm"
+                                    variant={isSysAudioActive ? "default" : "outline"}
+                                    className={cn("h-6 text-xs", isSysAudioActive && "bg-orange-600 hover:bg-orange-700")}
+                                    onClick={toggleSysAudio}
+                                >
+                                    {isSysAudioActive ? "ON" : "OFF"}
+                                </Button>
+                            </div>
+                            <Slider.Root
+                                className="relative flex items-center select-none touch-none w-full h-5"
+                                value={[sysVolume]}
+                                max={1}
+                                step={0.01}
+                                onValueChange={(val) => setSysVolume(val[0])}
+                            >
+                                <Slider.Track className="bg-zinc-800 relative grow rounded-full h-[3px]">
+                                    <Slider.Range className="absolute bg-orange-500 rounded-full h-full" />
+                                </Slider.Track>
+                                <Slider.Thumb className="block w-4 h-4 bg-zinc-200 border border-orange-500 rounded-full focus:outline-none" />
                             </Slider.Root>
                         </div>
                     </div>
