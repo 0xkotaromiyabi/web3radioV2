@@ -1,0 +1,419 @@
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { Mic, Play, Pause, Square, Upload, Volume2, Radio, Info } from 'lucide-react';
+import * as Slider from '@radix-ui/react-slider';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+
+interface BroadcastControlsProps {
+    onStatusChange?: (status: 'disconnected' | 'connecting' | 'connected') => void;
+}
+
+export default function BroadcastControls({ onStatusChange }: BroadcastControlsProps) {
+    // --- Audio State ---
+    const [isMicActive, setIsMicActive] = useState(false);
+    const [isPlayingFile, setIsPlayingFile] = useState(false);
+    const [isBroadcasting, setIsBroadcasting] = useState(false);
+    const [status, setStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
+    const [currentTime, setCurrentTime] = useState<string>('00:00:00');
+
+    // --- Volumes ---
+    const [masterVolume, setMasterVolume] = useState(0.8);
+    const [micVolume, setMicVolume] = useState(1.0);
+    const [fileVolume, setFileVolume] = useState(0.7);
+
+    // --- Refs for Audio Engine ---
+    const audioContextRef = useRef<AudioContext | null>(null);
+    const micStreamRef = useRef<MediaStream | null>(null);
+    const micSourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
+    const fileSourceRef = useRef<AudioBufferSourceNode | null>(null);
+    const fileBufferRef = useRef<AudioBuffer | null>(null);
+
+    // Gain Nodes
+    const masterGainRef = useRef<GainNode | null>(null);
+    const micGainRef = useRef<GainNode | null>(null);
+    const fileGainRef = useRef<GainNode | null>(null);
+
+    // Worklet / Processor for Streaming
+    const processorRef = useRef<ScriptProcessorNode | null>(null);
+    const wsRef = useRef<WebSocket | null>(null);
+
+    // --- UI State ---
+    const [currentTrack, setCurrentTrack] = useState<string>('No track loaded');
+    const [fileDuration, setFileDuration] = useState<number>(0);
+    const [fileProgress, setFileProgress] = useState<number>(0); // 0-100
+
+    // --- Initialize Audio Context ---
+    useEffect(() => {
+        const initAudio = () => {
+            const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+            const ctx = new AudioContextClass({ sampleRate: 44100 });
+            audioContextRef.current = ctx;
+
+            // Master Gain
+            const masterGain = ctx.createGain();
+            masterGain.gain.value = masterVolume;
+            masterGain.connect(ctx.destination); // Connect to local speakers (monitor)
+            masterGainRef.current = masterGain;
+
+            // Mic Gain
+            const micGain = ctx.createGain();
+            micGain.gain.value = 0; // Start muted
+            micGain.connect(masterGain);
+            micGainRef.current = micGain;
+
+            // File Gain
+            const fileGain = ctx.createGain();
+            fileGain.gain.value = fileVolume;
+            fileGain.connect(masterGain);
+            fileGainRef.current = fileGain;
+        };
+
+        if (!audioContextRef.current) {
+            initAudio();
+        }
+
+        return () => {
+            audioContextRef.current?.close();
+        };
+    }, []);
+
+    // --- Clock ---
+    useEffect(() => {
+        const timer = setInterval(() => {
+            const now = new Date();
+            setCurrentTime(now.toLocaleTimeString('en-GB'));
+        }, 1000);
+        return () => clearInterval(timer);
+    }, []);
+
+    // --- Volume Updates ---
+    useEffect(() => {
+        if (masterGainRef.current) masterGainRef.current.gain.value = masterVolume;
+    }, [masterVolume]);
+
+    useEffect(() => {
+        if (micGainRef.current) micGainRef.current.gain.value = isMicActive ? micVolume : 0;
+    }, [micVolume, isMicActive]);
+
+    useEffect(() => {
+        if (fileGainRef.current) fileGainRef.current.gain.value = fileVolume;
+    }, [fileVolume]);
+
+    // --- WebSocket & Streaming Logic ---
+    const startBroadcast = useCallback(() => {
+        if (!audioContextRef.current || !masterGainRef.current) return;
+
+        setStatus('connecting');
+        onStatusChange?.('connecting');
+
+        // Connect to WebSocket Server (Backend)
+        const ws = new WebSocket('ws://localhost:3001'); // Adjust port as needed
+        wsRef.current = ws;
+
+        ws.onopen = () => {
+            console.log('WS Connected');
+            ws.send(JSON.stringify({
+                type: 'connect',
+                config: {
+                    host: 'web3radio.cloud',
+                    port: 8000,
+                    password: 'passweb3radio', // In production, get field inputs
+                    mountpoint: '/stream'
+                }
+            }));
+            setStatus('connected');
+            setIsBroadcasting(true);
+            onStatusChange?.('connected');
+        };
+
+        ws.onclose = () => {
+            console.log('WS Closed');
+            setStatus('disconnected');
+            setIsBroadcasting(false);
+            onStatusChange?.('disconnected');
+        };
+
+        ws.onerror = (err) => {
+            console.error('WS Error', err);
+            setStatus('disconnected');
+            setIsBroadcasting(false);
+        };
+
+        // Setup ScriptProcessor for scraping audio data
+        // Note: ScriptProcessor is deprecated but easiest for raw PCM extraction without AudioWorklet files
+        const processor = audioContextRef.current.createScriptProcessor(4096, 2, 2);
+        processorRef.current = processor;
+
+        processor.onaudioprocess = (e) => {
+            if (ws.readyState === WebSocket.OPEN) {
+                // Interleave channels (L, R, L, R...)
+                const left = e.inputBuffer.getChannelData(0);
+                const right = e.inputBuffer.getChannelData(1);
+                const interleaved = new Float32Array(left.length * 2);
+
+                for (let i = 0; i < left.length; i++) {
+                    interleaved[i * 2] = left[i];
+                    interleaved[i * 2 + 1] = right[i];
+                }
+
+                // Send raw float32 buffer to backend
+                ws.send(JSON.stringify({ type: 'audio', buffer: Array.from(interleaved) }));
+            }
+        };
+
+        // Connect Master Gain -> Processor -> Destination (to keep graph alive)
+        masterGainRef.current.connect(processor);
+        processor.connect(audioContextRef.current.destination);
+
+    }, [onStatusChange]);
+
+    const stopBroadcast = useCallback(() => {
+        if (wsRef.current) {
+            wsRef.current.close();
+            wsRef.current = null;
+        }
+        if (processorRef.current && masterGainRef.current && audioContextRef.current) {
+            processorRef.current.disconnect();
+            masterGainRef.current.disconnect(processorRef.current);
+            // Reconnect master to destination to keep hearing local audio
+            masterGainRef.current.connect(audioContextRef.current.destination);
+        }
+        setIsBroadcasting(false);
+        setStatus('disconnected');
+        onStatusChange?.('disconnected');
+    }, [onStatusChange]);
+
+
+    // --- Mic Handling ---
+    const toggleMic = async () => {
+        if (!audioContextRef.current || !micGainRef.current) return;
+
+        if (isMicActive) {
+            setIsMicActive(false);
+            // We don't necessarily stop the stream, just mute the gain (handled in useEffect)
+        } else {
+            try {
+                if (!micStreamRef.current) {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    micStreamRef.current = stream;
+                    const source = audioContextRef.current.createMediaStreamSource(stream);
+                    micSourceRef.current = source;
+                    source.connect(micGainRef.current);
+                }
+                setIsMicActive(true);
+            } catch (err) {
+                console.error("Error accessing microphone:", err);
+                alert("Could not access microphone.");
+            }
+        }
+    };
+
+    // --- File Handling ---
+    const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file || !audioContextRef.current) return;
+
+        setCurrentTrack(file.name);
+        const arrayBuffer = await file.arrayBuffer();
+        const audioBuffer = await audioContextRef.current.decodeAudioData(arrayBuffer);
+        fileBufferRef.current = audioBuffer;
+        setFileDuration(audioBuffer.duration);
+    };
+
+    const playFile = () => {
+        if (!audioContextRef.current || !fileBufferRef.current || !fileGainRef.current) return;
+        if (isPlayingFile) return;
+
+        const source = audioContextRef.current.createBufferSource();
+        source.buffer = fileBufferRef.current;
+        source.connect(fileGainRef.current);
+        source.onended = () => setIsPlayingFile(false);
+
+        fileSourceRef.current = source;
+        source.start(0);
+        setIsPlayingFile(true);
+    };
+
+    const stopFile = () => {
+        if (fileSourceRef.current) {
+            try {
+                fileSourceRef.current.stop();
+            } catch (e) { /* ignore */ }
+            fileSourceRef.current = null;
+        }
+        setIsPlayingFile(false);
+    };
+
+
+    return (
+        <Card className="w-full h-full border-zinc-800 bg-black/40 backdrop-blur-xl text-white shadow-2xl">
+            <CardHeader className="pb-2 border-b border-zinc-800/50">
+                <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                        <Radio className={cn("w-5 h-5", isBroadcasting ? "text-red-500 animate-pulse" : "text-zinc-500")} />
+                        <CardTitle className="text-lg font-bold tracking-tight">ON AIR / CONTROL ROOM</CardTitle>
+                    </div>
+                    <div className="flex items-center gap-4 text-xs font-mono">
+                        <Badge variant={isBroadcasting ? "destructive" : "secondary"} className="uppercase">
+                            {status}
+                        </Badge>
+                        <span className="text-zinc-400">{currentTime}</span>
+                    </div>
+                </div>
+            </CardHeader>
+
+            <CardContent className="p-6 space-y-6">
+                {/* Main Transport Controls */}
+                <div className="flex justify-center gap-4">
+                    {!isBroadcasting ? (
+                        <Button
+                            onClick={startBroadcast}
+                            size="lg"
+                            className="bg-red-600 hover:bg-red-700 text-white w-32 shadow-[0_0_20px_rgba(220,38,38,0.5)] border-none"
+                        >
+                            START AIR
+                        </Button>
+                    ) : (
+                        <Button
+                            onClick={stopBroadcast}
+                            size="lg"
+                            variant="secondary"
+                            className="w-32"
+                        >
+                            STOP AIR
+                        </Button>
+                    )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                    {/* Left Column: Mixer */}
+                    <div className="space-y-6 p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-sm font-semibold text-zinc-400">MASTER OUTPUT</h3>
+                            <span className="text-xs font-mono text-cyan-400">{Math.round(masterVolume * 100)}%</span>
+                        </div>
+                        <Slider.Root
+                            className="relative flex items-center select-none touch-none w-full h-5"
+                            value={[masterVolume]}
+                            max={1}
+                            step={0.01}
+                            onValueChange={(val) => setMasterVolume(val[0])}
+                        >
+                            <Slider.Track className="bg-zinc-800 relative grow rounded-full h-[3px]">
+                                <Slider.Range className="absolute bg-cyan-500 rounded-full h-full" />
+                            </Slider.Track>
+                            <Slider.Thumb
+                                className="block w-5 h-5 bg-white border-2 border-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)] rounded-full hover:scale-110 focus:outline-none transition-transform"
+                                aria-label="Master Volume"
+                            />
+                        </Slider.Root>
+
+                        {/* Mic Control */}
+                        <div className="space-y-2 mt-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <Mic className={cn("w-4 h-4", isMicActive ? "text-green-400" : "text-zinc-500")} />
+                                    <span className="text-sm font-medium">MICROPHONE</span>
+                                </div>
+                                <Button
+                                    size="sm"
+                                    variant={isMicActive ? "default" : "outline"}
+                                    className={cn("h-6 text-xs", isMicActive && "bg-green-600 hover:bg-green-700")}
+                                    onClick={toggleMic}
+                                >
+                                    {isMicActive ? "ON" : "OFF"}
+                                </Button>
+                            </div>
+                            <Slider.Root
+                                className="relative flex items-center select-none touch-none w-full h-5"
+                                value={[micVolume]}
+                                max={1}
+                                step={0.01}
+                                onValueChange={(val) => setMicVolume(val[0])}
+                            >
+                                <Slider.Track className="bg-zinc-800 relative grow rounded-full h-[3px]">
+                                    <Slider.Range className="absolute bg-green-500 rounded-full h-full" />
+                                </Slider.Track>
+                                <Slider.Thumb className="block w-4 h-4 bg-zinc-200 border border-green-500 rounded-full focus:outline-none" />
+                            </Slider.Root>
+                        </div>
+                    </div>
+
+                    {/* Right Column: Deck / Player */}
+                    <div className="space-y-4 p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+                        <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-sm font-semibold text-zinc-400">DECK A (LOCAL FILE)</h3>
+                            <input
+                                type="file"
+                                accept="audio/*"
+                                onChange={handleFileUpload}
+                                className="text-xs text-zinc-500 file:mr-4 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:bg-zinc-800 file:text-zinc-400 hover:file:bg-zinc-700"
+                            />
+                        </div>
+
+                        <div className="bg-black/80 p-3 rounded-lg border border-zinc-800/50 mb-4 h-16 flex items-center justify-center">
+                            <p className="text-cyan-400 font-mono text-sm truncate animate-pulse">
+                                {isPlayingFile ? `▶ ${currentTrack}` : currentTrack}
+                            </p>
+                        </div>
+
+                        <div className="flex items-center gap-2 justify-center">
+                            <Button
+                                size="icon"
+                                variant="secondary"
+                                className="rounded-full w-12 h-12"
+                                onClick={playFile}
+                                disabled={isPlayingFile}
+                            >
+                                <Play className="w-5 h-5 fill-current" />
+                            </Button>
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                className="rounded-full w-10 h-10 border border-zinc-700"
+                                onClick={() => {
+                                    if (fileSourceRef.current) {
+                                        // Simplified Pause (actually stop for now)
+                                        stopFile();
+                                    }
+                                }}
+                            >
+                                <Pause className="w-4 h-4" />
+                            </Button>
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                className="rounded-full w-10 h-10 border border-zinc-700 hover:text-red-400"
+                                onClick={stopFile}
+                            >
+                                <Square className="w-4 h-4 fill-current" />
+                            </Button>
+                        </div>
+
+                        <div className="space-y-1 mt-2">
+                            <div className="flex justify-between text-xs text-zinc-500">
+                                <span>Volume</span>
+                                <span>{Math.round(fileVolume * 100)}%</span>
+                            </div>
+                            <Slider.Root
+                                className="relative flex items-center select-none touch-none w-full h-5"
+                                value={[fileVolume]}
+                                max={1}
+                                step={0.01}
+                                onValueChange={(val) => setFileVolume(val[0])}
+                            >
+                                <Slider.Track className="bg-zinc-800 relative grow rounded-full h-[3px]">
+                                    <Slider.Range className="absolute bg-indigo-500 rounded-full h-full" />
+                                </Slider.Track>
+                                <Slider.Thumb className="block w-4 h-4 bg-zinc-200 border border-indigo-500 rounded-full focus:outline-none" />
+                            </Slider.Root>
+                        </div>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    );
+}

@@ -25,6 +25,7 @@ const CMSSidebar: React.FC<CMSSidebarProps> = ({ onLogout, activeTab, onTabChang
         { id: 'events', label: 'Events', icon: Calendar },
         { id: 'stations', label: 'Radio Stations', icon: Radio },
         { id: 'media', label: 'Media Library', icon: Image },
+        { id: 'radio-hub', label: 'Radio Hub', icon: Radio },
     ];
 
     return (
