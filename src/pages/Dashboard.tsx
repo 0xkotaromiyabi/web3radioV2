@@ -12,6 +12,7 @@ import MediaLibrary from '@/components/cms/MediaLibrary';
 import DashboardOverview from '@/components/cms/DashboardOverview';
 import RadioHub from '@/components/radio/RadioHub';
 import { ConnectButton, useActiveAccount, useDisconnect } from "thirdweb/react";
+import logo from '@/assets/web3radio-logo.png';
 import { client } from "@/services/w3rSmartContract";
 
 // Super Admin Wallet Addresses (lowercase for comparison)
@@ -192,7 +193,7 @@ const Dashboard = () => {
         <div className="panel-float w-full max-w-md p-8 text-center">
           {/* Logo */}
           <img
-            src="/web3radio-logo.png"
+            src={logo}
             alt="Web3Radio"
             className="w-20 h-20 mx-auto mb-6 rounded-2xl shadow-apple-md"
           />
