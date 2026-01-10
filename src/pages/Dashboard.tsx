@@ -10,6 +10,7 @@ import StationEditor from '@/components/cms/StationEditor';
 import CMSSidebar from '@/components/cms/CMSSidebar';
 import MediaLibrary from '@/components/cms/MediaLibrary';
 import DashboardOverview from '@/components/cms/DashboardOverview';
+import RadioHub from '@/components/radio/RadioHub';
 import { ConnectButton, useActiveAccount, useDisconnect } from "thirdweb/react";
 import { client } from "@/services/w3rSmartContract";
 
@@ -424,6 +425,9 @@ const Dashboard = () => {
 
       case 'media':
         return <MediaLibrary />;
+
+      case 'radio-hub':
+        return <RadioHub />;
 
       default:
         return null;
