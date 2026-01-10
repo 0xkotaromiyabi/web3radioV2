@@ -1,16 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>web3radio</title>
-    <meta name="description" content="Decentralized Radio Station" />
-    <meta name="author" content="web3radio" />
-    <meta property="og:image" content="/og-image.png" />
-    <meta name="base:app_id" content="6956c1aec63ad876c9081c90" />
 
-    <!-- ✅ Farcaster Mini App Embed -->
-    <meta name="fc:frame" content='{
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="fc:miniapp" content='{
+      "version":"next",
+      "imageUrl":"https://i.imgur.com/emXbMkd.png",
+      "button":{
+          "title":"Play",
+          "action":{
+          "type":"launch_miniapp",
+          "name":"web3radio v2",
+          "url":"https://web3radio-v2.vercel.app/"
+          }
+      }
+    }' />
+  <title>web3radio</title>
+  <meta name="description" content="Decentralized Radio Station" />
+  <meta name="author" content="web3radio" />
+  <meta property="og:image" content="/og-image.png" />
+  <meta name="base:app_id" content="6956c1aec63ad876c9081c90" />
+
+  <!-- ✅ Farcaster Mini App Embed -->
+  <meta name="fc:frame" content='{
       "version": "next",
       "imageUrl": "https://i.imgur.com/emXbMkd.png",
       "button": {
@@ -24,11 +37,12 @@
         }
       }
     }' />
-  </head>
+</head>
 
-  <body>
-    <div id="root"></div>
-    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<body>
+  <div id="root"></div>
+  <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>
