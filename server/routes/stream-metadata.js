@@ -19,12 +19,12 @@ const STATION_METADATA = {
         metadataUrl: 'https://api.radiojar.com/api/stations/4ywdgup3bnzuv/now_playing/',
     },
     'female': {
-        type: 'cloudmu',
-        metadataUrl: 'https://s1.cloudmu.id/listen/female_radio/stats',
+        type: 'shoutcast',
+        metadataUrl: 'https://s1.cloudmu.id/listen/female_radio/currentsong?sid=1',
     },
     'delta': {
-        type: 'cloudmu',
-        metadataUrl: 'https://s1.cloudmu.id/listen/delta_fm/stats',
+        type: 'shoutcast',
+        metadataUrl: 'https://s1.cloudmu.id/listen/delta_fm/currentsong?sid=1',
     },
     'prambors': {
         type: 'shoutcast',
