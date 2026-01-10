@@ -1,9 +1,9 @@
 import React from "react";
-import { useAccount } from "wagmi";
+import { useWallet } from "@/hooks/useWallet";
 import WalletConnectButton from "../marketplace/WalletConnectButton";
 
 const FarcasterConnectMenu = () => {
-  const { isConnected } = useAccount();
+  const { isConnected } = useWallet();
 
   // Only show wallet connect button when not connected
   if (!isConnected) {
