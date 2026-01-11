@@ -238,10 +238,10 @@ const RadioPlayer = () => {
       {/* Events Ticker */}
       <EventsTicker isMobile={isMobile} />
 
-      {/* Main Player Card - Frosted Glass Style */}
-      <div className="rounded-3xl overflow-hidden backdrop-blur-xl bg-white/70 border border-white/50 shadow-[0_12px_48px_rgba(0,0,0,0.15),0_4px_12px_rgba(0,0,0,0.1)]">
+      {/* Main Player Card - Dark Frosted Glass Style */}
+      <div className="rounded-3xl overflow-hidden backdrop-blur-xl bg-black/40 border border-white/10 shadow-[0_12px_48px_rgba(0,0,0,0.4),0_4px_12px_rgba(0,0,0,0.3)]">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200/30 flex items-center justify-between bg-white/40">
+        <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-black/20">
           <div className="flex items-center gap-3">
             <img
               src={logo}
@@ -249,28 +249,28 @@ const RadioPlayer = () => {
               className="w-10 h-10 rounded-xl"
             />
             <div>
-              <h2 className="font-semibold text-gray-900">{stationNames[currentStation]}</h2>
-              <p className="text-sm text-gray-500">
+              <h2 className="font-semibold text-white">{stationNames[currentStation]}</h2>
+              <p className="text-sm text-gray-400">
                 {isPlaying ? 'Playing' : 'Paused'}
               </p>
             </div>
           </div>
           {/* Window Controls - Apple Style */}
           <div className="flex gap-2">
-            <div className="w-3 h-3 rounded-full bg-red-400 hover:bg-red-500 transition-colors cursor-pointer" />
-            <div className="w-3 h-3 rounded-full bg-yellow-400 hover:bg-yellow-500 transition-colors cursor-pointer" />
-            <div className="w-3 h-3 rounded-full bg-green-400 hover:bg-green-500 transition-colors cursor-pointer" />
+            <div className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-400 transition-colors cursor-pointer" />
+            <div className="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-400 transition-colors cursor-pointer" />
+            <div className="w-3 h-3 rounded-full bg-green-500 hover:bg-green-400 transition-colors cursor-pointer" />
           </div>
         </div>
 
         {/* Visualizer & Ticker */}
-        <div className="p-6 space-y-4 bg-white/30">
+        <div className="p-6 space-y-4 bg-black/20">
           <CryptoPriceTicker isMobile={isMobile} />
           <AudioVisualizer />
 
           {/* Now Playing Info */}
           {currentSong && (
-            <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/50 shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
+            <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 shadow-[0_4px_16px_rgba(0,0,0,0.2)]">
               {currentSong.artwork ? (
                 <img
                   src={currentSong.artwork}
@@ -278,21 +278,21 @@ const RadioPlayer = () => {
                   className="w-16 h-16 rounded-xl object-cover flex-shrink-0 shadow-lg"
                 />
               ) : (
-                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center flex-shrink-0">
-                  <Music className="w-6 h-6 text-blue-500" />
+                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center flex-shrink-0">
+                  <Music className="w-6 h-6 text-white" />
                 </div>
               )}
               <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-gray-900 truncate">{currentSong.title}</h3>
-                <p className="text-sm text-gray-500 truncate">{currentSong.artist}</p>
-                <p className="text-xs text-gray-400 truncate">{currentSong.album}</p>
+                <h3 className="font-medium text-white truncate">{currentSong.title}</h3>
+                <p className="text-sm text-gray-300 truncate">{currentSong.artist}</p>
+                <p className="text-xs text-gray-500 truncate">{currentSong.album}</p>
               </div>
             </div>
           )}
         </div>
 
         {/* Controls */}
-        <div className="border-t border-gray-200/30 bg-white/40">
+        <div className="border-t border-white/10 bg-black/20">
           <RadioControls
             isPlaying={isPlaying}
             volume={volume}
@@ -302,7 +302,7 @@ const RadioPlayer = () => {
         </div>
 
         {/* Wallet Connection */}
-        <div className="border-t border-gray-200/30 bg-white/40">
+        <div className="border-t border-white/10 bg-black/20">
           <WalletConnection isPlaying={isPlaying} />
         </div>
       </div>
