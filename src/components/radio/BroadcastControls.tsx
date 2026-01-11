@@ -308,13 +308,13 @@ export default function BroadcastControls({ onStatusChange }: BroadcastControlsP
     return (
         <Card className="w-full h-full border-zinc-800 bg-black/40 backdrop-blur-xl text-white shadow-2xl overflow-y-auto">
             <CardHeader className="pb-2 border-b border-zinc-800/50">
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                     <div className="flex items-center gap-2">
                         <Radio className={cn("w-5 h-5", isBroadcasting ? "text-red-500 animate-pulse" : "text-zinc-500")} />
-                        <CardTitle className="text-lg font-bold tracking-tight">ON AIR / CONTROL ROOM</CardTitle>
+                        <CardTitle className="text-base sm:text-lg font-bold tracking-tight">ON AIR / CONTROL ROOM</CardTitle>
                     </div>
-                    <div className="flex items-center gap-4 text-xs font-mono">
-                        <Badge variant={isBroadcasting ? "destructive" : "secondary"} className="uppercase">
+                    <div className="flex items-center gap-2 sm:gap-4 text-xs font-mono">
+                        <Badge variant={isBroadcasting ? "destructive" : "secondary"} className="uppercase text-[10px] sm:text-xs">
                             {status}
                         </Badge>
                         <span className="text-zinc-400">{currentTime}</span>
@@ -322,14 +322,14 @@ export default function BroadcastControls({ onStatusChange }: BroadcastControlsP
                 </div>
             </CardHeader>
 
-            <CardContent className="p-6 space-y-6">
+            <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
                 {/* Main Transport Controls */}
-                <div className="flex justify-center gap-4">
+                <div className="flex justify-center gap-3 sm:gap-4">
                     {!isBroadcasting ? (
                         <Button
                             onClick={startBroadcast}
                             size="lg"
-                            className="bg-red-600 hover:bg-red-700 text-white w-32 shadow-[0_0_20px_rgba(220,38,38,0.5)] border-none"
+                            className="bg-red-600 hover:bg-red-700 text-white w-28 sm:w-32 text-sm sm:text-base shadow-[0_0_20px_rgba(220,38,38,0.5)] border-none"
                         >
                             START AIR
                         </Button>
@@ -338,17 +338,17 @@ export default function BroadcastControls({ onStatusChange }: BroadcastControlsP
                             onClick={stopBroadcast}
                             size="lg"
                             variant="secondary"
-                            className="w-32"
+                            className="w-28 sm:w-32 text-sm sm:text-base"
                         >
                             STOP AIR
                         </Button>
                     )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
 
                     {/* Left Column: Mixer */}
-                    <div className="space-y-6 p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+                    <div className="space-y-4 sm:space-y-6 p-3 sm:p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
 
                         {/* Master */}
                         <div>
@@ -374,7 +374,7 @@ export default function BroadcastControls({ onStatusChange }: BroadcastControlsP
                         </div>
 
                         {/* Mic Control */}
-                        <div className="space-y-2 mt-4">
+                        <div className="space-y-2 mt-3 sm:mt-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <Mic className={cn("w-4 h-4", isMicActive ? "text-green-400" : "text-zinc-500")} />
@@ -404,7 +404,7 @@ export default function BroadcastControls({ onStatusChange }: BroadcastControlsP
                         </div>
 
                         {/* System Audio Control */}
-                        <div className="space-y-2 mt-4">
+                        <div className="space-y-2 mt-3 sm:mt-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <Laptop className={cn("w-4 h-4", isSysAudioActive ? "text-orange-400" : "text-zinc-500")} />
@@ -435,37 +435,37 @@ export default function BroadcastControls({ onStatusChange }: BroadcastControlsP
                     </div>
 
                     {/* Right Column: Deck / Player */}
-                    <div className="space-y-4 p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
-                        <div className="flex items-center justify-between mb-2">
+                    <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-2">
                             <h3 className="text-sm font-semibold text-zinc-400">DECK A (LOCAL FILE)</h3>
                             <input
                                 type="file"
                                 accept="audio/*"
                                 onChange={handleFileUpload}
-                                className="text-xs text-zinc-500 file:mr-4 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:bg-zinc-800 file:text-zinc-400 hover:file:bg-zinc-700"
+                                className="text-xs text-zinc-500 w-full sm:w-auto file:mr-2 sm:file:mr-4 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:bg-zinc-800 file:text-zinc-400 hover:file:bg-zinc-700"
                             />
                         </div>
 
-                        <div className="bg-black/80 p-3 rounded-lg border border-zinc-800/50 mb-4 h-16 flex items-center justify-center">
-                            <p className="text-cyan-400 font-mono text-sm truncate animate-pulse">
+                        <div className="bg-black/80 p-3 rounded-lg border border-zinc-800/50 mb-3 sm:mb-4 h-14 sm:h-16 flex items-center justify-center">
+                            <p className="text-cyan-400 font-mono text-xs sm:text-sm truncate animate-pulse">
                                 {isPlayingFile ? `▶ ${currentTrack}` : currentTrack}
                             </p>
                         </div>
 
-                        <div className="flex items-center gap-2 justify-center">
+                        <div className="flex items-center gap-2 sm:gap-3 justify-center">
                             <Button
                                 size="icon"
                                 variant="secondary"
-                                className="rounded-full w-12 h-12"
+                                className="rounded-full w-10 h-10 sm:w-12 sm:h-12"
                                 onClick={playFile}
                                 disabled={isPlayingFile}
                             >
-                                <Play className="w-5 h-5 fill-current" />
+                                <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
                             </Button>
                             <Button
                                 size="icon"
                                 variant="ghost"
-                                className="rounded-full w-10 h-10 border border-zinc-700"
+                                className="rounded-full w-8 h-8 sm:w-10 sm:h-10 border border-zinc-700"
                                 onClick={() => {
                                     if (fileSourceRef.current) {
                                         // Simplified Pause (actually stop for now)
@@ -473,19 +473,19 @@ export default function BroadcastControls({ onStatusChange }: BroadcastControlsP
                                     }
                                 }}
                             >
-                                <Pause className="w-4 h-4" />
+                                <Pause className="w-3 h-3 sm:w-4 sm:h-4" />
                             </Button>
                             <Button
                                 size="icon"
                                 variant="ghost"
-                                className="rounded-full w-10 h-10 border border-zinc-700 hover:text-red-400"
+                                className="rounded-full w-8 h-8 sm:w-10 sm:h-10 border border-zinc-700 hover:text-red-400"
                                 onClick={stopFile}
                             >
-                                <Square className="w-4 h-4 fill-current" />
+                                <Square className="w-3 h-3 sm:w-4 sm:h-4 fill-current" />
                             </Button>
                         </div>
 
-                        <div className="space-y-1 mt-2">
+                        <div className="space-y-1 mt-2 sm:mt-3">
                             <div className="flex justify-between text-xs text-zinc-500">
                                 <span>Volume</span>
                                 <span>{Math.round(fileVolume * 100)}%</span>
