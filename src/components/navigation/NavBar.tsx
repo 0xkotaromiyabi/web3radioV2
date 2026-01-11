@@ -98,9 +98,16 @@ const NavBar = () => {
       </div>
 
       {/* Mobile Navigation */}
-      {mobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 right-0 glass border-t border-border/50">
-          <nav className="container mx-auto py-4 px-4 flex flex-col gap-1">
+      <div
+        className={cn(
+          "md:hidden fixed inset-x-0 top-[57px] z-50 transform transition-all duration-300 ease-in-out",
+          mobileMenuOpen
+            ? "translate-y-0 opacity-100 pointer-events-auto"
+            : "-translate-y-4 opacity-0 pointer-events-none"
+        )}
+      >
+        <nav className="mx-4 mt-2 rounded-2xl glass border border-border/50 shadow-apple-md overflow-hidden">
+          <div className="py-3 px-4 flex flex-col gap-1">
             {navLinks.map((link) => (
               <Link
                 key={link.to}
@@ -108,7 +115,7 @@ const NavBar = () => {
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200",
                   isActive(link.to)
-                    ? "bg-black/5 dark:bg-white/10 text-foreground"
+                    ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5"
                 )}
                 onClick={() => setMobileMenuOpen(false)}
@@ -117,16 +124,21 @@ const NavBar = () => {
                 <span>{link.label}</span>
               </Link>
             ))}
-            <div className="divider-apple my-2" />
+            <div className="h-px bg-border/50 my-2" />
             <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
               <Button className="w-full btn-apple-primary justify-center">
                 <LogIn className="h-4 w-4 mr-2" />
                 <span>Login</span>
               </Button>
             </Link>
-          </nav>
-        </div>
-      )}
+          </div>
+        </nav>
+        {/* Backdrop */}
+        <div
+          className="fixed inset-0 -z-10 bg-black/20 backdrop-blur-sm"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      </div>
     </header>
   );
 };
