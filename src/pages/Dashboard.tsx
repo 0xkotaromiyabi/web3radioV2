@@ -261,12 +261,12 @@ const Dashboard = () => {
 
       case 'news':
         return (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-semibold text-foreground">News Management</h2>
+          <div className="space-y-4 sm:space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <h2 className="text-xl sm:text-2xl font-semibold text-foreground">News Management</h2>
               <button
                 onClick={() => setShowEditor(!showEditor)}
-                className="btn-apple-primary flex items-center gap-2"
+                className="btn-apple-primary flex items-center gap-2 text-sm w-full sm:w-auto justify-center"
               >
                 <Plus className="h-4 w-4" />
                 {showEditor ? 'Hide Editor' : 'Add Article'}
@@ -315,12 +315,12 @@ const Dashboard = () => {
 
       case 'events':
         return (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-semibold text-foreground">Events Management</h2>
+          <div className="space-y-4 sm:space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <h2 className="text-xl sm:text-2xl font-semibold text-foreground">Events Management</h2>
               <button
                 onClick={() => setShowEditor(!showEditor)}
-                className="btn-apple-primary flex items-center gap-2"
+                className="btn-apple-primary flex items-center gap-2 text-sm w-full sm:w-auto justify-center"
               >
                 <Plus className="h-4 w-4" />
                 {showEditor ? 'Hide Editor' : 'Add Event'}
@@ -369,12 +369,12 @@ const Dashboard = () => {
 
       case 'stations':
         return (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-semibold text-foreground">Radio Stations Management</h2>
+          <div className="space-y-4 sm:space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <h2 className="text-xl sm:text-2xl font-semibold text-foreground">Radio Stations</h2>
               <button
                 onClick={() => setShowEditor(!showEditor)}
-                className="btn-apple-primary flex items-center gap-2"
+                className="btn-apple-primary flex items-center gap-2 text-sm w-full sm:w-auto justify-center"
               >
                 <Plus className="h-4 w-4" />
                 {showEditor ? 'Hide Editor' : 'Add Station'}
@@ -449,27 +449,27 @@ const Dashboard = () => {
       />
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto min-w-0">
         {/* Top Bar */}
-        <div className="glass-subtle sticky top-0 z-10 border-b border-border/30 px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full" />
-            <span className="text-sm font-medium text-foreground">Super Admin</span>
+        <div className="glass-subtle sticky top-0 z-10 border-b border-border/30 px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
+          <div className="flex items-center gap-2 ml-12 lg:ml-0">
+            <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0" />
+            <span className="text-xs sm:text-sm font-medium text-foreground">Super Admin</span>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <span className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
               {activeAccount?.address.slice(0, 6)}...{activeAccount?.address.slice(-4)}
             </span>
             <button
               onClick={handleLogout}
-              className="btn-apple-secondary text-sm"
+              className="btn-apple-secondary text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2"
             >
               Disconnect
             </button>
           </div>
         </div>
 
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {renderContent()}
         </div>
       </div>
