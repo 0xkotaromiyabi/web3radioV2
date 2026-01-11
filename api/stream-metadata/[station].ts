@@ -9,7 +9,7 @@ const STATION_METADATA: Record<string, { type: string; metadataUrl: string; moun
     },
     'Venus': {
         type: 'zeno',
-        metadataUrl: 'https://api.zeno.fm/mounts/metadata/subscribe/3wiuocujuobtv',
+        metadataUrl: 'https://stream.zeno.fm/3wiuocujuobtv',
     },
     'iradio': {
         type: 'radiojar',
