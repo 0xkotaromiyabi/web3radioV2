@@ -18,6 +18,7 @@ import { client } from "@/services/w3rSmartContract";
 // Super Admin Wallet Addresses (lowercase for comparison)
 const SUPER_ADMINS = [
   "0x242dfb7849544ee242b2265ca7e585bdec60456b",
+  "0x46b4ee7c6dc39ee96009b0808378df11c6938c6b",
   "0xdbca8ab9eb325a8f550ffc6e45277081a6c7d681",
   "0x13dd8b8f54c3b54860f8d41a6fbff7ffc6bf01ef"
 ];
