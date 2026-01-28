@@ -134,9 +134,17 @@ function parseShoutcastCurrentsong(text, defaultArtist = 'Unknown Station') {
 }
 
 // Fetch album artwork from iTunes Search API
+// Fetch album artwork from iTunes Search API
 async function fetchAlbumArt(artist, title) {
     try {
-        const searchQuery = encodeURIComponent(`${artist} ${title}`);
+        // Clean artist name: remove "[+]" and everything after, and possibly "Feat."
+        const cleanArtist = artist.split(/\[\+|feat\.|ft\./i)[0].trim();
+        // Also remove generic radio formatting
+        const cleanTitle = title.replace(/\(.*?\)/g, '').trim();
+
+        const searchQuery = encodeURIComponent(`${cleanArtist} ${cleanTitle}`);
+        // console.log(`Searching iTunes for: ${cleanArtist} - ${cleanTitle}`);
+
         const response = await fetch(
             `https://itunes.apple.com/search?term=${searchQuery}&media=music&limit=1`,
             { timeout: 3000 }
@@ -153,8 +161,7 @@ async function fetchAlbumArt(artist, title) {
             }
         }
     } catch (e) {
-        // Silent fail for artwork
-        // console.error('Error fetching album art:', e);
+        console.error(`Error fetching album art for ${artist}:`, e.message);
     }
     return null;
 }
