@@ -11,7 +11,7 @@ const STATION_METADATA = {
         mount: '/stream'
     },
     'Venus': {
-        type: 'zeno',
+        type: 'zeno meta',
         metadataUrl: 'https://api.zeno.fm/mounts/metadata/subscribe/3wiuocujuobtv',
     },
     'iradio': {
