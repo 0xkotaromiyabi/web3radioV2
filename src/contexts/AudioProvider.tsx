@@ -27,7 +27,7 @@ const AudioContext = createContext<AudioContextType | undefined>(undefined);
 // Station Config (Shared with RadioPlayer logic basically)
 const STATIONS: Record<string, string> = {
     web3: 'https://web3radio.cloud/stream',
-    Venus: 'https://stream.zeno.fm/3wiuocujuobtv',
+    ozradio: 'https://streaming.ozradiojakarta.com:8443/ozjakarta',
     iradio: 'https://n04.radiojar.com/4ywdgup3bnzuv?1744076195=&rj-tok=AAABlhMxTIcARnjabAV4uyOIpA&rj-ttl=5',
     female: 'https://s1.cloudmu.id/listen/female_radio/radio.mp3',
     delta: 'https://s1.cloudmu.id/listen/delta_fm/radio.mp3',
@@ -36,7 +36,7 @@ const STATIONS: Record<string, string> = {
 
 const STATION_NAMES: Record<string, string> = {
     web3: 'Web3 Radio',
-    Venus: 'Venus FM',
+    ozradio: 'Oz Radio Jakarta',
     iradio: 'i-Radio',
     female: 'Female Radio',
     delta: 'Delta FM',

@@ -10,9 +10,10 @@ const STATION_METADATA = {
         metadataUrl: 'https://web3radio.cloud/status-json.xsl',
         mount: '/stream'
     },
-    'Venus': {
-        type: 'zeno',
-        metadataUrl: 'https://api.zeno.fm/mounts/metadata/subscribe/3wiuocujuobtv',
+    'ozradio': {
+        type: 'icecast',
+        metadataUrl: 'https://streaming.ozradiojakarta.com:8443/status-json.xsl',
+        mount: '/ozjakarta'
     },
     'iradio': {
         type: 'radiojar',

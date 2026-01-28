@@ -26,7 +26,7 @@ const RadioPlayer = () => {
 
   const stationNames: Record<string, string> = {
     web3: 'Web3 Radio',
-    Venus: 'Venus FM',
+    ozradio: 'Oz Radio Jakarta',
     iradio: 'i-Radio',
     female: 'Female Radio',
     delta: 'Delta FM',

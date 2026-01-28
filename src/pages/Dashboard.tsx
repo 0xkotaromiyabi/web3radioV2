@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Eye, Trash2, Plus, Edit, Wallet, ShieldCheck, Radio } from "lucide-react";
+import { Loader2, Eye, Trash2, Plus, Edit, Wallet, ShieldCheck, Radio, Clock, AlertTriangle } from "lucide-react";
 import { fetchNews, deleteNewsItem, fetchEvents, deleteEvent, fetchStations, deleteStation, subscribeToTable } from '@/lib/supabase';
 import NewsEditor from '@/components/cms/NewsEditor';
 import EventEditor from '@/components/cms/EventEditor';
@@ -14,14 +14,7 @@ import RadioHub from '@/components/radio/RadioHub';
 import { useAppKit } from '@reown/appkit/react';
 import { useAccount, useDisconnect } from 'wagmi';
 import logo from '@/assets/web3radio-logo.png';
-
-// Super Admin Wallet Addresses (lowercase for comparison)
-const SUPER_ADMINS = [
-  "0x242dfb7849544ee242b2265ca7e585bdec60456b",
-  "0x46b4ee7c6dc39ee96009b0808378df11c6938c6b",
-  "0xdbca8ab9eb325a8f550ffc6e45277081a6c7d681",
-  "0x13dd8b8f54c3b54860f8d41a6fbff7ffc6bf01ef"
-];
+import { useAdminAccess } from '@/hooks/useAdminAccess';
 
 // Type definitions
 type NewsItem = {
@@ -57,29 +50,33 @@ const Dashboard = () => {
   const { open } = useAppKit();
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
-  const [isAdmin, setIsAdmin] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [showEditor, setShowEditor] = useState(false);
+  const [showTimeRestrictedPopup, setShowTimeRestrictedPopup] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Use the new admin access hook with time-based restrictions
+  const adminAccess = useAdminAccess(address);
 
   // Data states
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [stations, setStations] = useState<Station[]>([]);
 
-  // Check if connected wallet is admin
+  // Check admin access on wallet connection
   useEffect(() => {
     if (isConnected && address) {
-      const currentAddress = address.toLowerCase();
-      const isSuperAdmin = SUPER_ADMINS.some(admin => admin.toLowerCase() === currentAddress);
-      setIsAdmin(isSuperAdmin);
-
-      if (isSuperAdmin) {
+      if (adminAccess.hasAccess) {
         toast({
           title: "Admin Access Granted",
-          description: "Welcome back, Super Admin!",
+          description: adminAccess.hasTimeRestriction
+            ? `Welcome! Your access is valid during ${adminAccess.allowedSlot}.`
+            : "Welcome back, Super Admin!",
         });
+      } else if (adminAccess.isAdmin && !adminAccess.hasAccess) {
+        // Admin but outside time slot - show popup
+        setShowTimeRestrictedPopup(true);
       } else {
         toast({
           title: "Access Denied",
@@ -87,18 +84,16 @@ const Dashboard = () => {
           variant: "destructive",
         });
       }
-    } else {
-      setIsAdmin(false);
     }
-  }, [isConnected, address, toast]);
+  }, [isConnected, address, adminAccess.hasAccess, adminAccess.isAdmin, toast]);
 
   // Load data when admin is authenticated
   useEffect(() => {
-    if (isAdmin) {
+    if (adminAccess.hasAccess) {
       loadAllData();
       setupRealtimeSubscriptions();
     }
-  }, [isAdmin]);
+  }, [adminAccess.hasAccess]);
 
   const loadAllData = async () => {
     await loadNews();
@@ -186,10 +181,47 @@ const Dashboard = () => {
     }
   };
 
+  // Time-Restricted Access Popup
+  const TimeRestrictedPopup = () => (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center animate-in fade-in zoom-in duration-300">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-100 flex items-center justify-center">
+          <Clock className="h-8 w-8 text-amber-600" />
+        </div>
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">Akses Terbatas</h2>
+        <p className="text-gray-600 mb-4">{adminAccess.message}</p>
+
+        <div className="bg-gray-100 rounded-xl p-4 mb-6">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-500">Slot Akses Anda:</span>
+            <span className="font-medium text-gray-900">{adminAccess.allowedSlot}</span>
+          </div>
+          <div className="flex items-center justify-between text-sm mt-2">
+            <span className="text-gray-500">Waktu Saat Ini:</span>
+            <span className="font-medium text-gray-900">{adminAccess.currentTimeWITA}</span>
+          </div>
+        </div>
+
+        <button
+          onClick={() => {
+            setShowTimeRestrictedPopup(false);
+            handleLogout();
+          }}
+          className="w-full bg-gray-900 hover:bg-gray-800 text-white font-medium py-3 rounded-xl transition-all"
+        >
+          Disconnect Wallet
+        </button>
+      </div>
+    </div>
+  );
+
   // Login page - Apple style wallet connect
-  if (!isAdmin) {
+  if (!adminAccess.hasAccess) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-6">
+        {/* Time Restricted Popup */}
+        {showTimeRestrictedPopup && <TimeRestrictedPopup />}
+
         <div className="panel-float w-full max-w-md p-8 text-center">
           {/* Logo */}
           <img
@@ -203,13 +235,28 @@ const Dashboard = () => {
 
           {isConnected && address ? (
             <div className="space-y-4">
-              <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20">
-                <ShieldCheck className="h-8 w-8 text-red-500 mx-auto mb-2" />
-                <p className="text-red-500 font-medium">Access Denied</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Wallet {address.slice(0, 6)}...{address.slice(-4)} is not authorized.
-                </p>
-              </div>
+              {adminAccess.isAdmin && !adminAccess.hasAccess ? (
+                // Admin but time-restricted
+                <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                  <Clock className="h-8 w-8 text-amber-500 mx-auto mb-2" />
+                  <p className="text-amber-600 font-medium">Akses Terbatas Waktu</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Slot Anda: {adminAccess.allowedSlot}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Waktu sekarang: {adminAccess.currentTimeWITA}
+                  </p>
+                </div>
+              ) : (
+                // Not admin at all
+                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20">
+                  <ShieldCheck className="h-8 w-8 text-red-500 mx-auto mb-2" />
+                  <p className="text-red-500 font-medium">Access Denied</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Wallet {address.slice(0, 6)}...{address.slice(-4)} is not authorized.
+                  </p>
+                </div>
+              )}
               <button
                 onClick={handleLogout}
                 className="w-full btn-apple-secondary text-red-500 py-3 rounded-xl transition-all"

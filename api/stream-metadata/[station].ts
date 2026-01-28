@@ -7,9 +7,10 @@ const STATION_METADATA: Record<string, { type: string; metadataUrl: string; moun
         metadataUrl: 'https://web3radio.cloud/status-json.xsl',
         mount: '/stream'
     },
-    'Venus': {
-        type: 'zeno',
-        metadataUrl: 'https://api.zeno.fm/mounts/metadata/subscribe/3wiuocujuobtv',
+    'ozradio': {
+        type: 'icecast',
+        metadataUrl: 'https://streaming.ozradiojakarta.com:8443/status-json.xsl',
+        mount: '/ozjakarta'
     },
     'iradio': {
         type: 'radiojar',
@@ -32,7 +33,7 @@ const STATION_METADATA: Record<string, { type: string; metadataUrl: string; moun
 // Pretty names for fallback
 const STATION_NAMES: Record<string, string> = {
     'web3': 'Web3 Radio',
-    'Venus': 'Venus FM',
+    'ozradio': 'Oz Radio Jakarta',
     'iradio': 'i-Radio',
     'female': 'Female Radio',
     'delta': 'Delta FM',

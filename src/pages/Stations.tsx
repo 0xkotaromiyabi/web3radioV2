@@ -19,7 +19,7 @@ type Station = {
 
 const stationUrls: { [key: string]: string } = {
   'Web3 Radio': 'https://web3radio.cloud/stream',
-  'Venus FM': 'https://stream.zeno.fm/3wiuocujuobtv',
+  'Oz Radio Jakarta': 'https://streaming.ozradiojakarta.com:8443/ozjakarta',
   'i-Radio': 'https://n04.radiojar.com/4ywdgup3bnzuv?1744076195=&rj-tok=AAABlhMxTIcARnjabAV4uyOIpA&rj-ttl=5',
   'Female Radio': 'https://s1.cloudmu.id/listen/female_radio/radio.mp3',
   'Delta FM': 'https://s1.cloudmu.id/listen/delta_fm/radio.mp3',
@@ -27,7 +27,7 @@ const stationUrls: { [key: string]: string } = {
 };
 
 const stationWebsites: { [key: string]: string } = {
-  'Venus FM': 'https://www.radiovenusfm.com/',
+  'Oz Radio Jakarta': 'https://ozradiojakarta.com/',
   'i-Radio': 'https://iswaranetwork.com/',
   'Female Radio': 'https://femaleradio.co.id/',
   'Delta FM': 'https://deltafm.net/'
