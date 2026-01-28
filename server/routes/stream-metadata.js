@@ -19,16 +19,16 @@ const STATION_METADATA = {
         metadataUrl: 'https://api.radiojar.com/api/stations/4ywdgup3bnzuv/now_playing/',
     },
     'female': {
-        type: 'shoutcast',
-        metadataUrl: 'https://s1.cloudmu.id/listen/female_radio/currentsong?sid=1',
+        type: 'shoutcast-v2',
+        metadataUrl: 'https://s1.cloudmu.id/listen/female_radio/stats?sid=1&json=1',
     },
     'delta': {
-        type: 'shoutcast',
-        metadataUrl: 'https://s1.cloudmu.id/listen/delta_fm/currentsong?sid=1',
+        type: 'shoutcast-v2',
+        metadataUrl: 'https://s1.cloudmu.id/listen/delta_fm/stats?sid=1&json=1',
     },
     'prambors': {
-        type: 'shoutcast',
-        metadataUrl: 'https://s2.cloudmu.id/listen/prambors/currentsong?sid=1',
+        type: 'shoutcast-v2',
+        metadataUrl: 'https://s2.cloudmu.id/listen/prambors/stats?sid=1&json=1',
     }
 };
 
@@ -66,6 +66,35 @@ function parseIcecastMetadata(data, mount) {
         }
     } catch (e) {
         console.error('Error parsing Icecast metadata:', e);
+    }
+    return null;
+}
+
+// Parse Shoutcast V2 JSON stats
+function parseShoutcastV2Metadata(data, defaultArtist = 'Unknown Station') {
+    try {
+        if (data && data.songtitle) {
+            const parts = data.songtitle.split(' - ');
+            if (parts.length >= 2) {
+                return {
+                    title: parts.slice(1).join(' - ').trim(),
+                    artist: parts[0].trim(),
+                    album: 'Top 40',
+                    listeners: data.currentlisteners,
+                    source: 'shoutcast-v2'
+                };
+            } else {
+                return {
+                    title: data.songtitle.trim(),
+                    artist: defaultArtist,
+                    album: 'Top 40',
+                    listeners: data.currentlisteners,
+                    source: 'shoutcast-v2'
+                };
+            }
+        }
+    } catch (e) {
+        console.error('Error parsing Shoutcast V2 metadata:', e);
     }
     return null;
 }
@@ -133,7 +162,6 @@ function parseShoutcastCurrentsong(text, defaultArtist = 'Unknown Station') {
     return null;
 }
 
-// Fetch album artwork from iTunes Search API
 // Fetch album artwork from iTunes Search API
 async function fetchAlbumArt(artist, title) {
     try {
@@ -213,6 +241,9 @@ router.get('/:station', async (req, res) => {
         switch (stationConfig.type) {
             case 'icecast':
                 metadata = parseIcecastMetadata(data, stationConfig.mount);
+                break;
+            case 'shoutcast-v2':
+                metadata = parseShoutcastV2Metadata(data, STATION_NAMES[stationId]);
                 break;
             case 'zeno':
                 metadata = parseZenoMetadata(data);
