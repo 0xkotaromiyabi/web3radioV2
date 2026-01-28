@@ -54,41 +54,45 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
+    // Fetch metadata function - moved outside useEffect for reusability
+    const fetchMetadata = async (station: string) => {
+        if (!Object.keys(STATIONS).includes(station)) return;
+
+        try {
+            const response = await fetch(`/api/stream-metadata/${station}`);
+            if (response.ok) {
+                const data = await response.json();
+                if (data.nowPlaying) {
+                    setCurrentSong({
+                        title: data.nowPlaying.title || 'Unknown Title',
+                        artist: data.nowPlaying.artist || 'Unknown Artist',
+                        album: data.nowPlaying.album || 'Live Stream',
+                        artwork: data.nowPlaying.artwork
+                    });
+                }
+            }
+        } catch (error) {
+            console.error("Error fetching metadata:", error);
+        }
+    };
+
     useEffect(() => {
         // Initialize Audio
         const audio = new Audio(STATIONS[currentStation]);
         audioRef.current = audio;
         audio.volume = volume / 100;
 
-        // Handle Metadata Updates
-        const fetchMetadata = async () => {
-            if (!isPlaying || !['female', 'delta', 'iradio', 'prambors'].includes(currentStation)) return;
+        // Fetch metadata immediately on mount
+        fetchMetadata(currentStation);
 
-            try {
-                const response = await fetch(`/api/stream-metadata/${currentStation}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.nowPlaying) {
-                        setCurrentSong({
-                            title: data.nowPlaying.title || 'Unknown Title',
-                            artist: data.nowPlaying.artist || 'Unknown Artist',
-                            album: data.nowPlaying.album || 'Live Stream',
-                            artwork: data.nowPlaying.artwork
-                        });
-                    }
-                }
-            } catch (error) {
-                console.error("Error fetching metadata", error);
-            }
-        };
-
-        const interval = setInterval(fetchMetadata, 30000);
+        // Set up periodic metadata refresh (every 30 seconds)
+        const interval = setInterval(() => fetchMetadata(currentStation), 30000);
 
         // Audio Event Listeners
         const onPlay = () => {
             setIsPlaying(true);
             setIsLoading(false);
-            fetchMetadata();
+            fetchMetadata(currentStation); // Also refresh on play
         };
         const onPause = () => setIsPlaying(false);
         const onError = (e: Event) => {
@@ -120,8 +124,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             clearInterval(interval);
             audioRef.current = null;
         };
-    }, []); // Run once on mount, we handle station changes separately to avoid destroying element unnecessarily? 
-    // Actually, standard practice for simple radio is replacing src.
+    }, []); // Run once on mount
 
     // Re-implementing effect for Station Change to update src properly
     useEffect(() => {
@@ -139,12 +142,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 }
             }
 
-            // Update Default Song Info
-            setCurrentSong({
-                title: 'Live Broadcast',
-                artist: STATION_NAMES[currentStation] || currentStation,
-                album: 'Web3Radio',
-            });
+            // Fetch metadata immediately when station changes
+            fetchMetadata(currentStation);
         }
     }, [currentStation]);
 

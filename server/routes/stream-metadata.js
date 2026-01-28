@@ -11,7 +11,7 @@ const STATION_METADATA = {
         mount: '/stream'
     },
     'Venus': {
-        type: 'zeno meta',
+        type: 'zeno',
         metadataUrl: 'https://api.zeno.fm/mounts/metadata/subscribe/3wiuocujuobtv',
     },
     'iradio': {
@@ -19,27 +19,17 @@ const STATION_METADATA = {
         metadataUrl: 'https://api.radiojar.com/api/stations/4ywdgup3bnzuv/now_playing/',
     },
     'female': {
-        type: 'shoutcast-v2',
-        metadataUrl: 'https://s1.cloudmu.id/listen/female_radio/stats?sid=1&json=1',
+        type: 'shoutcast',
+        metadataUrl: 'https://s1.cloudmu.id/listen/female_radio/currentsong?sid=1',
     },
     'delta': {
-        type: 'shoutcast-v2',
-        metadataUrl: 'https://s1.cloudmu.id/listen/delta_fm/stats?sid=1&json=1',
+        type: 'shoutcast',
+        metadataUrl: 'https://s1.cloudmu.id/listen/delta_fm/currentsong?sid=1',
     },
     'prambors': {
-        type: 'shoutcast-v2',
-        metadataUrl: 'https://s2.cloudmu.id/listen/prambors/stats?sid=1&json=1',
+        type: 'shoutcast',
+        metadataUrl: 'https://s2.cloudmu.id/listen/prambors/currentsong?sid=1',
     }
-};
-
-// Pretty names for fallback
-const STATION_NAMES = {
-    'web3': 'Web3 Radio',
-    'Venus': 'Venus FM',
-    'iradio': 'i-Radio',
-    'female': 'Female Radio',
-    'delta': 'Delta FM',
-    'prambors': 'Prambors FM'
 };
 
 // Parse Icecast JSON response
@@ -66,35 +56,6 @@ function parseIcecastMetadata(data, mount) {
         }
     } catch (e) {
         console.error('Error parsing Icecast metadata:', e);
-    }
-    return null;
-}
-
-// Parse Shoutcast V2 JSON stats
-function parseShoutcastV2Metadata(data, defaultArtist = 'Unknown Station') {
-    try {
-        if (data && data.songtitle) {
-            const parts = data.songtitle.split(' - ');
-            if (parts.length >= 2) {
-                return {
-                    title: parts.slice(1).join(' - ').trim(),
-                    artist: parts[0].trim(),
-                    album: 'Top 40',
-                    listeners: data.currentlisteners,
-                    source: 'shoutcast-v2'
-                };
-            } else {
-                return {
-                    title: data.songtitle.trim(),
-                    artist: defaultArtist,
-                    album: 'Top 40',
-                    listeners: data.currentlisteners,
-                    source: 'shoutcast-v2'
-                };
-            }
-        }
-    } catch (e) {
-        console.error('Error parsing Shoutcast V2 metadata:', e);
     }
     return null;
 }
@@ -136,21 +97,21 @@ function parseRadioJarMetadata(data) {
 }
 
 // Parse Shoutcast currentsong (plain text format: "ARTIST - TITLE")
-function parseShoutcastCurrentsong(text, defaultArtist = 'Unknown Station') {
+function parseShoutcastCurrentsong(text) {
     try {
         if (text && typeof text === 'string') {
             const parts = text.trim().split(' - ');
             if (parts.length >= 2) {
                 return {
-                    title: parts.slice(1).join(' - ').trim(),
-                    artist: parts[0].trim(),
+                    title: parts.slice(1).join(' - '),
+                    artist: parts[0],
                     album: 'Top 40',
                     source: 'shoutcast'
                 };
             } else {
                 return {
                     title: text.trim(),
-                    artist: defaultArtist,
+                    artist: 'Prambors FM',
                     album: 'Top 40',
                     source: 'shoutcast'
                 };
@@ -165,14 +126,7 @@ function parseShoutcastCurrentsong(text, defaultArtist = 'Unknown Station') {
 // Fetch album artwork from iTunes Search API
 async function fetchAlbumArt(artist, title) {
     try {
-        // Clean artist name: remove "[+]" and everything after, and possibly "Feat."
-        const cleanArtist = artist.split(/\[\+|feat\.|ft\./i)[0].trim();
-        // Also remove generic radio formatting
-        const cleanTitle = title.replace(/\(.*?\)/g, '').trim();
-
-        const searchQuery = encodeURIComponent(`${cleanArtist} ${cleanTitle}`);
-        // console.log(`Searching iTunes for: ${cleanArtist} - ${cleanTitle}`);
-
+        const searchQuery = encodeURIComponent(`${artist} ${title}`);
         const response = await fetch(
             `https://itunes.apple.com/search?term=${searchQuery}&media=music&limit=1`,
             { timeout: 3000 }
@@ -189,7 +143,7 @@ async function fetchAlbumArt(artist, title) {
             }
         }
     } catch (e) {
-        console.error(`Error fetching album art for ${artist}:`, e.message);
+        console.error('Error fetching album art:', e);
     }
     return null;
 }
@@ -207,13 +161,13 @@ router.get('/:station', async (req, res) => {
     }
 
     try {
-        // console.log(`Fetching metadata for station: ${stationId}`);
+        console.log(`Fetching metadata for station: ${stationId}`);
 
         const response = await fetch(stationConfig.metadataUrl, {
             timeout: 5000,
             headers: {
-                'Accept': 'application/json', // Some servers prefer this even for text endpoints
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                'Accept': 'application/json',
+                'User-Agent': 'Web3Radio/1.0'
             }
         });
 
@@ -227,7 +181,7 @@ router.get('/:station', async (req, res) => {
         if (contentType?.includes('application/json')) {
             data = await response.json();
         } else {
-            // Try to parse as JSON anyway, or fall back to text
+            // Try to parse as JSON anyway
             const text = await response.text();
             try {
                 data = JSON.parse(text);
@@ -242,9 +196,6 @@ router.get('/:station', async (req, res) => {
             case 'icecast':
                 metadata = parseIcecastMetadata(data, stationConfig.mount);
                 break;
-            case 'shoutcast-v2':
-                metadata = parseShoutcastV2Metadata(data, STATION_NAMES[stationId]);
-                break;
             case 'zeno':
                 metadata = parseZenoMetadata(data);
                 break;
@@ -257,8 +208,7 @@ router.get('/:station', async (req, res) => {
                 break;
             case 'shoutcast':
                 // Shoutcast currentsong returns plain text
-                const defaultName = STATION_NAMES[stationId] || 'Radio Station';
-                metadata = parseShoutcastCurrentsong(data.raw || JSON.stringify(data), defaultName);
+                metadata = parseShoutcastCurrentsong(data.raw || JSON.stringify(data));
                 break;
             default:
                 metadata = { raw: data };
@@ -283,7 +233,7 @@ router.get('/:station', async (req, res) => {
                 station: stationId,
                 nowPlaying: {
                     title: 'Live Broadcast',
-                    artist: STATION_NAMES[stationId] || stationId,
+                    artist: stationId,
                     album: 'Live Stream',
                     source: 'fallback'
                 },
@@ -292,7 +242,7 @@ router.get('/:station', async (req, res) => {
         }
 
     } catch (error) {
-        console.error(`Error fetching metadata for ${stationId}:`, error.message);
+        console.error(`Error fetching metadata for ${stationId}:`, error);
         res.status(500).json({
             error: error.message,
             station: stationId

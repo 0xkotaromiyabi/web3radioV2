@@ -9,23 +9,23 @@ const STATION_METADATA: Record<string, { type: string; metadataUrl: string; moun
     },
     'Venus': {
         type: 'zeno',
-        metadataUrl: 'https://stream.zeno.fm/3wiuocujuobtv',
+        metadataUrl: 'https://api.zeno.fm/mounts/metadata/subscribe/3wiuocujuobtv',
     },
     'iradio': {
         type: 'radiojar',
         metadataUrl: 'https://api.radiojar.com/api/stations/4ywdgup3bnzuv/now_playing/',
     },
     'female': {
-        type: 'shoutcast-v2',
-        metadataUrl: 'https://s1.cloudmu.id/listen/female_radio/stats?sid=1&json=1',
+        type: 'shoutcast',
+        metadataUrl: 'https://s1.cloudmu.id/listen/female_radio/currentsong?sid=1',
     },
     'delta': {
-        type: 'shoutcast-v2',
-        metadataUrl: 'https://s1.cloudmu.id/listen/delta_fm/stats?sid=1&json=1',
+        type: 'shoutcast',
+        metadataUrl: 'https://s1.cloudmu.id/listen/delta_fm/currentsong?sid=1',
     },
     'prambors': {
-        type: 'shoutcast-v2',
-        metadataUrl: 'https://s2.cloudmu.id/listen/prambors/stats?sid=1&json=1',
+        type: 'shoutcast',
+        metadataUrl: 'https://s2.cloudmu.id/listen/prambors/currentsong?sid=1',
     }
 };
 
@@ -72,35 +72,6 @@ function parseIcecastMetadata(data: any, mount: string): Metadata | null {
         }
     } catch (e) {
         console.error('Error parsing Icecast metadata:', e);
-    }
-    return null;
-}
-
-// Parse Shoutcast V2 JSON stats
-function parseShoutcastV2Metadata(data: any, defaultArtist: string = 'Unknown Station'): Metadata | null {
-    try {
-        if (data && data.songtitle) {
-            const parts = data.songtitle.split(' - ');
-            if (parts.length >= 2) {
-                return {
-                    title: parts.slice(1).join(' - ').trim(),
-                    artist: parts[0].trim(),
-                    album: 'Top 40',
-                    listeners: data.currentlisteners,
-                    source: 'shoutcast-v2'
-                };
-            } else {
-                return {
-                    title: data.songtitle.trim(),
-                    artist: defaultArtist,
-                    album: 'Top 40',
-                    listeners: data.currentlisteners,
-                    source: 'shoutcast-v2'
-                };
-            }
-        }
-    } catch (e) {
-        console.error('Error parsing Shoutcast V2 metadata:', e);
     }
     return null;
 }
@@ -169,15 +140,9 @@ function parseShoutcastCurrentsong(text: string, defaultArtist: string = 'Unknow
 }
 
 // Fetch album artwork from iTunes Search API
-// Fetch album artwork from iTunes Search API
 async function fetchAlbumArt(artist: string, title: string): Promise<string | null> {
     try {
-        // Clean artist name: remove "[+]" and everything after, and possibly "Feat."
-        const cleanArtist = artist.split(/\[\+|feat\.|ft\./i)[0].trim();
-        // Also remove generic radio formatting
-        const cleanTitle = title.replace(/\(.*?\)/g, '').trim();
-
-        const searchQuery = encodeURIComponent(`${cleanArtist} ${cleanTitle}`);
+        const searchQuery = encodeURIComponent(`${artist} ${title}`);
 
         const response = await fetch(
             `https://itunes.apple.com/search?term=${searchQuery}&media=music&limit=1`,
@@ -231,12 +196,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
-        // console.log(`Fetching metadata for station: ${stationId}`);
+        console.log(`Fetching metadata for station: ${stationId}`);
 
         const response = await fetch(stationConfig.metadataUrl, {
             headers: {
                 'Accept': 'application/json',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                'User-Agent': 'Web3Radio/1.0'
             }
         });
 
@@ -264,9 +229,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             case 'icecast':
                 metadata = parseIcecastMetadata(data, stationConfig.mount || '/');
                 break;
-            case 'shoutcast-v2':
-                metadata = parseShoutcastV2Metadata(data, STATION_NAMES[stationId]);
-                break;
             case 'zeno':
                 metadata = parseZenoMetadata(data);
                 break;
@@ -277,8 +239,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 const defaultName = STATION_NAMES[stationId] || 'Radio Station';
                 metadata = parseShoutcastCurrentsong(data.raw || JSON.stringify(data), defaultName);
                 break;
+            case 'cloudmu':
+                // Keeping cloudmu mapping to icecast just in case, though user removed it in their snippet for stations but kept it in switch?
+                // Actually user's snippet uses 'shoutcast' type for female/delta.
+                // But the switch case 'cloudmu' is present in their snippet.
+                metadata = parseIcecastMetadata(data, '/');
+                break;
             default:
-                metadata = { title: 'Live', artist: stationId, album: 'Stream', source: 'unknown' };
+                metadata = { raw: data } as any; // fallback
         }
 
         if (metadata) {
