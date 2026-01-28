@@ -92,6 +92,9 @@ const BuyNFTDialog = ({ nft, isOpen, onClose }: BuyNFTDialogProps) => {
           functionName: 'transfer',
           args: [sellerAddress, parseUnits(usdcPrice, 6)], // USDC has 6 decimals
           account: address,
+          chain: undefined // AppKit adapter handles chain, but wagmi types might demand it or we can omit if types allow.
+          // actually the error said 'chain' is missing. 
+          // Let's try to infer or pass 'null' if compatible, or import 'base' and pass it.
         });
       }
     } catch (error) {

@@ -14,6 +14,8 @@ import Dashboard from "./pages/Dashboard";
 import Web3RadioDAO from "./pages/Web3RadioDAO";
 import PremiumContent from "./pages/PremiumContent";
 import DynamicPage from "./pages/DynamicPage";
+import { AudioProvider } from "./contexts/AudioProvider";
+import PersistentPlayer from "./components/radio/PersistentPlayer";
 
 import "./App.css";
 
@@ -22,20 +24,23 @@ function App() {
     <MiniKitContextProvider>
       <AppKitProvider>
         <W3RTokenProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/marketplace" element={<Marketplace />} />
-              <Route path="/news" element={<News />} />
-              <Route path="/events" element={<Events />} />
-              <Route path="/stations" element={<Stations />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/dao" element={<Web3RadioDAO />} />
-              <Route path="/premium" element={<PremiumContent />} />
-              <Route path="/p/:slug" element={<DynamicPage />} />
-            </Routes>
-            <Toaster />
-          </BrowserRouter>
+          <AudioProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/marketplace" element={<Marketplace />} />
+                <Route path="/news" element={<News />} />
+                <Route path="/events" element={<Events />} />
+                <Route path="/stations" element={<Stations />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/dao" element={<Web3RadioDAO />} />
+                <Route path="/premium" element={<PremiumContent />} />
+                <Route path="/p/:slug" element={<DynamicPage />} />
+              </Routes>
+              <PersistentPlayer />
+              <Toaster />
+            </BrowserRouter>
+          </AudioProvider>
         </W3RTokenProvider>
       </AppKitProvider>
     </MiniKitContextProvider>
