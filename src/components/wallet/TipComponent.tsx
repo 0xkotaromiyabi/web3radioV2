@@ -1,18 +1,13 @@
+
 import React, { useState } from "react";
-import { createThirdwebClient, prepareTransaction, getContract, prepareContractCall } from "thirdweb";
-import { base } from "thirdweb/chains";
-import {
-  useConnect,
-  useActiveWallet,
-  useSendTransaction,
-} from "thirdweb/react";
-import { createWallet } from "thirdweb/wallets";
+import { useAccount, useSendTransaction, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { parseUnits, parseEther } from "viem";
+import { useAppKit } from "@reown/appkit/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Heart, Wallet, Send } from "lucide-react";
+import { Loader2, Wallet, Send } from "lucide-react";
 
 const TOKENS = [
   {
@@ -25,7 +20,7 @@ const TOKENS = [
     symbol: "USDC",
     name: "USDC",
     decimals: 6,
-    address: "0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA",
+    address: "0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA", // Verify Base USDC address
   },
   {
     symbol: "USDT",
@@ -42,41 +37,46 @@ const TOKENS = [
 ];
 
 const BASE_TIP_ADDRESS = "0x242DfB7849544eE242b2265cA7E585bdec60456B";
-
-const client = createThirdwebClient({
-  clientId: "ac0e7bf99e676e48fa3a2d9f4c33089c",
-});
+const NATIVE_TOKEN_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 
 const TipComponent = () => {
   const [selectedToken, setSelectedToken] = useState(TOKENS[0]);
   const [amount, setAmount] = useState("0.001");
-  const { connect, isConnecting, error } = useConnect();
-  const wallet = useActiveWallet();
-  const {
-    mutate: sendTx,
-    data: txResult,
-    error: txError,
-    isPending,
-  } = useSendTransaction();
+  const { open } = useAppKit();
+  const { address, isConnected, isConnecting } = useAccount();
   const { toast } = useToast();
+
+  const {
+    sendTransaction,
+    data: ethTxHash,
+    isPending: isEthPending,
+    error: ethError
+  } = useSendTransaction();
+
+  const {
+    writeContract,
+    data: tokenTxHash,
+    isPending: isTokenPending,
+    error: tokenError
+  } = useWriteContract();
+
+  const txHash = ethTxHash || tokenTxHash;
+  const isPending = isEthPending || isTokenPending;
+  const error = ethError || tokenError;
 
   // Show success toast when transaction completes
   React.useEffect(() => {
-    if (txResult) {
+    if (txHash) {
       toast({
-        title: "Sawer Sent Successfully!",
-        description: `${amount} ${selectedToken.symbol} has been sent`,
+        title: "Transaction Sent!",
+        description: `Your tip is being processed. Hash: ${txHash.slice(0, 10)}...`,
       });
     }
-  }, [txResult, amount, selectedToken.symbol, toast]);
+  }, [txHash, toast]);
 
-  // Connect Metamask
+  // Connect Wallet
   const handleConnect = () => {
-    connect(async () => {
-      const metamask = createWallet("io.metamask");
-      await metamask.connect({ client });
-      return metamask;
-    });
+    open();
   };
 
   // Send Tip
@@ -84,32 +84,33 @@ const TipComponent = () => {
     try {
       const n = Number(amount);
       if (!n || n <= 0) throw new Error("Invalid amount");
-      
-      const value = BigInt(n * Math.pow(10, selectedToken.decimals));
-      
-      if (selectedToken.address === "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE") {
+
+      if (selectedToken.address === NATIVE_TOKEN_ADDRESS) {
         // Native ETH transfer
-        const transaction = prepareTransaction({
+        sendTransaction({
           to: BASE_TIP_ADDRESS,
-          value: value,
-          chain: base,
-          client,
-          data: "0x",
+          value: parseEther(amount),
         });
-        sendTx(transaction);
       } else {
         // TRANSFER ERC20
-        const contract = getContract({
-          address: selectedToken.address,
-          chain: base,
-          client,
+        const value = parseUnits(amount, selectedToken.decimals);
+        writeContract({
+          address: selectedToken.address as `0x${string}`,
+          abi: [
+            {
+              name: 'transfer',
+              type: 'function',
+              stateMutability: 'nonpayable',
+              inputs: [
+                { name: 'to', type: 'address' },
+                { name: 'amount', type: 'uint256' }
+              ],
+              outputs: [{ name: '', type: 'bool' }]
+            }
+          ],
+          functionName: 'transfer',
+          args: [BASE_TIP_ADDRESS, value],
         });
-        const transaction = prepareContractCall({
-          contract,
-          method: "function transfer(address to, uint256 value)",
-          params: [BASE_TIP_ADDRESS, value],
-        });
-        sendTx(transaction);
       }
     } catch (err: any) {
       toast({
@@ -132,7 +133,7 @@ const TipComponent = () => {
           </p>
         </div>
 
-        {!wallet ? (
+        {!isConnected ? (
           <Button
             onClick={handleConnect}
             disabled={isConnecting}
@@ -169,7 +170,7 @@ const TipComponent = () => {
                 ))}
               </div>
             </div>
-            
+
             <div>
               <label className="text-sm text-foreground mb-2 block">Amount ({selectedToken.symbol})</label>
               <Input
@@ -184,7 +185,7 @@ const TipComponent = () => {
 
             <Button
               onClick={handleSendTip}
-              disabled={isPending || !wallet}
+              disabled={isPending}
               className="w-full"
               variant="default"
             >
@@ -201,31 +202,25 @@ const TipComponent = () => {
               )}
             </Button>
 
-            {txResult && (
+            {txHash && (
               <div className="mt-4 p-3 bg-secondary border border-border rounded-md">
                 <p className="text-foreground text-sm font-medium">Sent! Tx hash:</p>
                 <a
-                  href={`https://basescan.org/tx/${txResult.transactionHash}`}
+                  href={`https://basescan.org/tx/${txHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:text-primary/80 text-xs break-all underline"
                 >
-                  {txResult.transactionHash}
+                  {txHash}
                 </a>
               </div>
             )}
 
-            {txError && (
+            {error && (
               <div className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
-                <p className="text-destructive text-sm">{txError.message}</p>
+                <p className="text-destructive text-sm">{error.message}</p>
               </div>
             )}
-          </div>
-        )}
-
-        {error && (
-          <div className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
-            <p className="text-destructive text-sm">{error.message}</p>
           </div>
         )}
       </div>

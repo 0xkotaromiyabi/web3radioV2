@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { useActiveAccount } from "thirdweb/react";
+import { useAccount } from 'wagmi';
 import { Badge } from "@/components/ui/badge";
 import { Clock, Zap } from 'lucide-react';
 import { useW3RToken } from "@/contexts/W3RTokenContext";
@@ -9,8 +9,7 @@ interface EnhancedListeningTimeTrackerProps {
 }
 
 const EnhancedListeningTimeTracker: React.FC<EnhancedListeningTimeTrackerProps> = ({ isPlaying }) => {
-  const account = useActiveAccount();
-  const address = account?.address;
+  const { address } = useAccount();
   const { listeningTime, updateListeningTime, rewardEligible, submitListeningSession } = useW3RToken();
 
   const [localListeningTime, setLocalListeningTime] = useState<number>(0);

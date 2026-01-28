@@ -1,24 +1,20 @@
 
 import React from 'react';
-import { NFTProvider, NFTMedia } from "thirdweb/react";
-import { getContract } from "thirdweb";
-import { useActiveAccount } from "thirdweb/react";
+import { useAccount } from 'wagmi';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ethereum } from "thirdweb/chains";
 
 interface NFTCollectionProps {
-  client: any;
+  // client prop removed
 }
 
-const NFTCollection: React.FC<NFTCollectionProps> = ({ client }) => {
-  const account = useActiveAccount();
+const NFTCollection: React.FC<NFTCollectionProps> = () => {
+  const { address, isConnected } = useAccount();
 
   // Example NFT contract address - using a valid format but placeholder
-  // Replace with your actual NFT contract address
   const contractAddress = "0x0000000000000000000000000000000000000000";
 
-  if (!account) {
+  if (!isConnected) {
     return (
       <Card className="p-3 bg-[#222] border-[#444]">
         <p className="text-xs text-gray-400 text-center">
@@ -26,20 +22,6 @@ const NFTCollection: React.FC<NFTCollectionProps> = ({ client }) => {
         </p>
       </Card>
     );
-  }
-
-  // Only create contract if we have a valid non-zero address
-  let nftContract = null;
-  try {
-    if (contractAddress !== "0x0000000000000000000000000000000000000000") {
-      nftContract = getContract({
-        client,
-        chain: ethereum, // Use the proper ethereum chain from thirdweb
-        address: contractAddress
-      });
-    }
-  } catch (error) {
-    console.log("Error creating contract:", error);
   }
 
   return (
@@ -51,41 +33,19 @@ const NFTCollection: React.FC<NFTCollectionProps> = ({ client }) => {
             Connected
           </Badge>
         </div>
-        
-        {nftContract ? (
-          <div className="grid grid-cols-2 gap-2">
-            <NFTProvider tokenId={0n} contract={nftContract}>
-              <NFTMedia
-                className="rounded-md w-full h-20 object-cover"
-                loadingComponent={
-                  <div className="w-full h-20 bg-[#333] rounded-md flex items-center justify-center">
-                    <span className="text-xs text-gray-400">Loading...</span>
-                  </div>
-                }
-              />
-            </NFTProvider>
-            
-            <NFTProvider tokenId={1n} contract={nftContract}>
-              <NFTMedia
-                className="rounded-md w-full h-20 object-cover"
-                loadingComponent={
-                  <div className="w-full h-20 bg-[#333] rounded-md flex items-center justify-center">
-                    <span className="text-xs text-gray-400">Loading...</span>
-                  </div>
-                }
-              />
-            </NFTProvider>
+
+        {/* Placeholder for NFT Grid - Wagmi data fetching needed */}
+        <div className="grid grid-cols-2 gap-2">
+          <div className="w-full h-20 bg-[#333] rounded-md flex items-center justify-center">
+            <span className="text-xs text-gray-400">NFT 1 (Placeholder)</span>
           </div>
-        ) : (
-          <div className="text-center py-4">
-            <div className="w-full h-20 bg-[#333] rounded-md flex items-center justify-center mb-2">
-              <span className="text-xs text-gray-400">No NFT Contract</span>
-            </div>
+          <div className="w-full h-20 bg-[#333] rounded-md flex items-center justify-center">
+            <span className="text-xs text-gray-400">NFT 2 (Placeholder)</span>
           </div>
-        )}
-        
+        </div>
+
         <p className="text-xs text-gray-400 text-center">
-          Add your NFT contract address to display your collection
+          NFT display temporarily unavailable during migration.
         </p>
       </div>
     </Card>

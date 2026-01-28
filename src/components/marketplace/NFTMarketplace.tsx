@@ -1,8 +1,4 @@
 import React, { useState } from 'react';
-import { createThirdwebClient, getContract } from "thirdweb";
-import { defineChain } from "thirdweb/chains";
-import { useReadContract } from "thirdweb/react";
-import { getNFTs } from "thirdweb/extensions/erc1155";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -23,113 +19,51 @@ interface NFTData {
   isListed?: boolean;
 }
 
-// Contract address and client setup
-const NFT_CONTRACT_ADDRESS = "0x49FBd93023FB44fefa81351271fb703cab0f2EE4";
-
-const client = createThirdwebClient({
-  clientId: "ac0e7bf99e676e48fa3a2d9f4c33089c",
-});
-
-const contract = getContract({
-  client,
-  chain: defineChain(8453), // Base chain
-  address: NFT_CONTRACT_ADDRESS,
-});
-
 const NFTMarketplace = () => {
-  const [filteredNfts, setFilteredNfts] = useState<NFTData[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedNft, setSelectedNft] = useState<NFTData | null>(null);
   const [showBuyDialog, setShowBuyDialog] = useState(false);
 
-  const { toast } = useToast();
-
-  // Get NFTs using thirdweb v5
-  const { data: nfts, isLoading, error } = useReadContract(getNFTs, {
-    contract,
-    start: 0,
-    count: 100,
-  });
-
-  // Process NFTs when data loads
-  React.useEffect(() => {
-    if (nfts && nfts.length > 0) {
-      console.log('Raw NFT data:', nfts);
-
-      const formattedNfts: NFTData[] = nfts.map((nft, index) => {
-        console.log(`NFT ${index}:`, nft);
-
-        return {
-          id: nft.id.toString(),
-          name: nft.metadata?.name?.toString() || `NFT #${nft.id}`,
-          description: nft.metadata?.description?.toString() || 'Digital collectible NFT',
-          image: nft.metadata?.image?.toString() || placeholderData,
-          tokenId: nft.id.toString(),
-          isListed: true,
-          price: "0.005", // Fixed price of 0.005 ETH
-        };
-      });
-
-      console.log('Formatted NFTs:', formattedNfts);
-      setFilteredNfts(formattedNfts);
+  // Mock Data since we removed Thirdweb SDK
+  const nfts: NFTData[] = [
+    {
+      id: "1",
+      name: "Radio NFT #1",
+      description: "Exclusive access to premium radio content",
+      image: "",
+      tokenId: "1",
+      price: "0.005",
+      isListed: true
+    },
+    {
+      id: "2",
+      name: "Radio NFT #2",
+      description: "Exclusive access to premium radio content",
+      image: "",
+      tokenId: "2",
+      price: "0.005",
+      isListed: true
+    },
+    {
+      id: "3",
+      name: "Radio NFT #3",
+      description: "Exclusive access to premium radio content",
+      image: "",
+      tokenId: "3",
+      price: "0.005",
+      isListed: true
     }
-  }, [nfts]);
+  ];
 
-  // Filter NFTs based on search
-  React.useEffect(() => {
-    if (!nfts) return;
-
-    let filtered = nfts.map((nft) => ({
-      id: nft.id.toString(),
-      name: nft.metadata?.name?.toString() || `NFT #${nft.id}`,
-      description: nft.metadata?.description?.toString() || 'Digital collectible NFT',
-      image: nft.metadata?.image?.toString() || placeholderData,
-      tokenId: nft.id.toString(),
-      isListed: true,
-      price: "0.005", // Fixed price of 0.005 ETH
-    }));
-
-    if (searchTerm) {
-      filtered = filtered.filter(nft =>
-        nft.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        nft.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        nft.tokenId.includes(searchTerm)
-      );
-    }
-
-    setFilteredNfts(filtered);
-  }, [searchTerm, nfts]);
+  const filteredNfts = nfts.filter(nft =>
+    nft.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    nft.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleBuyNFT = (nft: NFTData) => {
-    console.log('Buying NFT:', nft);
     setSelectedNft(nft);
     setShowBuyDialog(true);
   };
-
-  if (error) {
-    console.error('Error loading NFTs:', error);
-    return (
-      <div className="max-w-7xl mx-auto p-6">
-        <Card className="bg-red-900/20 border-red-600">
-          <CardContent className="p-8 text-center">
-            <h3 className="text-xl font-semibold text-red-400 mb-2">Error Loading NFTs</h3>
-            <p className="text-red-300">Failed to load NFT collection. Please try again later.</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <div className="max-w-7xl mx-auto p-6">
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="w-8 h-8 animate-spin text-green-500" />
-          <span className="ml-2 text-white">Loading NFT marketplace...</span>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
@@ -196,8 +130,8 @@ const NFTMarketplace = () => {
               key={nft.id}
               nft={nft}
               onBuy={() => handleBuyNFT(nft)}
-              contract={contract}
-              client={client}
+              contract={null}
+              client={null}
             />
           ))}
         </div>
@@ -209,8 +143,8 @@ const NFTMarketplace = () => {
           nft={selectedNft}
           isOpen={showBuyDialog}
           onClose={() => setShowBuyDialog(false)}
-          contract={contract}
-          client={client}
+          contract={null}
+          client={null}
         />
       )}
     </div>

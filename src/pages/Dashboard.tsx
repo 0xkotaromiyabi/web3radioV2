@@ -11,9 +11,9 @@ import CMSSidebar from '@/components/cms/CMSSidebar';
 import MediaLibrary from '@/components/cms/MediaLibrary';
 import DashboardOverview from '@/components/cms/DashboardOverview';
 import RadioHub from '@/components/radio/RadioHub';
-import { ConnectButton, useActiveAccount, useDisconnect } from "thirdweb/react";
+import { useAppKit } from '@reown/appkit/react';
+import { useAccount, useDisconnect } from 'wagmi';
 import logo from '@/assets/web3radio-logo.png';
-import { client } from "@/services/w3rSmartContract";
 
 // Super Admin Wallet Addresses (lowercase for comparison)
 const SUPER_ADMINS = [
@@ -54,7 +54,8 @@ type Station = {
 };
 
 const Dashboard = () => {
-  const activeAccount = useActiveAccount();
+  const { open } = useAppKit();
+  const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
   const [isAdmin, setIsAdmin] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
@@ -69,9 +70,9 @@ const Dashboard = () => {
 
   // Check if connected wallet is admin
   useEffect(() => {
-    if (activeAccount) {
-      const address = activeAccount.address.toLowerCase();
-      const isSuperAdmin = SUPER_ADMINS.some(admin => admin.toLowerCase() === address);
+    if (isConnected && address) {
+      const currentAddress = address.toLowerCase();
+      const isSuperAdmin = SUPER_ADMINS.some(admin => admin.toLowerCase() === currentAddress);
       setIsAdmin(isSuperAdmin);
 
       if (isSuperAdmin) {
@@ -89,7 +90,7 @@ const Dashboard = () => {
     } else {
       setIsAdmin(false);
     }
-  }, [activeAccount, toast]);
+  }, [isConnected, address, toast]);
 
   // Load data when admin is authenticated
   useEffect(() => {
@@ -145,11 +146,9 @@ const Dashboard = () => {
   };
 
   const handleLogout = () => {
-    if (activeAccount) {
-      disconnect(activeAccount);
-      setIsAdmin(false);
-      toast({ title: "Disconnected", description: "Wallet disconnected successfully" });
-    }
+    disconnect();
+    setIsAdmin(false);
+    toast({ title: "Disconnected", description: "Wallet disconnected successfully" });
   };
 
   const handleSaveComplete = () => {
@@ -202,42 +201,30 @@ const Dashboard = () => {
           <h1 className="text-2xl font-semibold text-foreground mb-2">CMS Dashboard</h1>
           <p className="text-muted-foreground mb-8">Connect your wallet to access the dashboard</p>
 
-          {activeAccount ? (
+          {isConnected && address ? (
             <div className="space-y-4">
               <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20">
                 <ShieldCheck className="h-8 w-8 text-red-500 mx-auto mb-2" />
                 <p className="text-red-500 font-medium">Access Denied</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Wallet {activeAccount.address.slice(0, 6)}...{activeAccount.address.slice(-4)} is not authorized.
+                  Wallet {address.slice(0, 6)}...{address.slice(-4)} is not authorized.
                 </p>
               </div>
               <button
                 onClick={handleLogout}
-                className="w-full btn-apple-secondary text-red-500"
+                className="w-full btn-apple-secondary text-red-500 py-3 rounded-xl transition-all"
               >
                 Disconnect Wallet
               </button>
             </div>
           ) : (
             <div className="space-y-4">
-              <ConnectButton
-                client={client}
-                theme="light"
-                connectButton={{
-                  label: "Connect Wallet",
-                  style: {
-                    backgroundColor: "#3b82f6",
-                    color: "white",
-                    padding: "14px 32px",
-                    borderRadius: "12px",
-                    fontSize: "15px",
-                    fontWeight: "500",
-                    width: "100%",
-                    display: "flex",
-                    justifyContent: "center"
-                  }
-                }}
-              />
+              <button
+                onClick={() => open()}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3.5 px-8 rounded-xl flex items-center justify-center transition-all shadow-md hover:shadow-lg"
+              >
+                Connect Wallet
+              </button>
               <p className="text-xs text-muted-foreground">
                 Only authorized wallets can access the CMS
               </p>
@@ -459,7 +446,7 @@ const Dashboard = () => {
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
             <span className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
-              {activeAccount?.address.slice(0, 6)}...{activeAccount?.address.slice(-4)}
+              {address?.slice(0, 6)}...{address?.slice(-4)}
             </span>
             <button
               onClick={handleLogout}

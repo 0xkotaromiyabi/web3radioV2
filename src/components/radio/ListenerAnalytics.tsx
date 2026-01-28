@@ -2,17 +2,6 @@
 import React from 'react';
 import { Users, Globe, TrendingUp, Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-
-const data = [
-    { time: '00:00', listeners: 40 },
-    { time: '04:00', listeners: 30 },
-    { time: '08:00', listeners: 85 },
-    { time: '12:00', listeners: 120 },
-    { time: '16:00', listeners: 90 },
-    { time: '20:00', listeners: 70 },
-    { time: '24:00', listeners: 50 },
-];
 
 export default function ListenerAnalytics() {
     return (
@@ -41,23 +30,31 @@ export default function ListenerAnalytics() {
                     </div>
                 </div>
 
-                <div className="h-40 w-full bg-zinc-900/20 rounded-lg border border-zinc-800 p-2">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={data}>
+                {/* Simple SVG Chart Replacement for Recharts */}
+                <div className="h-40 w-full bg-zinc-900/20 rounded-lg border border-zinc-800 p-2 relative overflow-hidden">
+                    <div className="absolute inset-0 flex items-end justify-center opacity-80">
+                        <svg viewBox="0 0 100 40" className="w-full h-full" preserveAspectRatio="none">
                             <defs>
-                                <linearGradient id="colorListeners" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.8} />
-                                    <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
+                                <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.5" />
+                                    <stop offset="100%" stopColor="#06b6d4" stopOpacity="0" />
                                 </linearGradient>
                             </defs>
-                            <XAxis dataKey="time" hide />
-                            <Tooltip
-                                contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', color: '#fff' }}
-                                itemStyle={{ color: '#06b6d4' }}
+                            <path
+                                d="M0,40 L0,25 Q10,15 20,28 T40,20 T60,30 T80,10 T100,25 L100,40 Z"
+                                fill="url(#chartGradient)"
                             />
-                            <Area type="monotone" dataKey="listeners" stroke="#06b6d4" fillOpacity={1} fill="url(#colorListeners)" />
-                        </AreaChart>
-                    </ResponsiveContainer>
+                            <path
+                                d="M0,25 Q10,15 20,28 T40,20 T60,30 T80,10 T100,25"
+                                fill="none"
+                                stroke="#06b6d4"
+                                strokeWidth="0.5"
+                            />
+                        </svg>
+                    </div>
+                    <div className="absolute top-2 right-2 text-[10px] text-zinc-500 bg-zinc-900/80 px-1 rounded border border-zinc-800">
+                        Live Data (24h)
+                    </div>
                 </div>
 
                 <div className="space-y-2">

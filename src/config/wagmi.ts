@@ -1,7 +1,9 @@
+import { http, createConfig } from 'wagmi';
+import { base, mainnet } from 'wagmi/chains';
+import { coinbaseWallet, walletConnect, injected } from 'wagmi/connectors';
 
-import { http, createConfig } from 'wagmi'
-import { base, mainnet } from 'wagmi/chains'
-import { farcasterFrame as miniAppConnector } from '@farcaster/frame-wagmi-connector'
+// WalletConnect Project ID from environment
+const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || '436eaacb5d6ac40e778902daf08eb741';
 
 export const config = createConfig({
   chains: [base, mainnet],
@@ -10,6 +12,14 @@ export const config = createConfig({
     [mainnet.id]: http(),
   },
   connectors: [
-    miniAppConnector()
-  ]
-})
+    injected(), // MetaMask, etc
+    coinbaseWallet({
+      appName: 'Web3Radio',
+      preference: 'smartWalletOnly', // Use smart wallet by default
+    }),
+    walletConnect({
+      projectId,
+      showQrModal: true,
+    }),
+  ],
+});

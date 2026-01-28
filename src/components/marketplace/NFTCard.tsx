@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart } from "lucide-react";
-import { useActiveAccount } from "thirdweb/react";
+import { useAccount } from 'wagmi';
 import placeholderData from '@/assets/placeholder.svg';
 
 interface NFTData {
@@ -25,7 +25,7 @@ interface NFTCardProps {
 }
 
 const NFTCard = ({ nft, onBuy }: NFTCardProps) => {
-  const account = useActiveAccount();
+  const { address: account } = useAccount();
 
   // Function to get IPFS image URL
   const getImageUrl = (imageUri: string) => {

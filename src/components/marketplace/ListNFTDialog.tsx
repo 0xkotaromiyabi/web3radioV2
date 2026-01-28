@@ -23,11 +23,10 @@ interface ListNFTDialogProps {
   nft: NFTData;
   isOpen: boolean;
   onClose: () => void;
-  client: any;
-  nftContract: any;
+  // client and nftContract props removed
 }
 
-const ListNFTDialog = ({ nft, isOpen, onClose, client, nftContract }: ListNFTDialogProps) => {
+const ListNFTDialog = ({ nft, isOpen, onClose }: ListNFTDialogProps) => {
   const [price, setPrice] = useState('');
   const [quantity, setQuantity] = useState('1');
   const [isListing, setIsListing] = useState(false);
@@ -54,30 +53,18 @@ const ListNFTDialog = ({ nft, isOpen, onClose, client, nftContract }: ListNFTDia
 
     try {
       setIsListing(true);
-      
-      // TODO: Implement actual listing with thirdweb marketplace
-      // This requires the marketplace contract to be deployed first
-      // Example:
-      // import { createListing } from "thirdweb/extensions/marketplace";
-      // const transaction = createListing({
-      //   contract: marketplaceContract,
-      //   assetContractAddress: nftContract.address,
-      //   tokenId: nft.tokenId,
-      //   quantity: BigInt(quantity),
-      //   currencyContractAddress: NATIVE_TOKEN_ADDRESS,
-      //   pricePerToken: parseEther(price),
-      //   startTimestamp: new Date(),
-      //   endTimestamp: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-      // });
-      
+
+      // TODO: Implement actual listing with Wagmi/Contract interaction
+      // This requires the marketplace contract to be deployed first and ABI integrated
+
       // Mock success for now
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       toast({
         title: "NFT Listed Successfully",
         description: `${nft.name} has been listed for ${price} ETH`,
       });
-      
+
       setPrice('');
       setQuantity('1');
       onClose();
@@ -172,16 +159,16 @@ const ListNFTDialog = ({ nft, isOpen, onClose, client, nftContract }: ListNFTDia
         </div>
 
         <DialogFooter>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={onClose}
             className="bg-gray-700 text-gray-200 border-gray-600 hover:bg-gray-600"
             disabled={isListing}
           >
             Cancel
           </Button>
-          <Button 
-            onClick={handleList} 
+          <Button
+            onClick={handleList}
             disabled={isListing || !price || !quantity}
             className="bg-green-600 text-white hover:bg-green-700"
           >

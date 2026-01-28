@@ -1,11 +1,7 @@
+
 import React, { useState, useEffect, useMemo } from "react";
-import {
-  ThirdwebProvider,
-  ConnectButton,
-  useActiveAccount,
-} from "thirdweb/react";
-import { mainnet } from "thirdweb/chains";
-import { createThirdwebClient } from "thirdweb";
+import { useAccount, useDisconnect } from 'wagmi';
+import { useAppKit } from '@reown/appkit/react';
 import {
   ConnectionProvider,
   WalletProvider,
@@ -18,17 +14,13 @@ import {
 import { clusterApiUrl } from "@solana/web3.js";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Shield, CheckCircle, AlertTriangle } from "lucide-react";
+import { Shield, CheckCircle, AlertTriangle, Wallet } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NavBar from "@/components/navigation/NavBar";
 
 import "@solana/wallet-adapter-react-ui/styles.css";
 
-const thirdwebClient = createThirdwebClient({
-  clientId: "ac0e7bf99e676e48fa3a2d9f4c33089c",
-});
-
-const REGISTERED_WALLETS = {
+const REGISTERED_WALLETS: Record<string, string> = {
   "kotarominami.eth": "ngapain ikut lomba?",
   "0xdigiweave.eth": "eh lu kan di blacklist dari lomba",
   "0xe4b19fcbb0c8ace2098bacc7a495c6c524ace29e": "Selamat yah... kamu Juara 1 - Tunggu informasi selanjutnya untuk distribusi hadiahnya",
@@ -43,18 +35,19 @@ const REGISTERED_WALLETS = {
 };
 
 function EthereumVerification() {
-  const account = useActiveAccount();
+  const { address, isConnected } = useAccount();
+  const { open } = useAppKit();
   const [notif, setNotif] = useState("");
   const [ensName, setEnsName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     async function checkWallet() {
-      if (account?.address) {
+      if (address) {
         setIsLoading(true);
         try {
           // Check if wallet address is directly registered
-          const walletAddress = account.address.toLowerCase();
+          const walletAddress = address.toLowerCase();
           if (REGISTERED_WALLETS[walletAddress]) {
             setNotif(REGISTERED_WALLETS[walletAddress]);
             setEnsName("");
@@ -63,11 +56,11 @@ function EthereumVerification() {
           }
 
           // Check ENS if wallet address not found
-          const response = await fetch(`https://api.ensideas.com/ens/resolve/${account.address}`);
+          const response = await fetch(`https://api.ensideas.com/ens/resolve/${address}`);
           if (response.ok) {
             const data = await response.json();
             const ens = data.name;
-            
+
             if (ens && ens.endsWith('.eth')) {
               setEnsName(ens);
               if (REGISTERED_WALLETS[ens]) {
@@ -96,24 +89,36 @@ function EthereumVerification() {
       }
     }
     checkWallet();
-  }, [account?.address]);
+  }, [address]);
 
   return (
     <div className="space-y-6">
       <div className="flex justify-center">
-        <ConnectButton 
-          client={thirdwebClient} 
-          chain={mainnet}
-          theme="dark"
-        />
+        {!isConnected ? (
+          <button
+            onClick={() => open()}
+            className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium"
+          >
+            <Wallet className="w-4 h-4" />
+            Connect Wallet
+          </button>
+        ) : (
+          <button
+            onClick={() => open({ view: 'Account' })}
+            className="flex items-center gap-2 px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg transition-colors font-medium border"
+          >
+            <div className="w-2 h-2 rounded-full bg-green-500" />
+            {address?.slice(0, 6)}...{address?.slice(-4)}
+          </button>
+        )}
       </div>
 
-      {account?.address && (
+      {address && (
         <div className="space-y-4">
           <div className="p-4 bg-secondary/20 rounded-lg">
             <h3 className="font-semibold text-foreground mb-2">Ethereum Wallet Connected</h3>
             <p className="text-sm text-muted-foreground font-mono break-all">
-              {account.address}
+              {address}
             </p>
           </div>
 
@@ -140,7 +145,7 @@ function EthereumVerification() {
             </Alert>
           )}
 
-          {account.address && !notif && !isLoading && (
+          {address && !notif && !isLoading && (
             <Alert>
               <CheckCircle className="h-4 w-4" />
               <AlertDescription>
@@ -151,7 +156,7 @@ function EthereumVerification() {
         </div>
       )}
 
-      {!account?.address && (
+      {!address && (
         <div className="text-center text-muted-foreground">
           <Shield className="h-12 w-12 mx-auto mb-3 opacity-50" />
           <p>Connect your Ethereum wallet to start verification process</p>
@@ -172,7 +177,7 @@ function SolanaVerification() {
         setIsLoading(true);
         try {
           const walletAddress = publicKey.toString().toLowerCase();
-          
+
           // Check if Solana wallet address is registered
           if (REGISTERED_WALLETS[walletAddress]) {
             setNotif(REGISTERED_WALLETS[walletAddress]);
@@ -278,11 +283,11 @@ function VerificationPlayground() {
                 <TabsTrigger value="ethereum">Ethereum</TabsTrigger>
                 <TabsTrigger value="solana">Solana</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="ethereum" className="mt-6">
                 <EthereumVerification />
               </TabsContent>
-              
+
               <TabsContent value="solana" className="mt-6">
                 <ConnectionProvider endpoint={endpoint}>
                   <WalletProvider wallets={wallets}>
@@ -305,9 +310,5 @@ function VerificationPlayground() {
 }
 
 export default function VerificationOnchain() {
-  return (
-    <ThirdwebProvider>
-      <VerificationPlayground />
-    </ThirdwebProvider>
-  );
+  return <VerificationPlayground />;
 }

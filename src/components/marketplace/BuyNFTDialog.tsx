@@ -1,7 +1,4 @@
-
 import React, { useState } from 'react';
-import { PayEmbed, getDefaultToken } from "thirdweb/react";
-import { base } from "thirdweb/chains";
 import {
   Dialog,
   DialogContent,
@@ -12,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { X, Coins } from "lucide-react";
+import { useSendTransaction, useWriteContract, useWaitForTransactionReceipt, useAccount } from 'wagmi';
+import { parseEther, parseUnits } from 'viem';
 
 interface NFTData {
   id: string;
@@ -30,26 +29,77 @@ interface BuyNFTDialogProps {
   client: any;
 }
 
-const BuyNFTDialog = ({ nft, isOpen, onClose, client }: BuyNFTDialogProps) => {
+const BuyNFTDialog = ({ nft, isOpen, onClose }: BuyNFTDialogProps) => {
   const [paymentMethod, setPaymentMethod] = useState<'usdc' | 'eth'>('eth');
+  const { address } = useAccount();
+
+  // Seller address from previous file
+  const sellerAddress = "0x242DfB7849544eE242b2265cA7E585bdec60456B";
+  const usdcAddress = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"; // Base USDC
+
+  // ETH Payment
+  const { sendTransaction, data: ethHash, isPending: isEthPending } = useSendTransaction();
+
+  // USDC Payment
+  const { writeContract, data: usdcHash, isPending: isUsdcPending } = useWriteContract();
+
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash: ethHash || usdcHash,
+  });
+
+  // Calculate USDC equivalent (approximate conversion: 1 ETH = ~3700 USDC)
+  const usdcPrice = nft.price ? (parseFloat(nft.price) * 3700).toFixed(6) : "18.5";
 
   // Function to get IPFS image URL
   const getImageUrl = (imageUri: string) => {
     if (!imageUri) return '/placeholder.svg';
-    
     if (imageUri.startsWith('ipfs://')) {
       return `https://ipfs.io/ipfs/${imageUri.replace('ipfs://', '')}`;
     }
-    
     if (imageUri.startsWith('http')) {
       return imageUri;
     }
-    
     return '/placeholder.svg';
   };
 
-  // Calculate USDC equivalent (approximate conversion: 1 ETH = ~3700 USDC)
-  const usdcPrice = nft.price ? (parseFloat(nft.price) * 3700).toFixed(0) : "18.5";
+  const handleCreateTransaction = async () => {
+    if (!nft.price || !address) return;
+
+    try {
+      if (paymentMethod === 'eth') {
+        sendTransaction({
+          to: sellerAddress,
+          value: parseEther(nft.price),
+        });
+      } else {
+        // USDC Transfer
+        const erc20Abi = [
+          {
+            name: 'transfer',
+            type: 'function',
+            stateMutability: 'nonpayable',
+            inputs: [
+              { name: 'to', type: 'address' },
+              { name: 'amount', type: 'uint256' },
+            ],
+            outputs: [{ name: '', type: 'bool' }],
+          },
+        ] as const;
+
+        writeContract({
+          address: usdcAddress,
+          abi: erc20Abi,
+          functionName: 'transfer',
+          args: [sellerAddress, parseUnits(usdcPrice, 6)], // USDC has 6 decimals
+          account: address,
+        });
+      }
+    } catch (error) {
+      console.error('Transaction failed:', error);
+    }
+  };
+
+  const isPending = isEthPending || isUsdcPending || isConfirming;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -60,12 +110,7 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, client }: BuyNFTDialogProps) => {
               <Coins className="w-5 h-5 mr-2" />
               Purchase NFT
             </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="text-gray-400 hover:text-white"
-            >
+            <Button variant="ghost" size="sm" onClick={onClose} className="text-gray-400 hover:text-white">
               <X className="w-4 h-4" />
             </Button>
           </DialogTitle>
@@ -78,9 +123,7 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, client }: BuyNFTDialogProps) => {
               src={getImageUrl(nft.image)}
               alt={nft.name}
               className="w-full h-full object-cover"
-              onError={(e) => {
-                e.currentTarget.src = '/placeholder.svg';
-              }}
+              onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }}
             />
           </div>
 
@@ -88,7 +131,6 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, client }: BuyNFTDialogProps) => {
           <div className="space-y-2">
             <h3 className="text-lg font-semibold">{nft.name}</h3>
             <p className="text-sm text-gray-400 line-clamp-3">{nft.description}</p>
-            
             <div className="flex items-center justify-between">
               <Badge className="bg-blue-600">Token ID: {nft.tokenId}</Badge>
               <Badge className="bg-green-600">Available</Badge>
@@ -98,69 +140,39 @@ const BuyNFTDialog = ({ nft, isOpen, onClose, client }: BuyNFTDialogProps) => {
           {/* Payment Options */}
           <Tabs value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as 'usdc' | 'eth')} className="w-full">
             <TabsList className="grid w-full grid-cols-2 bg-gray-700">
-              <TabsTrigger value="eth" className="data-[state=active]:bg-purple-600">
-                ETH Payment
-              </TabsTrigger>
-              <TabsTrigger value="usdc" className="data-[state=active]:bg-blue-600">
-                USDC Payment
-              </TabsTrigger>
+              <TabsTrigger value="eth" className="data-[state=active]:bg-purple-600">ETH Payment</TabsTrigger>
+              <TabsTrigger value="usdc" className="data-[state=active]:bg-blue-600">USDC Payment</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="eth" className="mt-4">
-              <div className="text-center mb-4">
-                <span className="text-2xl font-bold text-purple-400">
-                  {nft.price || "0.005"} ETH
-                </span>
-                <p className="text-xs text-gray-400 mt-1">
-                  ≈ {usdcPrice} USDC
-                </p>
+            <TabsContent value="eth" className="mt-4 text-center">
+              <div className="mb-4">
+                <span className="text-2xl font-bold text-purple-400">{nft.price || "0.005"} ETH</span>
+                <p className="text-xs text-gray-400 mt-1">≈ {usdcPrice} USDC</p>
               </div>
-              <PayEmbed
-                client={client}
-                theme="dark"
-                payOptions={{
-                  mode: "direct_payment",
-                  paymentInfo: {
-                    amount: nft.price || "0.005",
-                    chain: base,
-                    sellerAddress: "0x242DfB7849544eE242b2265cA7E585bdec60456B",
-                  },
-                  metadata: {
-                    name: nft.name,
-                    image: getImageUrl(nft.image),
-                  },
-                }}
-              />
             </TabsContent>
 
-            <TabsContent value="usdc" className="mt-4">
-              <div className="text-center mb-4">
-                <span className="text-2xl font-bold text-green-400">
-                  {usdcPrice} USDC
-                </span>
-                <p className="text-xs text-gray-400 mt-1">
-                  ≈ {nft.price || "0.005"} ETH
-                </p>
+            <TabsContent value="usdc" className="mt-4 text-center">
+              <div className="mb-4">
+                <span className="text-2xl font-bold text-green-400">{usdcPrice} USDC</span>
+                <p className="text-xs text-gray-400 mt-1">≈ {nft.price || "0.005"} ETH</p>
               </div>
-              <PayEmbed
-                client={client}
-                theme="dark"
-                payOptions={{
-                  mode: "direct_payment",
-                  paymentInfo: {
-                    amount: usdcPrice,
-                    chain: base,
-                    token: getDefaultToken(base, "USDC"),
-                    sellerAddress: "0x242DfB7849544eE242b2265cA7E585bdec60456B",
-                  },
-                  metadata: {
-                    name: nft.name,
-                    image: getImageUrl(nft.image),
-                  },
-                }}
-              />
             </TabsContent>
           </Tabs>
+
+          {/* Transaction Status */}
+          {isSuccess ? (
+            <div className="p-3 bg-green-900/20 text-green-400 rounded-lg text-center text-sm">
+              ✅ Purchase Successful!
+            </div>
+          ) : (
+            <Button
+              onClick={handleCreateTransaction}
+              disabled={isPending || !address}
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            >
+              {isPending ? 'Processing...' : `Pay using ${paymentMethod.toUpperCase()}`}
+            </Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>

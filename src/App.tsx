@@ -1,16 +1,9 @@
 
-import React, { useEffect } from 'react';
-import sdk from '@farcaster/miniapp-sdk';
+import React from 'react';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { WagmiProvider } from 'wagmi';
-import { ThirdwebProvider, ConnectButton } from "thirdweb/react";
-import { createThirdwebClient } from "thirdweb";
-import { base } from "thirdweb/chains";
-import { client } from "./services/w3rSmartContract";
+import { AppKitProvider } from './config/appkit';
 import { W3RTokenProvider } from "./contexts/W3RTokenContext";
 import { MiniKitContextProvider } from "./providers/MiniKitProvider";
-import { config } from "./config/wagmi";
 import { Toaster } from "@/components/ui/toaster";
 import Index from "./pages/Index";
 import Marketplace from "./pages/Marketplace";
@@ -18,54 +11,33 @@ import News from "./pages/News";
 import Events from "./pages/Events";
 import Stations from "./pages/Stations";
 import Dashboard from "./pages/Dashboard";
-import VerificationOnchain from "./pages/VerificationOnchain";
+import Web3RadioDAO from "./pages/Web3RadioDAO";
 import PremiumContent from "./pages/PremiumContent";
 import DynamicPage from "./pages/DynamicPage";
 
 import "./App.css";
 
-const queryClient = new QueryClient();
-
-
-
 function App() {
-  useEffect(() => {
-    const initSdk = async () => {
-      try {
-        await sdk.actions.ready();
-      } catch (error) {
-        console.error('Failed to initialize Farcaster SDK:', error);
-      }
-    };
-    initSdk();
-  }, []);
-
   return (
     <MiniKitContextProvider>
-      <WagmiProvider config={config}>
-        <QueryClientProvider client={queryClient}>
-          <ThirdwebProvider>
-            <W3RTokenProvider>
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/marketplace" element={<Marketplace />} />
-                  <Route path="/news" element={<News />} />
-                  <Route path="/events" element={<Events />} />
-                  <Route path="/stations" element={<Stations />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/17an-onchain" element={<VerificationOnchain />} />
-                  <Route path="/premium" element={<PremiumContent />} />
-                  <Route path="/p/:slug" element={<DynamicPage />} />
-
-
-                </Routes>
-                <Toaster />
-              </BrowserRouter>
-            </W3RTokenProvider>
-          </ThirdwebProvider>
-        </QueryClientProvider>
-      </WagmiProvider>
+      <AppKitProvider>
+        <W3RTokenProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/news" element={<News />} />
+              <Route path="/events" element={<Events />} />
+              <Route path="/stations" element={<Stations />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dao" element={<Web3RadioDAO />} />
+              <Route path="/premium" element={<PremiumContent />} />
+              <Route path="/p/:slug" element={<DynamicPage />} />
+            </Routes>
+            <Toaster />
+          </BrowserRouter>
+        </W3RTokenProvider>
+      </AppKitProvider>
     </MiniKitContextProvider>
   );
 }

@@ -29,6 +29,16 @@ const STATION_METADATA: Record<string, { type: string; metadataUrl: string; moun
     }
 };
 
+// Pretty names for fallback
+const STATION_NAMES: Record<string, string> = {
+    'web3': 'Web3 Radio',
+    'Venus': 'Venus FM',
+    'iradio': 'i-Radio',
+    'female': 'Female Radio',
+    'delta': 'Delta FM',
+    'prambors': 'Prambors FM'
+};
+
 interface Metadata {
     title: string;
     artist: string;
@@ -103,21 +113,21 @@ function parseRadioJarMetadata(data: any): Metadata | null {
 }
 
 // Parse Shoutcast currentsong (plain text format: "ARTIST - TITLE")
-function parseShoutcastCurrentsong(text: string): Metadata | null {
+function parseShoutcastCurrentsong(text: string, defaultArtist: string = 'Unknown Station'): Metadata | null {
     try {
         if (text && typeof text === 'string') {
             const parts = text.trim().split(' - ');
             if (parts.length >= 2) {
                 return {
-                    title: parts.slice(1).join(' - '),
-                    artist: parts[0],
+                    title: parts.slice(1).join(' - ').trim(),
+                    artist: parts[0].trim(),
                     album: 'Top 40',
                     source: 'shoutcast'
                 };
             } else {
                 return {
                     title: text.trim(),
-                    artist: 'Live Radio',
+                    artist: defaultArtist,
                     album: 'Top 40',
                     source: 'shoutcast'
                 };
@@ -134,7 +144,10 @@ async function fetchAlbumArt(artist: string, title: string): Promise<string | nu
     try {
         const searchQuery = encodeURIComponent(`${artist} ${title}`);
         const response = await fetch(
-            `https://itunes.apple.com/search?term=${searchQuery}&media=music&limit=1`
+            `https://itunes.apple.com/search?term=${searchQuery}&media=music&limit=1`,
+            {
+                // Add simple timeout signal if environment supports it, but standard fetch in Node might vary
+            }
         );
 
         if (response.ok) {
@@ -147,7 +160,7 @@ async function fetchAlbumArt(artist: string, title: string): Promise<string | nu
             }
         }
     } catch (e) {
-        console.error('Error fetching album art:', e);
+        // console.error('Error fetching album art:', e);
     }
     return null;
 }
@@ -182,12 +195,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
-        console.log(`Fetching metadata for station: ${stationId}`);
+        // console.log(`Fetching metadata for station: ${stationId}`);
 
         const response = await fetch(stationConfig.metadataUrl, {
             headers: {
                 'Accept': 'application/json',
-                'User-Agent': 'Web3Radio/1.0'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
             }
         });
 
@@ -222,7 +235,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 metadata = parseRadioJarMetadata(data);
                 break;
             case 'shoutcast':
-                metadata = parseShoutcastCurrentsong(data.raw || JSON.stringify(data));
+                const defaultName = STATION_NAMES[stationId] || 'Radio Station';
+                metadata = parseShoutcastCurrentsong(data.raw || JSON.stringify(data), defaultName);
                 break;
             default:
                 metadata = { title: 'Live', artist: stationId, album: 'Stream', source: 'unknown' };
@@ -247,7 +261,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 station: stationId,
                 nowPlaying: {
                     title: 'Live Broadcast',
-                    artist: stationId,
+                    artist: STATION_NAMES[stationId] || stationId,
                     album: 'Live Stream',
                     source: 'fallback'
                 },

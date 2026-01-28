@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
-import { createThirdwebClient } from "thirdweb";
-import { ConnectButton, useActiveAccount } from "thirdweb/react";
-import { inAppWallet, createWallet } from "thirdweb/wallets";
+import { useAppKit } from '@reown/appkit/react';
+import { useAccount, useDisconnect } from 'wagmi';
 import {
   ConnectionProvider,
   WalletProvider,
@@ -13,66 +12,65 @@ import {
 } from "@solana/wallet-adapter-react-ui";
 import { clusterApiUrl } from "@solana/web3.js";
 import EnhancedListeningTimeTracker from './EnhancedListeningTimeTracker';
-import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import FarcasterConnectMenu from './FarcasterConnectMenu';
+import BuyIDRXComponent from './BuyIDRXComponent';
+import TipIDRXComponent from './TipIDRXComponent';
 import "@solana/wallet-adapter-react-ui/styles.css";
+import { Wallet, LogOut } from 'lucide-react';
 
 interface WalletConnectionProps {
   isPlaying: boolean;
 }
 
-const client = createThirdwebClient({
-  clientId: "ac0e7bf99e676e48fa3a2d9f4c33089c",
-});
-
-const wallets = [
-  inAppWallet({
-    auth: {
-      options: [
-        "google",
-        "discord",
-        "telegram",
-        "farcaster",
-        "email",
-        "x",
-        "passkey",
-        "phone",
-      ],
-    },
-  }),
-  createWallet("io.metamask"),
-  createWallet("com.coinbase.wallet"),
-  createWallet("me.rainbow"),
-  createWallet("io.rabby"),
-  createWallet("io.zerion.wallet"),
-];
-
 function EthereumWalletConnection() {
-  const account = useActiveAccount();
+  const { open } = useAppKit();
+  const { address, isConnected } = useAccount();
+  const { disconnect } = useDisconnect();
 
   return (
     <div className="space-y-4">
       <div className="text-center">
         <h3 className="text-sm font-semibold text-gray-900 mb-1">Connect Ethereum Wallet</h3>
         <p className="text-xs text-gray-500 mb-4">
-          Access Web3 Radio features via ETH
+          Access Web3 Radio features via ETH/Base
         </p>
       </div>
 
       <div className="flex justify-center">
-        <ConnectButton
-          client={client}
-          wallets={wallets}
-          connectModal={{ size: "compact" }}
-          theme="light"
-        />
+        {!isConnected ? (
+          <button
+            onClick={() => open()}
+            className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all font-medium shadow-md hover:shadow-lg"
+          >
+            <Wallet className="w-4 h-4" />
+            Connect Wallet
+          </button>
+        ) : (
+          <div className="w-full space-y-3">
+            <button
+              onClick={() => open({ view: 'Account' })}
+              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-900 border border-gray-200 rounded-xl transition-all font-medium shadow-sm"
+            >
+              <div className="w-2 h-2 rounded-full bg-green-500" />
+              {address?.slice(0, 6)}...{address?.slice(-4)}
+            </button>
+          </div>
+        )}
       </div>
 
-      {account?.address && (
-        <div className="p-3 bg-white/50 rounded-xl border border-gray-200/50 shadow-inner">
-          <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider font-medium">Connected Address</p>
-          <p className="text-xs text-gray-900 font-mono break-all">{account.address}</p>
+      {isConnected && (
+        <div className="space-y-4 animate-in fade-in-50 duration-500">
+          <div className="p-3 bg-white/50 rounded-xl border border-gray-200/50 shadow-inner">
+            <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider font-medium">Connected Address</p>
+            <p className="text-xs text-gray-900 font-mono break-all">{address}</p>
+          </div>
+
+          {/* Enhanced IDRX Operations */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <BuyIDRXComponent />
+            <TipIDRXComponent />
+          </div>
         </div>
       )}
     </div>

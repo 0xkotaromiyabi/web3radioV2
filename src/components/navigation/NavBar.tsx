@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Newspaper, Calendar, Radio, Menu, X, Shield, LogIn } from 'lucide-react';
+import { Home, Newspaper, Calendar, Radio, Menu, X, Users, LogIn } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import logo from '@/assets/web3radio-logo.png';
@@ -28,7 +28,7 @@ const NavBar = () => {
     { to: '/news', label: 'News', icon: Newspaper },
     { to: '/events', label: 'Events', icon: Calendar },
     { to: '/stations', label: 'Radio Stations', icon: Radio },
-    { to: '/17an-onchain', label: '17an Onchain', icon: Shield },
+    { to: '/dao', label: 'Web3Radio DAO', icon: Users }, // Updated from 17an Onchain
   ];
 
   const isActive = (path: string) => location.pathname === path;

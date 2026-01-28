@@ -5,11 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useW3RToken } from "@/contexts/W3RTokenContext";
-import { useActiveAccount } from "thirdweb/react";
+import { useAccount } from "wagmi";
 import { Coins, Clock, Gift, Loader } from 'lucide-react';
 
 const W3RRewardClaim = () => {
-  const account = useActiveAccount();
+  const { address } = useAccount();
   const { balance, rewardEligible, nextRewardIn, claimReward, isLoading } = useW3RToken();
   const { toast } = useToast();
   const [isClaiming, setIsClaiming] = useState(false);
@@ -18,7 +18,7 @@ const W3RRewardClaim = () => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    
+
     if (hours > 0) {
       return `${hours}h ${minutes}m ${secs}s`;
     } else if (minutes > 0) {
@@ -29,12 +29,12 @@ const W3RRewardClaim = () => {
   };
 
   const handleClaimReward = async () => {
-    if (!account?.address || !rewardEligible) return;
+    if (!address || !rewardEligible) return;
 
     setIsClaiming(true);
     try {
       const success = await claimReward();
-      
+
       if (success) {
         toast({
           title: "Reward Claimed Successfully! 🎉",
@@ -55,7 +55,7 @@ const W3RRewardClaim = () => {
     }
   };
 
-  if (!account) return null;
+  if (!address) return null;
 
   return (
     <Card className="p-3 bg-[#222] border-[#444] space-y-3">

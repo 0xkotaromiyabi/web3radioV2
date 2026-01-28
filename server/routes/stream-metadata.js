@@ -32,6 +32,16 @@ const STATION_METADATA = {
     }
 };
 
+// Pretty names for fallback
+const STATION_NAMES = {
+    'web3': 'Web3 Radio',
+    'Venus': 'Venus FM',
+    'iradio': 'i-Radio',
+    'female': 'Female Radio',
+    'delta': 'Delta FM',
+    'prambors': 'Prambors FM'
+};
+
 // Parse Icecast JSON response
 function parseIcecastMetadata(data, mount) {
     try {
@@ -97,21 +107,21 @@ function parseRadioJarMetadata(data) {
 }
 
 // Parse Shoutcast currentsong (plain text format: "ARTIST - TITLE")
-function parseShoutcastCurrentsong(text) {
+function parseShoutcastCurrentsong(text, defaultArtist = 'Unknown Station') {
     try {
         if (text && typeof text === 'string') {
             const parts = text.trim().split(' - ');
             if (parts.length >= 2) {
                 return {
-                    title: parts.slice(1).join(' - '),
-                    artist: parts[0],
+                    title: parts.slice(1).join(' - ').trim(),
+                    artist: parts[0].trim(),
                     album: 'Top 40',
                     source: 'shoutcast'
                 };
             } else {
                 return {
                     title: text.trim(),
-                    artist: 'Prambors FM',
+                    artist: defaultArtist,
                     album: 'Top 40',
                     source: 'shoutcast'
                 };
@@ -143,7 +153,8 @@ async function fetchAlbumArt(artist, title) {
             }
         }
     } catch (e) {
-        console.error('Error fetching album art:', e);
+        // Silent fail for artwork
+        // console.error('Error fetching album art:', e);
     }
     return null;
 }
@@ -161,13 +172,13 @@ router.get('/:station', async (req, res) => {
     }
 
     try {
-        console.log(`Fetching metadata for station: ${stationId}`);
+        // console.log(`Fetching metadata for station: ${stationId}`);
 
         const response = await fetch(stationConfig.metadataUrl, {
             timeout: 5000,
             headers: {
-                'Accept': 'application/json',
-                'User-Agent': 'Web3Radio/1.0'
+                'Accept': 'application/json', // Some servers prefer this even for text endpoints
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
             }
         });
 
@@ -181,7 +192,7 @@ router.get('/:station', async (req, res) => {
         if (contentType?.includes('application/json')) {
             data = await response.json();
         } else {
-            // Try to parse as JSON anyway
+            // Try to parse as JSON anyway, or fall back to text
             const text = await response.text();
             try {
                 data = JSON.parse(text);
@@ -208,7 +219,8 @@ router.get('/:station', async (req, res) => {
                 break;
             case 'shoutcast':
                 // Shoutcast currentsong returns plain text
-                metadata = parseShoutcastCurrentsong(data.raw || JSON.stringify(data));
+                const defaultName = STATION_NAMES[stationId] || 'Radio Station';
+                metadata = parseShoutcastCurrentsong(data.raw || JSON.stringify(data), defaultName);
                 break;
             default:
                 metadata = { raw: data };
@@ -233,7 +245,7 @@ router.get('/:station', async (req, res) => {
                 station: stationId,
                 nowPlaying: {
                     title: 'Live Broadcast',
-                    artist: stationId,
+                    artist: STATION_NAMES[stationId] || stationId,
                     album: 'Live Stream',
                     source: 'fallback'
                 },
@@ -242,7 +254,7 @@ router.get('/:station', async (req, res) => {
         }
 
     } catch (error) {
-        console.error(`Error fetching metadata for ${stationId}:`, error);
+        console.error(`Error fetching metadata for ${stationId}:`, error.message);
         res.status(500).json({
             error: error.message,
             station: stationId
