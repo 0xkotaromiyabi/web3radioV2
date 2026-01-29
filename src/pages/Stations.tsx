@@ -8,14 +8,8 @@ import { fetchStations, subscribeToTable } from '@/lib/supabase';
 import { Loader } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
-type Station = {
-  id: number;
-  name: string;
-  genre: string;
-  description: string;
-  streaming: boolean;
-  image_url?: string;
-};
+import { Link } from 'react-router-dom';
+import { Station } from '@/types/content';
 
 type GenreCategory = 'all' | 'pop' | 'rock' | 'news' | 'community';
 
@@ -53,24 +47,24 @@ const Stations = () => {
   // Sample station data for each genre category
   const sampleStations: Station[] = [
     // Pop / Top 40
-    { id: 101, name: 'Prambors FM', genre: 'pop', description: 'Jakarta\'s #1 Hit Music Station', streaming: true, image_url: '' },
-    { id: 102, name: 'Female Radio', genre: 'pop', description: 'Music & Lifestyle for Modern Women', streaming: true, image_url: '' },
-    { id: 103, name: 'i-Radio', genre: 'pop', description: 'Today\'s Best Music', streaming: true, image_url: '' },
+    { id: 101, name: 'Prambors FM', genre: 'pop', description: 'Jakarta\'s #1 Hit Music Station', streaming: true, image_url: '', slug: 'prambors-fm' },
+    { id: 102, name: 'Female Radio', genre: 'pop', description: 'Music & Lifestyle for Modern Women', streaming: true, image_url: '', slug: 'female-radio' },
+    { id: 103, name: 'i-Radio', genre: 'pop', description: 'Today\'s Best Music', streaming: true, image_url: '', slug: 'i-radio' },
 
     // Rock (Classic Rock, Alternative, Indie)
-    { id: 201, name: 'Hard Rock FM', genre: 'rock', description: 'Classic Rock Anthems 24/7', streaming: false, image_url: '' },
-    { id: 202, name: 'Indie Nation', genre: 'rock', description: 'Alternative & Indie Rock Hits', streaming: false, image_url: '' },
-    { id: 203, name: 'Delta FM', genre: 'rock', description: 'Rock & Alternative Music', streaming: true, image_url: '' },
+    { id: 201, name: 'Hard Rock FM', genre: 'rock', description: 'Classic Rock Anthems 24/7', streaming: false, image_url: '', slug: 'hard-rock-fm' },
+    { id: 202, name: 'Indie Nation', genre: 'rock', description: 'Alternative & Indie Rock Hits', streaming: false, image_url: '', slug: 'indie-nation' },
+    { id: 203, name: 'Delta FM', genre: 'rock', description: 'Rock & Alternative Music', streaming: true, image_url: '', slug: 'delta-fm' },
 
     // News
-    { id: 301, name: 'BBC World Service', genre: 'news', description: 'Global News & Current Affairs', streaming: false, image_url: '' },
-    { id: 302, name: 'Metro News FM', genre: 'news', description: 'Your Source for Local & National News', streaming: false, image_url: '' },
-    { id: 303, name: 'Oz Radio Jakarta', genre: 'news', description: 'News, Talk & Information', streaming: true, image_url: '' },
+    { id: 301, name: 'BBC World Service', genre: 'news', description: 'Global News & Current Affairs', streaming: false, image_url: '', slug: 'bbc-world-service' },
+    { id: 302, name: 'Metro News FM', genre: 'news', description: 'Your Source for Local & National News', streaming: false, image_url: '', slug: 'metro-news-fm' },
+    { id: 303, name: 'Oz Radio Jakarta', genre: 'news', description: 'News, Talk & Information', streaming: true, image_url: '', slug: 'oz-radio-jakarta' },
 
     // Community Radio
-    { id: 401, name: 'Web3 Radio', genre: 'community', description: 'Community-Powered Web3 Broadcasting', streaming: true, image_url: '' },
-    { id: 402, name: 'Local Voice Radio', genre: 'community', description: 'Your Community, Your Voice', streaming: false, image_url: '' },
-    { id: 403, name: 'Campus FM', genre: 'community', description: 'Student-Run Campus Radio', streaming: false, image_url: '' },
+    { id: 401, name: 'Web3 Radio', genre: 'community', description: 'Community-Powered Web3 Broadcasting', streaming: true, image_url: '', slug: 'web3-radio' },
+    { id: 402, name: 'Local Voice Radio', genre: 'community', description: 'Your Community, Your Voice', streaming: false, image_url: '', slug: 'local-voice-radio' },
+    { id: 403, name: 'Campus FM', genre: 'community', description: 'Student-Run Campus Radio', streaming: false, image_url: '', slug: 'campus-fm' },
   ];
 
   useEffect(() => {
@@ -227,8 +221,8 @@ const Stations = () => {
                   key={category.id}
                   onClick={() => setSelectedGenre(category.id as GenreCategory)}
                   className={`flex items-center gap-2 px-6 py-3 font-medium transition-all duration-200 border-b-2 ${isActive
-                      ? 'border-green-500 text-green-400 bg-gray-800/50'
-                      : 'border-transparent text-gray-400 hover:text-gray-300 hover:bg-gray-800/30'
+                    ? 'border-green-500 text-green-400 bg-gray-800/50'
+                    : 'border-transparent text-gray-400 hover:text-gray-300 hover:bg-gray-800/30'
                     }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -258,7 +252,11 @@ const Stations = () => {
                 )}
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <div>
-                    <CardTitle className="text-green-400">{station.name}</CardTitle>
+                    <CardTitle className="text-green-400">
+                      <Link to={`/stations/${station.slug || station.id}`} className="hover:underline hover:text-green-300 transition-colors">
+                        {station.name}
+                      </Link>
+                    </CardTitle>
                     <CardDescription className="text-gray-300 flex items-center gap-2">
                       <Music className="h-3 w-3" />
                       {station.genre}

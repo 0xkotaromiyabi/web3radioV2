@@ -146,3 +146,16 @@ export const addPage = async (page: { title: string; slug: string; content: stri
 export const deletePage = async (id: number) => {
   return apiFetch<null>(`/api/pages/${id}`, { method: 'DELETE' });
 };
+
+// Helper functions to fetch by slug or ID
+export const getNewsBySlug = async (slug: string) => {
+  return apiFetch<any>(`/api/news/${slug}`);
+};
+
+export const getEventBySlug = async (slug: string) => {
+  return apiFetch<any>(`/api/events/${slug}`);
+};
+
+export const getStationBySlug = async (slug: string) => {
+  return apiFetch<any>(`/api/stations/${slug}`);
+};

@@ -8,14 +8,8 @@ import { Calendar, MapPin, Radio, Users } from 'lucide-react';
 import { fetchEvents, subscribeToTable } from '@/lib/supabase';
 import { Loader } from 'lucide-react';
 
-type Event = {
-  id: number;
-  title: string;
-  date: string;
-  location: string;
-  description: string;
-  image_url?: string;
-};
+import { Link } from 'react-router-dom';
+import { Event } from '@/types/content';
 
 const Events = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -58,13 +52,13 @@ const Events = () => {
   }
 
   // Filter events by type
-  const communityEvents = events.filter(event => 
-    !event.title.toLowerCase().includes('web3 radio schedule') && 
+  const communityEvents = events.filter(event =>
+    !event.title.toLowerCase().includes('web3 radio schedule') &&
     !event.location.toLowerCase().includes('web3 radio studio')
   );
-  
-  const radioSchedule = events.filter(event => 
-    event.title.toLowerCase().includes('web3 radio schedule') || 
+
+  const radioSchedule = events.filter(event =>
+    event.title.toLowerCase().includes('web3 radio schedule') ||
     event.location.toLowerCase().includes('web3 radio studio')
   );
 
@@ -72,16 +66,22 @@ const Events = () => {
     <Card key={event.id} className="bg-gray-800 border-green-500 overflow-hidden flex flex-col hover:border-green-400 transition-colors">
       {event.image_url && (
         <div className="w-full h-48 overflow-hidden">
-          <img 
-            src={event.image_url} 
-            alt={event.title}
-            className="w-full h-full object-cover"
-          />
+          <Link to={`/events/${event.slug || event.id}`}>
+            <img
+              src={event.image_url}
+              alt={event.title}
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+            />
+          </Link>
         </div>
       )}
       <CardHeader>
         <div className="flex items-start justify-between">
-          <CardTitle className="text-green-400 flex-1">{event.title}</CardTitle>
+          <CardTitle className="text-green-400 flex-1">
+            <Link to={`/events/${event.slug || event.id}`} className="hover:underline hover:text-green-300">
+              {event.title}
+            </Link>
+          </CardTitle>
           {isRadioSchedule && (
             <Badge variant="secondary" className="ml-2">
               <Radio className="h-3 w-3 mr-1" />
@@ -119,7 +119,7 @@ const Events = () => {
           <h1 className="text-3xl font-bold mb-2 text-green-400">Web3 & Crypto Events</h1>
           <p className="text-gray-300">Discover the latest crypto events and Web3 Radio broadcasts</p>
         </div>
-        
+
         <Tabs defaultValue="community" className="w-full">
           <TabsList className="grid w-full grid-cols-2 bg-gray-800 border border-green-500">
             <TabsTrigger value="community" className="data-[state=active]:bg-green-500 data-[state=active]:text-black">
@@ -131,7 +131,7 @@ const Events = () => {
               Radio Schedule
             </TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="community" className="mt-6">
             {communityEvents.length > 0 ? (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -144,7 +144,7 @@ const Events = () => {
               </div>
             )}
           </TabsContent>
-          
+
           <TabsContent value="radio" className="mt-6">
             {radioSchedule.length > 0 ? (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
