@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS news (
   content TEXT NOT NULL,
   date TEXT NOT NULL,
   image_url TEXT,
+  slug TEXT UNIQUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -29,6 +30,7 @@ CREATE TABLE IF NOT EXISTS events (
   location TEXT NOT NULL,
   description TEXT NOT NULL,
   image_url TEXT,
+  slug TEXT UNIQUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -41,6 +43,7 @@ CREATE TABLE IF NOT EXISTS stations (
   description TEXT NOT NULL,
   streaming BOOLEAN DEFAULT false,
   image_url TEXT,
+  slug TEXT UNIQUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
