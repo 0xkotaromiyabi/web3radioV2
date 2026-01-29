@@ -13,6 +13,11 @@ export default defineConfig(() => ({
         target: 'http://localhost:3001',
         changeOrigin: true,
       },
+      '/cryptopanic-api': {
+        target: 'https://cryptopanic.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/cryptopanic-api/, ''),
+      },
     },
   },
   plugins: [
