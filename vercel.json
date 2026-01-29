@@ -3,6 +3,10 @@
         {
             "source": "/api/stream-metadata/:station",
             "destination": "/api/stream-metadata/[station]"
+        },
+        {
+            "source": "/(.*)",
+            "destination": "/index.html"
         }
     ],
     "redirects": []
