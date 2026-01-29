@@ -169,9 +169,12 @@ async function fetchAlbumArt(artist: string, title: string): Promise<string | nu
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Set CORS headers
+    // Set CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    // Disable Vercel Edge caching
+    res.setHeader('Cache-Control', 's-maxage=0, no-cache, no-store, must-revalidate');
 
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
@@ -199,10 +202,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
         console.log(`Fetching metadata for station: ${stationId}`);
 
-        const response = await fetch(stationConfig.metadataUrl, {
+        // Add cache-busting timestamp
+        const separator = stationConfig.metadataUrl.includes('?') ? '&' : '?';
+        const urlWithTimestamp = `${stationConfig.metadataUrl}${separator}_t=${Date.now()}`;
+
+        const response = await fetch(urlWithTimestamp, {
             headers: {
                 'Accept': 'application/json',
-                'User-Agent': 'Web3Radio/1.0'
+                'User-Agent': 'Web3Radio/1.0',
+                'Cache-Control': 'no-cache'
             }
         });
 

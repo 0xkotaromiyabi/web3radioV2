@@ -161,14 +161,22 @@ router.get('/:station', async (req, res) => {
         });
     }
 
+    // Disable caching
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+
     try {
         console.log(`Fetching metadata for station: ${stationId}`);
 
-        const response = await fetch(stationConfig.metadataUrl, {
+        // Add cache-busting timestamp
+        const separator = stationConfig.metadataUrl.includes('?') ? '&' : '?';
+        const urlWithTimestamp = `${stationConfig.metadataUrl}${separator}_t=${Date.now()}`;
+
+        const response = await fetch(urlWithTimestamp, {
             timeout: 5000,
             headers: {
                 'Accept': 'application/json',
-                'User-Agent': 'Web3Radio/1.0'
+                'User-Agent': 'Web3Radio/1.0',
+                'Cache-Control': 'no-cache'
             }
         });
 
