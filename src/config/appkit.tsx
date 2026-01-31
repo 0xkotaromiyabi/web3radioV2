@@ -1,6 +1,6 @@
 import { createAppKit } from '@reown/appkit/react';
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
-import { base, mainnet } from '@reown/appkit/networks';
+import { base, mainnet, sepolia } from '@reown/appkit/networks';
 import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
@@ -10,14 +10,14 @@ const projectId = '436eaacb5d6ac40e778902daf08eb741';
 
 // 2. Set up Wagmi adapter
 const wagmiAdapter = new WagmiAdapter({
-    networks: [base, mainnet],
+    networks: [base, mainnet, sepolia],
     projectId,
 });
 
 // 3. Create the AppKit modal
 createAppKit({
     adapters: [wagmiAdapter],
-    networks: [base, mainnet],
+    networks: [base, mainnet, sepolia],
     projectId,
     metadata: {
         name: 'Web3Radio',

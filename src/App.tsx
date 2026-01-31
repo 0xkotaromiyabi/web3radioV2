@@ -14,10 +14,11 @@ import Dashboard from "./pages/Dashboard";
 import Web3RadioDAO from "./pages/Web3RadioDAO";
 import PremiumContent from "./pages/PremiumContent";
 import DynamicPage from "./pages/DynamicPage";
-import DynamicPage from "./pages/DynamicPage";
+
 import NewsDetail from "./pages/NewsDetail";
 import EventDetail from "./pages/EventDetail";
 import StationDetail from "./pages/StationDetail";
+import RentalAccess from "./pages/RentalAccess";
 import { AudioProvider } from "./contexts/AudioProvider";
 import PersistentPlayer from "./components/radio/PersistentPlayer";
 
@@ -39,6 +40,7 @@ function App() {
                 <Route path="/events/:slug" element={<EventDetail />} />
                 <Route path="/stations" element={<Stations />} />
                 <Route path="/stations/:slug" element={<StationDetail />} />
+                <Route path="/rental" element={<RentalAccess />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/dao" element={<Web3RadioDAO />} />
                 <Route path="/premium" element={<PremiumContent />} />

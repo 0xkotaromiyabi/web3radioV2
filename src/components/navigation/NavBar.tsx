@@ -28,6 +28,7 @@ const NavBar = () => {
     { to: '/news', label: 'News', icon: Newspaper },
     { to: '/events', label: 'Events', icon: Calendar },
     { to: '/stations', label: 'Radio Stations', icon: Radio },
+    { to: '/rental', label: 'Rental Access', icon: Calendar },
     { to: '/dao', label: 'Web3Radio DAO', icon: Users }, // Updated from 17an Onchain
   ];
 
