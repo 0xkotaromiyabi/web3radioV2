@@ -6,11 +6,11 @@ const WITA_OFFSET_HOURS = 8;
 // Admin time slots configuration
 // Format: { address (lowercase): { startHour, endHour, label } }
 const ADMIN_TIME_SLOTS: Record<string, { startHour: number; endHour: number; label: string }> = {
-    // 0x242dfb7849544ee242b2265ca7e585bdec60456b - 20:00-23:59 WITA
+    // 0x242dfb7849544ee242b2265ca7e585bdec60456b - 13:00-23:59 WITA
     '0x242dfb7849544ee242b2265ca7e585bdec60456b': {
-        startHour: 20,
+        startHour: 13,
         endHour: 24, // 23:59 is effectively until 24:00
-        label: '20:00 - 23:59 WITA'
+        label: '13:00 - 23:59 WITA'
     },
     // 0x13dd8b8f54c3b54860f8d41a6fbff7ffc6bf01ef - 00:00-03:59 WITA
     '0x13dd8b8f54c3b54860f8d41a6fbff7ffc6bf01ef': {
@@ -141,3 +141,4 @@ export function useAdminAccess(address: string | undefined): AdminAccessResult {
 }
 
 export { ADMIN_TIME_SLOTS, UNRESTRICTED_ADMINS };
+
