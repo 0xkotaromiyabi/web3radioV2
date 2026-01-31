@@ -1,5 +1,5 @@
 // Local API client - replaces Supabase client
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3001');
 
 // Token management
 let authToken: string | null = localStorage.getItem('auth_token');

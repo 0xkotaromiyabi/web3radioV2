@@ -5,7 +5,23 @@
             "destination": "/api/stream-metadata/[station]"
         },
         {
-            "source": "/(.*)",
+            "source": "/api/rentals",
+            "destination": "/api/rentals"
+        },
+        {
+            "source": "/api/news",
+            "destination": "/api/news"
+        },
+        {
+            "source": "/api/events",
+            "destination": "/api/events"
+        },
+        {
+            "source": "/api/stations",
+            "destination": "/api/stations"
+        },
+        {
+            "source": "/((?!api/).*)",
             "destination": "/index.html"
         }
     ],

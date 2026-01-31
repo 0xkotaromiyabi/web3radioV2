@@ -4,8 +4,9 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 const STATION_METADATA: Record<string, { type: string; metadataUrl: string; mount?: string }> = {
     'web3': {
         type: 'icecast',
-        metadataUrl: 'https://web3radio.cloud/status-json.xsl',
-        mount: '/stream'
+        // metadataUrl: 'https://web3radio.cloud/status-json.xsl', // Obsolete
+        metadataUrl: 'https://streaming.ozradiojakarta.com:8443/status-json.xsl',
+        mount: '/ozjakarta'
     },
     'ozradio': {
         type: 'icecast',

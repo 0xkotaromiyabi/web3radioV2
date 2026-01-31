@@ -105,7 +105,8 @@ const RentalAccess = () => {
     useEffect(() => {
         const fetchListings = async () => {
             try {
-                const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/rentals`);
+                const baseUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3001');
+                const response = await fetch(`${baseUrl}/api/rentals`);
                 const result = await response.json();
                 if (result.data && result.data.length > 0) {
                     setListings(result.data.map((l: any) => ({
