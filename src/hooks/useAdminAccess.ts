@@ -1,35 +1,10 @@
 import { useMemo } from 'react';
+import { useAccount, useReadContract } from 'wagmi';
+import { WEB3_RADIO_ACCESS_PASS_ADDRESS, WEB3_RADIO_ACCESS_PASS_ABI } from '@/config/contracts';
+import { getCurrentUTCTime, getTimeSlotFromTokenId } from '@/utils/timeSlots';
 
-// WITA = UTC+8 (Waktu Indonesia Tengah)
+// UTC Offset +8 for WITA display reference
 const WITA_OFFSET_HOURS = 8;
-
-// Admin time slots configuration
-// Format: { address (lowercase): { startHour, endHour, label } }
-const ADMIN_TIME_SLOTS: Record<string, { startHour: number; endHour: number; label: string }> = {
-    // 0x242dfb7849544ee242b2265ca7e585bdec60456b - 13:00-23:59 WITA
-    '0x242dfb7849544ee242b2265ca7e585bdec60456b': {
-        startHour: 13,
-        endHour: 24, // 23:59 is effectively until 24:00
-        label: '13:00 - 23:59 WITA'
-    },
-    // 0x13dd8b8f54c3b54860f8d41a6fbff7ffc6bf01ef - 00:00-03:59 WITA
-    '0x13dd8b8f54c3b54860f8d41a6fbff7ffc6bf01ef': {
-        startHour: 0,
-        endHour: 4, // 03:59 is effectively until 04:00
-        label: '00:00 - 03:59 WITA'
-    },
-    // 0xdbca8ab9eb325a8f550ffc6e45277081a6c7d681 - 04:00-08:00 WITA
-    '0xdbca8ab9eb325a8f550ffc6e45277081a6c7d681': {
-        startHour: 4,
-        endHour: 8,
-        label: '04:00 - 08:00 WITA'
-    }
-};
-
-// Wallets without time restrictions (full access)
-const UNRESTRICTED_ADMINS = [
-    '0x46b4ee7c6dc39ee96009b0808378df11c6938c6b'
-];
 
 interface AdminAccessResult {
     hasAccess: boolean;
@@ -38,107 +13,116 @@ interface AdminAccessResult {
     allowedSlot: string | null;
     currentTimeWITA: string;
     message: string | null;
+    isLoading: boolean;
 }
 
 /**
- * Get current hour in WITA timezone
- */
-function getCurrentWITAHour(): { hour: number; timeString: string } {
-    const now = new Date();
-    // UTC time
-    const utcHours = now.getUTCHours();
-    const utcMinutes = now.getUTCMinutes();
-
-    // Convert to WITA (UTC+8)
-    let witaHour = (utcHours + WITA_OFFSET_HOURS) % 24;
-
-    const timeString = `${witaHour.toString().padStart(2, '0')}:${utcMinutes.toString().padStart(2, '0')} WITA`;
-
-    return { hour: witaHour, timeString };
-}
-
-/**
- * Check if current WITA hour is within allowed range
- */
-function isWithinTimeSlot(currentHour: number, startHour: number, endHour: number): boolean {
-    // Handle normal range (e.g., 04:00-08:00)
-    if (startHour < endHour) {
-        return currentHour >= startHour && currentHour < endHour;
-    }
-    // Handle wrap-around range (e.g., 22:00-02:00) - not currently used but good to have
-    return currentHour >= startHour || currentHour < endHour;
-}
-
-/**
- * Custom hook to check admin access based on wallet and time slot
+ * Custom hook to check admin access based on smart contract time slots
  * @param address - The connected wallet address
  * @returns AdminAccessResult with access status and messages
  */
 export function useAdminAccess(address: string | undefined): AdminAccessResult {
-    return useMemo(() => {
+    const { data: hasAccessNow, isLoading, isError } = useReadContract({
+        address: WEB3_RADIO_ACCESS_PASS_ADDRESS,
+        abi: WEB3_RADIO_ACCESS_PASS_ABI,
+        functionName: 'hasAccessNow',
+        args: address ? [address as `0x${string}`] : undefined,
+        query: {
+            enabled: !!address,
+        }
+    });
+
+    // Also check if the user is an owner of ANY pass (to differentiate between "not authorized at all" and "not authorized RIGHT NOW")
+    const { data: hasRegularAccess } = useReadContract({
+        address: WEB3_RADIO_ACCESS_PASS_ADDRESS,
+        abi: WEB3_RADIO_ACCESS_PASS_ABI,
+        functionName: 'hasRegularAccess', // We might need a generic "isAnyPassHolder" but for now this helps
+        args: address ? [address as `0x${string}`] : undefined,
+        query: {
+            enabled: !!address,
+        }
+    });
+
+    const currentTimeWITA = useMemo(() => {
+        const now = new Date();
+        const witaHour = (now.getUTCHours() + WITA_OFFSET_HOURS) % 24;
+        const witaMinutes = now.getUTCMinutes().toString().padStart(2, '0');
+        return `${witaHour.toString().padStart(2, '0')}:${witaMinutes} WITA`;
+    }, []);
+
+    const result = useMemo(() => {
         if (!address) {
             return {
                 hasAccess: false,
                 isAdmin: false,
                 hasTimeRestriction: false,
                 allowedSlot: null,
-                currentTimeWITA: '',
-                message: null
+                currentTimeWITA,
+                message: null,
+                isLoading: false
             };
         }
 
-        const lowerAddress = address.toLowerCase();
-        const { hour, timeString } = getCurrentWITAHour();
+        if (isLoading) {
+            return {
+                hasAccess: false,
+                isAdmin: false,
+                hasTimeRestriction: false,
+                allowedSlot: null,
+                currentTimeWITA,
+                message: "Checking access...",
+                isLoading: true
+            };
+        }
 
-        // Check if unrestricted admin
-        if (UNRESTRICTED_ADMINS.includes(lowerAddress)) {
+        // Super Admin / Unrestricted Bypass
+        const UNRESTRICTED_ADMINS = [
+            '0x242DfB7849544eE242b2265cA7E585bdec60456B'.toLowerCase(),
+            '0x46b4ee7c6dc39ee96009b0808378df11c6938c6b'.toLowerCase()
+        ];
+
+        if (UNRESTRICTED_ADMINS.includes(address.toLowerCase())) {
             return {
                 hasAccess: true,
                 isAdmin: true,
                 hasTimeRestriction: false,
-                allowedSlot: 'Full Access (24/7)',
-                currentTimeWITA: timeString,
-                message: null
+                allowedSlot: "Super Admin (Full Access)",
+                currentTimeWITA,
+                message: null,
+                isLoading: false
             };
         }
 
-        // Check if time-restricted admin
-        const timeSlot = ADMIN_TIME_SLOTS[lowerAddress];
-        if (timeSlot) {
-            const isWithinSlot = isWithinTimeSlot(hour, timeSlot.startHour, timeSlot.endHour);
+        const { dayIndex, hour } = getCurrentUTCTime();
+        const currentSlotLabel = `${dayIndex === 1 ? 'Monday' : dayIndex === 2 ? 'Tuesday' : dayIndex === 3 ? 'Wednesday' : dayIndex === 4 ? 'Thursday' : dayIndex === 5 ? 'Friday' : dayIndex === 6 ? 'Saturday' : 'Sunday'} ${hour.toString().padStart(2, '0')}:00 UTC`;
 
-            if (isWithinSlot) {
-                return {
-                    hasAccess: true,
-                    isAdmin: true,
-                    hasTimeRestriction: true,
-                    allowedSlot: timeSlot.label,
-                    currentTimeWITA: timeString,
-                    message: null
-                };
-            } else {
-                return {
-                    hasAccess: false,
-                    isAdmin: true,
-                    hasTimeRestriction: true,
-                    allowedSlot: timeSlot.label,
-                    currentTimeWITA: timeString,
-                    message: `Akses Anda dibatasi pada jam ${timeSlot.label}. Waktu saat ini: ${timeString}.`
-                };
-            }
+        if (hasAccessNow) {
+            return {
+                hasAccess: true,
+                isAdmin: true,
+                hasTimeRestriction: true,
+                allowedSlot: "Current Active Slot",
+                currentTimeWITA,
+                message: null,
+                isLoading: false
+            };
         }
 
-        // Not an admin at all
+        // Check if is admin (owns a regular pass)
+        const isAdmin = Boolean(hasRegularAccess) || false;
+
         return {
             hasAccess: false,
-            isAdmin: false,
-            hasTimeRestriction: false,
-            allowedSlot: null,
-            currentTimeWITA: timeString,
-            message: 'Wallet Anda tidak terdaftar sebagai admin.'
+            isAdmin: isAdmin,
+            hasTimeRestriction: true,
+            allowedSlot: "Your NFT Time Slots",
+            currentTimeWITA,
+            message: isAdmin
+                ? `Akses Anda tidak aktif pada jam ini (${currentSlotLabel}). Silakan cek jadwal NFT Anda.`
+                : 'Wallet Anda tidak memiliki Access Pass yang aktif.',
+            isLoading: false
         };
-    }, [address]);
+    }, [address, hasAccessNow, isLoading, hasRegularAccess, currentTimeWITA]);
+
+    return result;
 }
-
-export { ADMIN_TIME_SLOTS, UNRESTRICTED_ADMINS };
-

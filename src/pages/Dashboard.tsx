@@ -142,7 +142,6 @@ const Dashboard = () => {
 
   const handleLogout = () => {
     disconnect();
-    setIsAdmin(false);
     toast({ title: "Disconnected", description: "Wallet disconnected successfully" });
   };
 
@@ -214,6 +213,17 @@ const Dashboard = () => {
       </div>
     </div>
   );
+
+  // Render loading state while checking access
+  if (adminAccess.isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
+        <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
+        <h2 className="text-xl font-semibold">Verifying Access...</h2>
+        <p className="text-muted-foreground mt-2">Checking your Temporal Access Pass on-chain</p>
+      </div>
+    );
+  }
 
   // Login page - Apple style wallet connect
   if (!adminAccess.hasAccess) {

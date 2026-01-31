@@ -147,6 +147,19 @@ CREATE TABLE IF NOT EXISTS now_playing (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Rental listings table
+CREATE TABLE IF NOT EXISTS rental_listings (
+  id SERIAL PRIMARY KEY,
+  token_id INTEGER NOT NULL,
+  lender TEXT NOT NULL,
+  price_per_hour NUMERIC NOT NULL,
+  max_duration_hours INTEGER NOT NULL,
+  is_active BOOLEAN DEFAULT true,
+  is_super_access BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_listening_sessions_user ON listening_sessions(user_address);
 CREATE INDEX IF NOT EXISTS idx_user_stats_user ON user_stats(user_address);

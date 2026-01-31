@@ -10,12 +10,12 @@ services:
       POSTGRES_USER: web3radio
       POSTGRES_PASSWORD: web3radio_local_dev
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./server/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U web3radio -d web3radio"]
+      test: [ "CMD-SHELL", "pg_isready -U web3radio -d web3radio" ]
       interval: 5s
       timeout: 5s
       retries: 5
