@@ -4,30 +4,53 @@ require('dotenv').config();
 // Helper to parse DATABASE_URL
 let config = {};
 
-if (process.env.DATABASE_URL) {
+// Use DIRECT_URL for pg pool if available (for Prisma Accelerate compatibility)
+const connectionString = process.env.DIRECT_URL || process.env.DATABASE_URL;
+
+if (connectionString) {
     try {
-        const url = new URL(process.env.DATABASE_URL);
-        config = {
-            user: url.username,
-            password: url.password,
-            host: url.hostname,
-            port: url.port,
-            database: url.pathname.split('/')[1],
-            ssl: url.searchParams.get('sslmode') !== 'disable' && url.hostname !== 'localhost' ? { rejectUnauthorized: false } : false
-        };
-        console.log(`Database configuration loaded for user: ${config.user}`);
+        // Handle potential quotes from .env
+        const cleanUrl = connectionString.replace(/"/g, '');
+
+        // If it's a prisma+postgres URL, we need to extract the direct part or use DIRECT_URL
+        if (cleanUrl.startsWith('prisma+postgres')) {
+            console.error('CRITICAL: DATABASE_URL is a Prisma Accelerate URL. Use DIRECT_URL for pg driver.');
+            if (process.env.DIRECT_URL) {
+                const directUrl = process.env.DIRECT_URL.replace(/"/g, '');
+                config = {
+                    connectionString: directUrl,
+                    ssl: { rejectUnauthorized: false }
+                };
+            } else {
+                throw new Error('DIRECT_URL missing for Prisma Accelerate setup.');
+            }
+        } else {
+            const url = new URL(cleanUrl);
+            config = {
+                user: url.username,
+                password: url.password,
+                host: url.hostname,
+                port: url.port,
+                database: url.pathname.split('/')[1],
+                ssl: url.searchParams.get('sslmode') !== 'disable' && url.hostname !== 'localhost' ? { rejectUnauthorized: false } : false
+            };
+        }
+        console.log(`Database connected to production host: ${config.host || 'remote'}`);
     } catch (e) {
-        console.error('Error parsing DATABASE_URL, falling back to connection string:', e.message);
-        config = { connectionString: process.env.DATABASE_URL };
+        console.error('Error parsing Connection String, falling back to basic connection:', e.message);
+        config = {
+            connectionString: connectionString.replace(/"/g, ''),
+            ssl: { rejectUnauthorized: false }
+        };
     }
 } else {
     console.error('CRITICAL: DATABASE_URL is not defined!');
-    // Fallback for local dev if .env fails to load but DB is running
+    // Fallback for local dev
     config = {
         user: 'web3radio',
         password: 'web3radio_local_dev',
         host: 'localhost',
-        port: 5432,
+        port: 5433,
         database: 'web3radio'
     };
 }
@@ -38,11 +61,8 @@ const pool = new Pool(config);
 pool.query('SELECT NOW()', (err, res) => {
     if (err) {
         console.error('Database connection error:', err);
-        if (err.message.includes('password')) {
-            console.error('TIP: Check if DATABASE_URL contains the correct password as a string.');
-        }
     } else {
-        console.log('Database connected at:', res.rows[0].now);
+        console.log('Database connected to Production/Prisma at:', res.rows[0].now);
     }
 });
 
