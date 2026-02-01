@@ -5,10 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PlusCircle, Loader2, AlertCircle, Calendar } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { useAccount, useReadContract } from 'wagmi';
-import { WEB3_RADIO_ACCESS_PASS_ADDRESS, WEB3_RADIO_ACCESS_PASS_ABI } from '@/config/contracts';
+import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { WEB3_RADIO_ACCESS_PASS_ADDRESS, WEB3_RADIO_ACCESS_PASS_ABI, RENTAL_MARKETPLACE_ADDRESS, RENTAL_MARKETPLACE_ABI } from '@/config/contracts';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getTimeSlotFromTokenId } from '@/utils/timeSlots';
+import { parseEther } from 'viem';
 
 const CreateListingModal = () => {
     const [open, setOpen] = useState(false);
@@ -43,6 +44,28 @@ const CreateListingModal = () => {
         }
     });
 
+    const { data: isApprovedForAll } = useReadContract({
+        address: WEB3_RADIO_ACCESS_PASS_ADDRESS,
+        abi: WEB3_RADIO_ACCESS_PASS_ABI,
+        functionName: 'isApprovedForAll',
+        args: address ? [address as `0x${string}`, RENTAL_MARKETPLACE_ADDRESS as `0x${string}`] : undefined,
+        query: {
+            enabled: !!address,
+        }
+    });
+
+    // Contract Writes
+    const { writeContract: writeNft, data: nftHash } = useWriteContract();
+    const { writeContract: writeMarket, data: marketHash } = useWriteContract();
+
+    const { isLoading: isNftConfirming, isSuccess: isNftSuccess } = useWaitForTransactionReceipt({
+        hash: nftHash,
+    });
+
+    const { isLoading: isMarketConfirming, isSuccess: isMarketSuccess } = useWaitForTransactionReceipt({
+        hash: marketHash,
+    });
+
     // Validation Status
     const isOwner = ownerOfResult && address && ownerOfResult.toString().toLowerCase() === address.toLowerCase();
     const isSuper = Boolean(isSuperResult);
@@ -65,6 +88,23 @@ const CreateListingModal = () => {
         }
     };
 
+    const handleApprove = async () => {
+        try {
+            writeNft({
+                address: WEB3_RADIO_ACCESS_PASS_ADDRESS,
+                abi: WEB3_RADIO_ACCESS_PASS_ABI,
+                functionName: 'setApprovalForAll',
+                args: [RENTAL_MARKETPLACE_ADDRESS as `0x${string}`, true],
+            });
+        } catch (error: any) {
+            toast({
+                title: "Approval Failed",
+                description: error.message || "Failed to grant approval.",
+                variant: "destructive"
+            });
+        }
+    };
+
     const handleCreateListing = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -77,7 +117,7 @@ const CreateListingModal = () => {
             return;
         }
 
-        const maxAllowed = isSuper ? 24 : 168; // 1 day or 7 days
+        const maxAllowed = isSuper ? 24 : 168;
         if (parseInt(duration) > maxAllowed) {
             toast({
                 title: "Validation Error",
@@ -90,24 +130,33 @@ const CreateListingModal = () => {
         setIsLoading(true);
 
         try {
-            // TODO: Signature generation or DB insert logic
-            await new Promise(resolve => setTimeout(resolve, 1500)); // Simulating delay
-
-            toast({
-                title: "Listing Created",
-                description: `Pass #${tokenId} listed for rent successfully (Mock).`,
+            writeMarket({
+                address: RENTAL_MARKETPLACE_ADDRESS as `0x${string}`,
+                abi: RENTAL_MARKETPLACE_ABI,
+                functionName: 'createListing',
+                args: [BigInt(tokenId), parseEther(price), BigInt(duration)],
             });
-            setOpen(false);
-        } catch (error) {
+        } catch (error: any) {
             toast({
                 title: "Error",
-                description: "Failed to create listing. Please try again.",
+                description: error.message || "Failed to create listing.",
                 variant: "destructive",
             });
         } finally {
             setIsLoading(false);
         }
     };
+
+    React.useEffect(() => {
+        if (isMarketSuccess) {
+            toast({
+                title: "Listing Created",
+                description: `Pass #${tokenId} listed for rent successfully!`,
+            });
+            setOpen(false);
+            // Refresh logic omitted here, assumes parent or real-time handles it
+        }
+    }, [isMarketSuccess, tokenId, toast]);
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -188,20 +237,38 @@ const CreateListingModal = () => {
                             )}
                         </div>
 
-                        <Button
-                            type="submit"
-                            className="w-full btn-apple-primary mt-4"
-                            disabled={isLoading || !isOwner}
-                        >
-                            {isLoading ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Creating...
-                                </>
-                            ) : (
-                                "Create Listing"
-                            )}
-                        </Button>
+                        {!isApprovedForAll ? (
+                            <Button
+                                type="button"
+                                onClick={handleApprove}
+                                className="w-full btn-apple-primary mt-4"
+                                disabled={isNftConfirming || !isOwner}
+                            >
+                                {isNftConfirming ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Approving Marketplace...
+                                    </>
+                                ) : (
+                                    "Approve Marketplace"
+                                )}
+                            </Button>
+                        ) : (
+                            <Button
+                                type="submit"
+                                className="w-full btn-apple-primary mt-4"
+                                disabled={isLoading || isMarketConfirming || !isOwner}
+                            >
+                                {isLoading || isMarketConfirming ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Creating Listing...
+                                    </>
+                                ) : (
+                                    "Create Listing"
+                                )}
+                            </Button>
+                        )}
                     </form>
                 )}
             </DialogContent>

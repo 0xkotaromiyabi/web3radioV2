@@ -9,6 +9,9 @@ import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSwitchCh
 import { WEB3_RADIO_ACCESS_PASS_ADDRESS, WEB3_RADIO_ACCESS_PASS_ABI } from '@/config/contracts';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { sepolia, base } from 'wagmi/chains';
+import { RENTAL_MARKETPLACE_ADDRESS, RENTAL_MARKETPLACE_ABI } from '@/config/contracts';
+import { parseEther, parseUnits } from 'viem';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Listing {
     id: string;
@@ -27,11 +30,37 @@ interface RentModalProps {
 
 const RentModal: React.FC<RentModalProps> = ({ listing, open, onOpenChange }) => {
     const [rentalHours, setRentalHours] = useState("24");
+    const [paymentMethod, setPaymentMethod] = useState<'eth' | 'usdc'>('eth');
     const { toast } = useToast();
     const { address } = useAccount();
     const { writeContract, data: hash, isPending } = useWriteContract();
     const { switchChain } = useSwitchChain();
     const { chain } = useAccount();
+
+    const USDC_ADDRESS = chain?.id === base.id
+        ? "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+        : "0x1c7D4B196Cb02324016fdD330689b09Be8697A21"; // Sepolia USDC
+
+    const { data: usdcAllowance } = useReadContract({
+        address: USDC_ADDRESS as `0x${string}`,
+        abi: [
+            {
+                name: 'allowance',
+                type: 'function',
+                stateMutability: 'view',
+                inputs: [
+                    { name: 'owner', type: 'address' },
+                    { name: 'spender', type: 'address' },
+                ],
+                outputs: [{ name: '', type: 'uint256' }],
+            },
+        ],
+        functionName: 'allowance',
+        args: address ? [address as `0x${string}`, RENTAL_MARKETPLACE_ADDRESS as `0x${string}`] : undefined,
+        query: {
+            enabled: !!address && paymentMethod === 'usdc',
+        }
+    });
 
     const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
         hash,
@@ -63,21 +92,49 @@ const RentModal: React.FC<RentModalProps> = ({ listing, open, onOpenChange }) =>
         }
 
         try {
-            // Check if on correct chain
-            if (chain?.id !== sepolia.id) {
+            // Check if on correct chain (assuming Sepolia for now, or match listing network)
+            if (chain?.id !== sepolia.id && chain?.id !== base.id) {
                 switchChain({ chainId: sepolia.id });
                 return;
             }
 
-            writeContract({
-                address: WEB3_RADIO_ACCESS_PASS_ADDRESS,
-                abi: WEB3_RADIO_ACCESS_PASS_ABI,
-                functionName: 'setUser',
-                args: [BigInt(listing.tokenId), address, BigInt(expiresTimestamp)],
-                chain: sepolia,
-                account: address,
-                gas: BigInt(200000), // Set manual gas limit to avoid "too high" error on revert estimation
-            });
+            if (paymentMethod === 'eth') {
+                writeContract({
+                    address: RENTAL_MARKETPLACE_ADDRESS as `0x${string}`,
+                    abi: RENTAL_MARKETPLACE_ABI,
+                    functionName: 'rentWithETH',
+                    args: [BigInt(listing.tokenId), BigInt(rentalHours)],
+                    value: parseEther(totalPrice),
+                });
+            } else {
+                // Check allowance
+                const needed = parseUnits(totalPrice, 6); // USDC has 6 decimals
+                if (!usdcAllowance || BigInt(usdcAllowance.toString()) < needed) {
+                    writeContract({
+                        address: USDC_ADDRESS as `0x${string}`,
+                        abi: [{
+                            name: 'approve',
+                            type: 'function',
+                            stateMutability: 'nonpayable',
+                            inputs: [
+                                { name: 'spender', type: 'address' },
+                                { name: 'amount', type: 'uint256' },
+                            ],
+                            outputs: [{ name: '', type: 'bool' }],
+                        }],
+                        functionName: 'approve',
+                        args: [RENTAL_MARKETPLACE_ADDRESS as `0x${string}`, needed],
+                    });
+                    return;
+                }
+
+                writeContract({
+                    address: RENTAL_MARKETPLACE_ADDRESS as `0x${string}`,
+                    abi: RENTAL_MARKETPLACE_ABI,
+                    functionName: 'rentWithUSDC',
+                    args: [BigInt(listing.tokenId), BigInt(rentalHours)],
+                });
+            }
         } catch (error: any) {
             toast({
                 title: "Transaction Failed",
@@ -147,6 +204,13 @@ const RentModal: React.FC<RentModalProps> = ({ listing, open, onOpenChange }) =>
                             </div>
                         </div>
 
+                        <Tabs value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as 'eth' | 'usdc')} className="w-full">
+                            <TabsList className="grid w-full grid-cols-2 bg-secondary/30">
+                                <TabsTrigger value="eth">Pay with ETH</TabsTrigger>
+                                <TabsTrigger value="usdc">Pay with USDC</TabsTrigger>
+                            </TabsList>
+                        </Tabs>
+
                         <Alert>
                             <AlertCircle className="h-4 w-4" />
                             <AlertTitle>Note</AlertTitle>
@@ -166,7 +230,9 @@ const RentModal: React.FC<RentModalProps> = ({ listing, open, onOpenChange }) =>
                                     {isPending ? 'Confirm in Wallet...' : 'Processing...'}
                                 </>
                             ) : (
-                                `Rent for ${totalPrice} ETH`
+                                paymentMethod === 'usdc' && (!usdcAllowance || BigInt(usdcAllowance.toString()) < parseUnits(totalPrice, 6))
+                                    ? "Approve USDC"
+                                    : `Rent for ${totalPrice} ${paymentMethod.toUpperCase()}`
                             )}
                         </Button>
                     </div>

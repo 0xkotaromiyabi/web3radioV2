@@ -14,7 +14,7 @@ module.exports = {
     },
     networks: {
         sepolia: {
-            url: "https://sepolia.infura.io/v3/4674092b7c4d4407b719266cd6032230",
+            url: process.env.SEPOLIA_RPC_URL || "https://ethereum-sepolia-rpc.publicnode.com",
             accounts: process.env.DEPLOYER_PRIVATE_KEY ? [process.env.DEPLOYER_PRIVATE_KEY] : [],
             chainId: 11155111
         },

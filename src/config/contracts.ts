@@ -1,4 +1,5 @@
 export const WEB3_RADIO_ACCESS_PASS_ADDRESS = '0xf6cE0304C02bBAcC817f2a90599cE700f538906F';
+export const RENTAL_MARKETPLACE_ADDRESS = '0x030898DEc907F13b1f9E1Cf34bc0CE085d416C6E';
 
 export const WEB3_RADIO_ACCESS_PASS_ABI = [
     {
@@ -140,6 +141,52 @@ export const WEB3_RADIO_ACCESS_PASS_ABI = [
         "inputs": [{ "internalType": "address", "name": "wallet", "type": "address" }],
         "name": "hasSuperAccess",
         "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+        "stateMutability": "view",
+        "type": "function"
+    }
+] as const;
+
+export const RENTAL_MARKETPLACE_ABI = [
+    {
+        "inputs": [
+            { "internalType": "uint256", "name": "tokenId", "type": "uint256" },
+            { "internalType": "uint256", "name": "pricePerHour", "type": "uint256" },
+            { "internalType": "uint256", "name": "maxDuration", "type": "uint256" }
+        ],
+        "name": "createListing",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "uint256", "name": "tokenId", "type": "uint256" },
+            { "internalType": "uint256", "name": "hoursCount", "type": "uint256" }
+        ],
+        "name": "rentWithETH",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "uint256", "name": "tokenId", "type": "uint256" },
+            { "internalType": "uint256", "name": "hoursCount", "type": "uint256" }
+        ],
+        "name": "rentWithUSDC",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "uint256", "name": "tokenId", "type": "uint256" }],
+        "name": "listings",
+        "outputs": [
+            { "internalType": "address", "name": "lender", "type": "address" },
+            { "internalType": "uint256", "name": "pricePerHour", "type": "uint256" },
+            { "internalType": "uint256", "name": "maxDuration", "type": "uint256" },
+            { "internalType": "bool", "name": "isActive", "type": "bool" }
+        ],
         "stateMutability": "view",
         "type": "function"
     }
