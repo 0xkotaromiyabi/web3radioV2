@@ -62,6 +62,15 @@ const RentModal: React.FC<RentModalProps> = ({ listing, open, onOpenChange }) =>
         }
     });
 
+    const { data: onChainListing, isLoading: isLoadingListing } = useReadContract({
+        address: RENTAL_MARKETPLACE_ADDRESS as `0x${string}`,
+        abi: RENTAL_MARKETPLACE_ABI,
+        functionName: 'listings',
+        args: listing ? [BigInt(listing.tokenId)] : undefined,
+    });
+
+    const isListingActive = onChainListing ? (onChainListing as any)[3] : false;
+
     const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
         hash,
     });
@@ -211,6 +220,16 @@ const RentModal: React.FC<RentModalProps> = ({ listing, open, onOpenChange }) =>
                             </TabsList>
                         </Tabs>
 
+                        {!isLoadingListing && !isListingActive && (
+                            <Alert variant="destructive">
+                                <AlertCircle className="h-4 w-4" />
+                                <AlertTitle>Listing Not Active On-Chain</AlertTitle>
+                                <AlertDescription>
+                                    This listing exists in the UI cache but not in the smart contract.
+                                    If this is your pass, please list it using "List My Pass" first.
+                                </AlertDescription>
+                            </Alert>
+                        )}
                         <Alert>
                             <AlertCircle className="h-4 w-4" />
                             <AlertTitle>Note</AlertTitle>
@@ -221,18 +240,19 @@ const RentModal: React.FC<RentModalProps> = ({ listing, open, onOpenChange }) =>
 
                         <Button
                             onClick={handleRent}
-                            className="w-full btn-apple-primary"
-                            disabled={isPending || isConfirming}
+                            className={`w-full h-12 text-lg font-semibold transition-all duration-300 ${paymentMethod === 'eth'
+                                    ? 'bg-blue-600 hover:bg-blue-700'
+                                    : 'bg-[#2775ca] hover:bg-[#1e5da1]'
+                                }`}
+                            disabled={isPending || isConfirming || !isListingActive || isLoadingListing}
                         >
                             {isPending || isConfirming ? (
                                 <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    {isPending ? 'Confirm in Wallet...' : 'Processing...'}
+                                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                    {isConfirming ? "Confirming..." : "Initialising..."}
                                 </>
                             ) : (
-                                paymentMethod === 'usdc' && (!usdcAllowance || BigInt(usdcAllowance.toString()) < parseUnits(totalPrice, 6))
-                                    ? "Approve USDC"
-                                    : `Rent for ${totalPrice} ${paymentMethod.toUpperCase()}`
+                                !isListingActive ? "Listing Not Available" : `Rent with ${paymentMethod.toUpperCase()}`
                             )}
                         </Button>
                     </div>
