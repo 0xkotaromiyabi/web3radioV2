@@ -1,37 +1,38 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { PrismaClient } from '@prisma/client';
-import { withAccelerate } from '@prisma/extension-accelerate';
+import { createClient } from '@supabase/supabase-js';
 
-const prisma = new PrismaClient({
-    accelerateUrl: process.env.DATABASE_URL
-}).$extends(withAccelerate());
+const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
+const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || '';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    if (req.method === 'OPTIONS') return res.status(200).end();
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
 
     try {
         if (req.method === 'GET') {
             const { slug } = req.query;
             if (slug) {
-                const isId = /^\d+$/.test(slug as string);
-                const station = isId
-                    ? await prisma.station.findUnique({ where: { id: parseInt(slug as string) } })
-                    : await prisma.station.findUnique({ where: { slug: slug as string } });
-
-                if (!station) {
-                    return res.status(404).json({ data: null, error: 'Station not found' });
-                }
-                return res.status(200).json({ data: station, error: null });
+                const { data, error } = await supabase
+                    .from('stations')
+                    .select('*')
+                    .eq('slug', slug)
+                    .single();
+                if (error) throw error;
+                return res.status(200).json({ data, error: null });
             }
 
-            const stations = await prisma.station.findMany({
-                orderBy: { name: 'asc' }
-            });
-            return res.status(200).json({ data: stations, error: null });
+            const { data, error } = await supabase
+                .from('stations')
+                .select('*')
+                .order('name', { ascending: true });
+            if (error) throw error;
+            return res.status(200).json({ data, error: null });
         }
 
         return res.status(405).json({ error: 'Method not allowed' });

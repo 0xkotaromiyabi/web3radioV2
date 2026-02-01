@@ -1,161 +1,133 @@
-// Local API helper functions
-// Replaces Supabase helper functions with local API calls
+import { createClient } from '@supabase/supabase-js';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Get token from localStorage
-const getToken = () => localStorage.getItem('auth_token');
-
-// Generic fetch helper
-async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<{ data: T | null; error: any }> {
-  try {
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-      ...(options.headers || {}),
-    };
-
-    const token = getToken();
-    if (token) {
-      (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
-    }
-
-    const response = await fetch(`${API_URL}${endpoint}`, {
-      ...options,
-      headers,
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      return { data: null, error: { message: result.error || 'Request failed' } };
-    }
-
-    return { data: result.data ?? result, error: null };
-  } catch (error) {
-    return { data: null, error: { message: (error as Error).message } };
-  }
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.warn('Missing Supabase environment variables. Please check your .env file.');
 }
 
-// Auth helper functions
-export const signUp = async (email: string, password: string) => {
-  const result = await apiFetch<{ user: any; token: string }>('/api/auth/signup', {
-    method: 'POST',
-    body: JSON.stringify({ email, password }),
-  });
-  if (result.data?.token) {
-    localStorage.setItem('auth_token', result.data.token);
-  }
-  return { data: result.data, error: result.error };
-};
+// Create the Supabase client
+export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
 
-export const signIn = async (email: string, password: string) => {
-  const result = await apiFetch<{ user: any; token: string }>('/api/auth/signin', {
-    method: 'POST',
-    body: JSON.stringify({ email, password }),
-  });
-  if (result.data?.token) {
-    localStorage.setItem('auth_token', result.data.token);
-  }
-  return { data: result.data, error: result.error };
-};
-
-export const signOut = async () => {
-  localStorage.removeItem('auth_token');
-  return { error: null };
-};
-
-export const getCurrentUser = async () => {
-  const token = getToken();
-  if (!token) return null;
-
-  const result = await apiFetch<{ user: any }>('/api/auth/me');
-  return result.data?.user || null;
-};
-
-// Database helper functions
+// Database helper functions for common operations
 export const fetchNews = async () => {
-  return apiFetch<any[]>('/api/news');
+  return await supabase
+    .from('news')
+    .select('*')
+    .order('created_at', { ascending: false });
 };
 
-export const addNewsItem = async (newsItem: { title: string; content: string; date: string; image_url?: string }) => {
-  return apiFetch<any[]>('/api/news', {
-    method: 'POST',
-    body: JSON.stringify(newsItem),
-  });
+export const addNewsItem = async (newsItem: any) => {
+  return await supabase
+    .from('news')
+    .insert([newsItem])
+    .select();
 };
 
 export const deleteNewsItem = async (id: number) => {
-  return apiFetch<null>(`/api/news/${id}`, { method: 'DELETE' });
+  return await supabase
+    .from('news')
+    .delete()
+    .eq('id', id);
 };
 
 export const fetchEvents = async () => {
-  return apiFetch<any[]>('/api/events');
+  return await supabase
+    .from('events')
+    .select('*')
+    .order('date', { ascending: true });
 };
 
-export const addEvent = async (event: { title: string; date: string; location: string; description: string; image_url?: string }) => {
-  return apiFetch<any[]>('/api/events', {
-    method: 'POST',
-    body: JSON.stringify(event),
-  });
+export const addEvent = async (event: any) => {
+  return await supabase
+    .from('events')
+    .insert([event])
+    .select();
 };
 
 export const deleteEvent = async (id: number) => {
-  return apiFetch<null>(`/api/events/${id}`, { method: 'DELETE' });
+  return await supabase
+    .from('events')
+    .delete()
+    .eq('id', id);
 };
 
 export const fetchStations = async () => {
-  return apiFetch<any[]>('/api/stations');
+  return await supabase
+    .from('stations')
+    .select('*')
+    .order('name', { ascending: true });
 };
 
-export const addStation = async (station: { name: string; genre: string; description: string; streaming: boolean; image_url?: string }) => {
-  return apiFetch<any[]>('/api/stations', {
-    method: 'POST',
-    body: JSON.stringify(station),
-  });
+export const addStation = async (station: any) => {
+  return await supabase
+    .from('stations')
+    .insert([station])
+    .select();
 };
 
 export const deleteStation = async (id: number) => {
-  return apiFetch<null>(`/api/stations/${id}`, { method: 'DELETE' });
+  return await supabase
+    .from('stations')
+    .delete()
+    .eq('id', id);
 };
 
-// Real-time subscription helper (not available in local mode)
-export const subscribeToTable = (tableName: string, callback: (payload: any) => void) => {
-  console.log(`[Local] Real-time subscription not available for ${tableName}`);
-  // Return a mock object with unsubscribe method
-  return {
-    unsubscribe: () => { }
-  };
-};
-
-// Pages helper functions
-export const fetchPages = async () => {
-  return apiFetch<any[]>('/api/pages');
-};
-
-export const getPageBySlug = async (slug: string) => {
-  return apiFetch<any>(`/api/pages/${slug}`);
-};
-
-export const addPage = async (page: { title: string; slug: string; content: string; is_published?: boolean }) => {
-  return apiFetch<any[]>('/api/pages', {
-    method: 'POST',
-    body: JSON.stringify(page),
-  });
-};
-
-export const deletePage = async (id: number) => {
-  return apiFetch<null>(`/api/pages/${id}`, { method: 'DELETE' });
-};
-
-// Helper functions to fetch by slug or ID
 export const getNewsBySlug = async (slug: string) => {
-  return apiFetch<any>(`/api/news/${slug}`);
+  return await supabase
+    .from('news')
+    .select('*')
+    .eq('slug', slug)
+    .single();
 };
 
 export const getEventBySlug = async (slug: string) => {
-  return apiFetch<any>(`/api/events/${slug}`);
+  return await supabase
+    .from('events')
+    .select('*')
+    .eq('slug', slug)
+    .single();
 };
 
 export const getStationBySlug = async (slug: string) => {
-  return apiFetch<any>(`/api/stations/${slug}`);
+  return await supabase
+    .from('stations')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+};
+
+// Real-time subscription helper
+export const subscribeToTable = (tableName: string, callback: (payload: any) => void) => {
+  return supabase
+    .channel(`${tableName}-changes`)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: tableName,
+      },
+      (payload) => callback(payload)
+    )
+    .subscribe();
+};
+
+// Auth helper functions
+export const signUp = async (email: string, password: string) => {
+  return await supabase.auth.signUp({ email, password });
+};
+
+export const signIn = async (email: string, password: string) => {
+  return await supabase.auth.signInWithPassword({ email, password });
+};
+
+export const signOut = async () => {
+  return await supabase.auth.signOut();
+};
+
+export const getCurrentUser = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  return user;
 };

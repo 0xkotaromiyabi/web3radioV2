@@ -1,12 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { PrismaClient } from '@prisma/client';
-import { withAccelerate } from '@prisma/extension-accelerate';
+import { createClient } from '@supabase/supabase-js';
 
-// In serverless environment, it's best to initialize prisma outside the handler
-// but be careful with connection pooling. Prisma Accelerate handles this via the URL.
-const prisma = new PrismaClient({
-    accelerateUrl: process.env.DATABASE_URL
-}).$extends(withAccelerate());
+const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
+const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || '';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     // CORS headers
@@ -20,23 +17,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     try {
         if (req.method === 'GET') {
-            // Get all active listings from production DB
-            const listings = await prisma.rentalListing.findMany({
-                where: { isActive: true },
-                orderBy: { createdAt: 'desc' }
-            });
+            const { data, error } = await supabase
+                .from('rental_listings')
+                .select('*')
+                .eq('is_active', true)
+                .order('created_at', { ascending: false });
 
-            // Format to match old structure if necessary
-            const formatted = listings.map(l => ({
-                ...l,
-                token_id: l.tokenId,
-                lender: l.lender,
-                price_per_hour: l.pricePerHour.toString(),
-                max_duration_hours: l.maxDurationHours,
-                is_super_access: l.isSuperAccess
-            }));
+            if (error) throw error;
 
-            return res.status(200).json({ data: formatted, error: null });
+            return res.status(200).json({ data, error: null });
         }
 
         if (req.method === 'POST') {
@@ -46,27 +35,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 return res.status(400).json({ data: null, error: 'Missing required fields' });
             }
 
-            const listing = await prisma.rentalListing.create({
-                data: {
-                    tokenId: parseInt(token_id),
+            const { data, error } = await supabase
+                .from('rental_listings')
+                .insert([{
+                    token_id: parseInt(token_id),
                     lender,
-                    pricePerHour: price_per_hour,
-                    maxDurationHours: parseInt(max_duration_hours),
-                    isSuperAccess: is_super_access || false
-                }
-            });
+                    price_per_hour,
+                    max_duration_hours: parseInt(max_duration_hours),
+                    is_super_access: is_super_access || false,
+                    is_active: true
+                }])
+                .select()
+                .single();
 
-            return res.status(200).json({ data: listing, error: null });
+            if (error) throw error;
+
+            return res.status(200).json({ data, error: null });
         }
 
         if (req.method === 'DELETE') {
             const { id } = req.query;
             if (!id) return res.status(400).json({ error: 'ID required' });
 
-            await prisma.rentalListing.update({
-                where: { id: parseInt(id as string) },
-                data: { isActive: false }
-            });
+            const { error } = await supabase
+                .from('rental_listings')
+                .update({ is_active: false })
+                .eq('id', parseInt(id as string));
+
+            if (error) throw error;
 
             return res.status(200).json({ message: 'Listing deactivated successfully', error: null });
         }
