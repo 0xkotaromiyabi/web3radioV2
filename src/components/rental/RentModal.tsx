@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Clock, Coins, AlertCircle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSwitchChain } from 'wagmi';
 import { WEB3_RADIO_ACCESS_PASS_ADDRESS, WEB3_RADIO_ACCESS_PASS_ABI } from '@/config/contracts';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { sepolia, base } from 'wagmi/chains';
@@ -30,6 +30,8 @@ const RentModal: React.FC<RentModalProps> = ({ listing, open, onOpenChange }) =>
     const { toast } = useToast();
     const { address } = useAccount();
     const { writeContract, data: hash, isPending } = useWriteContract();
+    const { switchChain } = useSwitchChain();
+    const { chain } = useAccount();
 
     const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
         hash,
@@ -61,13 +63,20 @@ const RentModal: React.FC<RentModalProps> = ({ listing, open, onOpenChange }) =>
         }
 
         try {
+            // Check if on correct chain
+            if (chain?.id !== sepolia.id) {
+                switchChain({ chainId: sepolia.id });
+                return;
+            }
+
             writeContract({
                 address: WEB3_RADIO_ACCESS_PASS_ADDRESS,
                 abi: WEB3_RADIO_ACCESS_PASS_ABI,
                 functionName: 'setUser',
                 args: [BigInt(listing.tokenId), address, BigInt(expiresTimestamp)],
-                chain: sepolia, // Current NFTs are on Sepolia as per user
+                chain: sepolia,
                 account: address,
+                gas: BigInt(200000), // Set manual gas limit to avoid "too high" error on revert estimation
             });
         } catch (error: any) {
             toast({
