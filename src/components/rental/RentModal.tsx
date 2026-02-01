@@ -8,6 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { WEB3_RADIO_ACCESS_PASS_ADDRESS, WEB3_RADIO_ACCESS_PASS_ABI } from '@/config/contracts';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { sepolia, base } from 'wagmi/chains';
 
 interface Listing {
     id: string;
@@ -65,6 +66,8 @@ const RentModal: React.FC<RentModalProps> = ({ listing, open, onOpenChange }) =>
                 abi: WEB3_RADIO_ACCESS_PASS_ABI,
                 functionName: 'setUser',
                 args: [BigInt(listing.tokenId), address, BigInt(expiresTimestamp)],
+                chain: sepolia, // Current NFTs are on Sepolia as per user
+                account: address,
             });
         } catch (error: any) {
             toast({

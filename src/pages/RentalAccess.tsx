@@ -99,6 +99,7 @@ const RentalAccess = () => {
     const [rentModalOpen, setRentModalOpen] = useState(false);
     const [filterDay, setFilterDay] = useState<string>("all");
     const [filterType, setFilterType] = useState<string>("all");
+    const [filterNetwork, setFilterNetwork] = useState<string>("sepolia");
     const [currentTime, setCurrentTime] = useState(getCurrentUTCTime());
 
     // Fetch listings from API
@@ -251,6 +252,16 @@ const RentalAccess = () => {
                         </SelectContent>
                     </Select>
 
+                    <Select value={filterNetwork} onValueChange={setFilterNetwork}>
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Network" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="sepolia">Sepolia Testnet</SelectItem>
+                            <SelectItem value="base">Base Mainnet</SelectItem>
+                        </SelectContent>
+                    </Select>
+
                     <div className="flex-1"></div>
 
                     <div className="text-sm text-muted-foreground">
@@ -263,14 +274,17 @@ const RentalAccess = () => {
                     <p className="text-xs text-muted-foreground">
                         <span className="font-semibold">Contract:</span>{' '}
                         <a
-                            href="https://sepolia.etherscan.io/address/0xf6cE0304C02bBAcC817f2a90599cE700f538906F"
+                            href={filterNetwork === 'sepolia'
+                                ? "https://sepolia.etherscan.io/address/0xf6cE0304C02bBAcC817f2a90599cE700f538906F"
+                                : "https://basescan.org/address/0xf6cE0304C02bBAcC817f2a90599cE700f538906F" // Assuming same addr for demo or user will update
+                            }
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-primary hover:underline font-mono"
                         >
                             0xf6cE...906F
                         </a>
-                        {' '}on Sepolia
+                        {' '}on {filterNetwork === 'sepolia' ? 'Sepolia' : 'Base'}
                     </p>
                 </div>
 
