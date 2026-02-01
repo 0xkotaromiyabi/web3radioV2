@@ -1,14 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Missing Supabase environment variables. Please check your .env file.');
+  console.error('❌ Supabase environment variables are missing! Make sure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set in your .env or Vercel settings.');
 }
 
-// Create the Supabase client
-export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
+// Create the Supabase client safely
+export const supabase = (supabaseUrl && supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null as any;
 
 // Database helper functions for common operations
 export const fetchNews = async () => {

@@ -34,6 +34,16 @@ const RentModal: React.FC<RentModalProps> = ({ listing, open, onOpenChange }) =>
         hash,
     });
 
+    React.useEffect(() => {
+        if (isConfirmed) {
+            toast({
+                title: "Rental Successful! 🎉",
+                description: `You now have access for ${rentalHours} hours.`,
+            });
+            onOpenChange(false);
+        }
+    }, [isConfirmed, rentalHours, onOpenChange, toast]);
+
     if (!listing) return null;
 
     const totalPrice = (parseFloat(listing.pricePerHour) * parseInt(rentalHours)).toFixed(4);
@@ -64,16 +74,6 @@ const RentModal: React.FC<RentModalProps> = ({ listing, open, onOpenChange }) =>
             });
         }
     };
-
-    React.useEffect(() => {
-        if (isConfirmed) {
-            toast({
-                title: "Rental Successful! 🎉",
-                description: `You now have access for ${rentalHours} hours.`,
-            });
-            onOpenChange(false);
-        }
-    }, [isConfirmed]);
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
