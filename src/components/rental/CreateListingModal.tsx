@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,9 +29,6 @@ const CreateListingModal = () => {
         abi: WEB3_RADIO_ACCESS_PASS_ABI,
         functionName: 'ownerOf',
         args: tokenId ? [BigInt(tokenId)] : undefined,
-        query: {
-            enabled: !!tokenId,
-        }
     });
 
     const { data: isSuperResult } = useReadContract({
@@ -39,9 +36,6 @@ const CreateListingModal = () => {
         abi: WEB3_RADIO_ACCESS_PASS_ABI,
         functionName: 'isSuper',
         args: tokenId ? [BigInt(tokenId)] : undefined,
-        query: {
-            enabled: !!tokenId,
-        }
     });
 
     const { data: isApprovedForAll } = useReadContract({
@@ -169,6 +163,9 @@ const CreateListingModal = () => {
             <DialogContent className="glass border-border/50 sm:max-w-[425px]">
                 <DialogHeader>
                     <DialogTitle>List Access Pass for Rent</DialogTitle>
+                    <DialogDescription>
+                        Set your price and duration to start earning from your pass.
+                    </DialogDescription>
                 </DialogHeader>
 
                 {!address ? (

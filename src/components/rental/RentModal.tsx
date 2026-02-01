@@ -159,7 +159,7 @@ const RentModal: React.FC<RentModalProps> = ({ listing, open, onOpenChange }) =>
                 <DialogHeader>
                     <DialogTitle>Rent Access Pass #{listing.tokenId}</DialogTitle>
                     <DialogDescription>
-                        {listing.isSuperAccess ? 'Super Access' : 'Regular Access'} Pass
+                        {listing.isSuperAccess ? 'Super Access' : 'Regular Access'} Pass • Available for the specified duration.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -241,8 +241,8 @@ const RentModal: React.FC<RentModalProps> = ({ listing, open, onOpenChange }) =>
                         <Button
                             onClick={handleRent}
                             className={`w-full h-12 text-lg font-semibold transition-all duration-300 ${paymentMethod === 'eth'
-                                    ? 'bg-blue-600 hover:bg-blue-700'
-                                    : 'bg-[#2775ca] hover:bg-[#1e5da1]'
+                                ? 'bg-blue-600 hover:bg-blue-700'
+                                : 'bg-[#2775ca] hover:bg-[#1e5da1]'
                                 }`}
                             disabled={isPending || isConfirming || !isListingActive || isLoadingListing}
                         >

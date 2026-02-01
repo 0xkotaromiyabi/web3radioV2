@@ -8,92 +8,8 @@ import { Filter, Clock } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DAYS_OF_WEEK, getCurrentUTCTime } from '@/utils/timeSlots';
 
-// Realistic mock data with various time slots
-const MOCK_LISTINGS = [
-    // Monday slots
-    {
-        id: "1",
-        tokenId: "13", // Monday 13:00-14:00
-        lender: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0",
-        pricePerHour: "0.005",
-        maxDuration: 168,
-        isSuperAccess: false
-    },
-    {
-        id: "2",
-        tokenId: "18", // Monday 18:00-19:00
-        lender: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0",
-        pricePerHour: "0.008",
-        maxDuration: 168,
-        isSuperAccess: false
-    },
-    // Tuesday slots
-    {
-        id: "3",
-        tokenId: "36", // Tuesday 12:00-13:00
-        lender: "0x8B3d5c9f1A2e4D7b6E3c5A9f8D2b1C4e7F6a5B3d",
-        pricePerHour: "0.007",
-        maxDuration: 168,
-        isSuperAccess: false
-    },
-    // Wednesday evening
-    {
-        id: "4",
-        tokenId: "66", // Wednesday 18:00-19:00
-        lender: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0",
-        pricePerHour: "0.01",
-        maxDuration: 168,
-        isSuperAccess: false
-    },
-    // Thursday prime time
-    {
-        id: "5",
-        tokenId: "90", // Thursday 18:00-19:00
-        lender: "0x9C4e6B8a2F5d7E1c3B6a8D9f2E1C4b7A6F8e5D3c",
-        pricePerHour: "0.012",
-        maxDuration: 168,
-        isSuperAccess: false
-    },
-    // Friday evening
-    {
-        id: "6",
-        tokenId: "114", // Friday 18:00-19:00
-        lender: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0",
-        pricePerHour: "0.015",
-        maxDuration: 168,
-        isSuperAccess: false
-    },
-    // Weekend slots
-    {
-        id: "7",
-        tokenId: "154", // Sunday 10:00-11:00
-        lender: "0xA5F7e9D2c1B4e6a8C3f5D7b9A2e4C6f8B1d3E5a7",
-        pricePerHour: "0.006",
-        maxDuration: 168,
-        isSuperAccess: false
-    },
-    // Super Access - Monday
-    {
-        id: "8",
-        tokenId: "169",
-        lender: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0",
-        pricePerHour: "0.025",
-        maxDuration: 24,
-        isSuperAccess: true
-    },
-    // Super Access - Friday
-    {
-        id: "9",
-        tokenId: "173",
-        lender: "0xB6C8f1A3d5E7b9C2a4F6D8e1B3c5A7f9D2e4B6a8",
-        pricePerHour: "0.03",
-        maxDuration: 24,
-        isSuperAccess: true
-    },
-];
-
 const RentalAccess = () => {
-    const [listings, setListings] = useState<any[]>(MOCK_LISTINGS);
+    const [listings, setListings] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedListing, setSelectedListing] = useState<any | null>(null);
     const [rentModalOpen, setRentModalOpen] = useState(false);
@@ -119,7 +35,7 @@ const RentalAccess = () => {
                     })));
                 }
             } catch (err) {
-                console.warn("API fetch failed, using mock data:", err);
+                console.error("API fetch failed:", err);
             } finally {
                 setIsLoading(false);
             }

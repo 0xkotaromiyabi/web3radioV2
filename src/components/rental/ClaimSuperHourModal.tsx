@@ -92,7 +92,7 @@ const ClaimSuperHourModal: React.FC<ClaimSuperHourModalProps> = ({ tokenId }) =>
                         Activate Super Access
                     </DialogTitle>
                     <DialogDescription>
-                        Pass #{tokenId} • {timeSlot.day}
+                        Pass #{tokenId} • {timeSlot.day} - Select an hour to activate your access for this week.
                     </DialogDescription>
                 </DialogHeader>
 
