@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Clock, Coins, AlertCircle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSwitchChain } from 'wagmi';
+import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useSwitchChain } from 'wagmi';
 import { WEB3_RADIO_ACCESS_PASS_ADDRESS, WEB3_RADIO_ACCESS_PASS_ABI } from '@/config/contracts';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { sepolia, base } from 'wagmi/chains';
