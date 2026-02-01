@@ -1,4 +1,4 @@
-const db = require('../db');
+const prisma = require('../prisma');
 
 async function mintAllListings() {
     const LENDER_ADDRESS = "0x242DfB7849544eE242b2265cA7E585bdec60456B";
@@ -6,33 +6,44 @@ async function mintAllListings() {
     const SUPER_SUPPLY = 7;
     const SUPER_START_ID = 168;
 
-    console.log("🚀 Starting to 'mint' (initialize) all listings in database...");
+    console.log("🚀 Starting to 'mint' (initialize) all listings in database via Prisma...");
 
     try {
         // Clear existing listings to avoid duplicates during dev
-        await db.query('DELETE FROM rental_listings');
+        await prisma.rentalListing.deleteMany({});
         console.log("Cleared existing listings.");
 
-        // Mint Regular Access Listings (168)
+        // Prepare records
+        const records = [];
+
+        // Regular Access Listings (168)
         for (let i = 0; i < REGULAR_SUPPLY; i++) {
-            await db.query(
-                `INSERT INTO rental_listings (token_id, lender, price_per_hour, max_duration_hours, is_super_access) 
-                 VALUES ($1, $2, $3, $4, $5)`,
-                [i, LENDER_ADDRESS, 0.001, 168, false]
-            );
-            if (i % 24 === 0) console.log(`Minted day ${i / 24} regular listings...`);
+            records.push({
+                tokenId: i,
+                lender: LENDER_ADDRESS,
+                pricePerHour: 0.001,
+                maxDurationHours: 168,
+                isSuperAccess: false
+            });
         }
 
-        // Mint Super Access Listings (7)
+        // Super Access Listings (7)
         for (let i = 0; i < SUPER_SUPPLY; i++) {
-            await db.query(
-                `INSERT INTO rental_listings (token_id, lender, price_per_hour, max_duration_hours, is_super_access) 
-                 VALUES ($1, $2, $3, $4, $5)`,
-                [SUPER_START_ID + i, LENDER_ADDRESS, 0.01, 24, true]
-            );
+            records.push({
+                tokenId: SUPER_START_ID + i,
+                lender: LENDER_ADDRESS,
+                pricePerHour: 0.01,
+                maxDurationHours: 24,
+                isSuperAccess: true
+            });
         }
 
-        console.log("✅ Successfully initialized all 175 listings in database!");
+        // Bulk insert
+        await prisma.rentalListing.createMany({
+            data: records
+        });
+
+        console.log("✅ Successfully initialized all 175 listings in database via Prisma!");
         process.exit(0);
     } catch (err) {
         console.error("❌ Error minting listings:", err);

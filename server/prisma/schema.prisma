@@ -3,9 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
 }
 
 model User {
@@ -71,18 +69,18 @@ model Page {
 }
 
 model ListeningSession {
-  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userAddress  String    @map("user_address")
-  startTime    DateTime  @map("start_time") @db.Timestamptz(6)
-  endTime      DateTime? @map("end_time") @db.Timestamptz(6)
-  duration     Int?      @default(0)
-  stationId    String?   @map("station_id")
-  verified     Boolean?  @default(false)
-  createdAt    DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt    DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userAddress String    @map("user_address")
+  startTime   DateTime  @map("start_time") @db.Timestamptz(6)
+  endTime     DateTime? @map("end_time") @db.Timestamptz(6)
+  duration    Int?      @default(0)
+  stationId   String?   @map("station_id")
+  verified    Boolean?  @default(false)
+  createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  @@map("listening_sessions")
   @@index([userAddress], map: "idx_listening_sessions_user")
+  @@map("listening_sessions")
 }
 
 model UserStats {
@@ -95,8 +93,8 @@ model UserStats {
   createdAt             DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt             DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  @@map("user_stats")
   @@index([userAddress], map: "idx_user_stats_user")
+  @@map("user_stats")
 }
 
 model RewardClaim {
@@ -111,8 +109,8 @@ model RewardClaim {
   createdAt     DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  @@map("reward_claims")
   @@index([userAddress], map: "idx_reward_claims_user")
+  @@map("reward_claims")
 }
 
 model RateLimiting {
@@ -124,39 +122,39 @@ model RateLimiting {
   createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  @@map("rate_limiting")
   @@unique([userAddress, actionType])
+  @@map("rate_limiting")
 }
 
 model MusicTweet {
-  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tweetId     String      @unique @map("tweet_id")
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tweetId     String       @unique @map("tweet_id")
   username    String
   handle      String
   content     String
-  avatarUrl   String?     @map("avatar_url")
-  songRequest String?     @map("song_request")
-  processed   Boolean?    @default(false)
-  createdAt   DateTime?   @default(now()) @map("created_at") @db.Timestamptz(6)
+  avatarUrl   String?      @map("avatar_url")
+  songRequest String?      @map("song_request")
+  processed   Boolean?     @default(false)
+  createdAt   DateTime?    @default(now()) @map("created_at") @db.Timestamptz(6)
   MusicQueue  MusicQueue[]
 
   @@map("music_tweets")
 }
 
 model MusicQueue {
-  id             String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tweetId        String?     @map("tweet_id")
-  title          String
-  artist         String
-  videoId        String?     @map("video_id")
-  thumbnailUrl   String?     @map("thumbnail_url")
-  duration       String?
-  requestedBy    String      @map("requested_by")
-  queuePosition  Int?        @map("queue_position")
-  status         String?     @default("pending")
-  createdAt      DateTime?   @default(now()) @map("created_at") @db.Timestamptz(6)
-  Tweet          MusicTweet? @relation(fields: [tweetId], references: [tweetId])
-  NowPlaying     NowPlaying[]
+  id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tweetId       String?      @map("tweet_id")
+  title         String
+  artist        String
+  videoId       String?      @map("video_id")
+  thumbnailUrl  String?      @map("thumbnail_url")
+  duration      String?
+  requestedBy   String       @map("requested_by")
+  queuePosition Int?         @map("queue_position")
+  status        String?      @default("pending")
+  createdAt     DateTime?    @default(now()) @map("created_at") @db.Timestamptz(6)
+  Tweet         MusicTweet?  @relation(fields: [tweetId], references: [tweetId])
+  NowPlaying    NowPlaying[]
 
   @@map("music_queue")
 }
@@ -174,15 +172,15 @@ model NowPlaying {
 }
 
 model RentalListing {
-  id                Int       @id @default(autoincrement())
-  tokenId           Int       @map("token_id")
-  lender            String
-  pricePerHour      Decimal   @map("price_per_hour") @db.Decimal
-  maxDurationHours  Int       @map("max_duration_hours")
-  isActive          Boolean?  @default(true) @map("is_active")
-  isSuperAccess     Boolean?  @default(false) @map("is_super_access")
-  createdAt         DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt         DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id               Int       @id @default(autoincrement())
+  tokenId          Int       @map("token_id")
+  lender           String
+  pricePerHour     Decimal   @map("price_per_hour") @db.Decimal
+  maxDurationHours Int       @map("max_duration_hours")
+  isActive         Boolean?  @default(true) @map("is_active")
+  isSuperAccess    Boolean?  @default(false) @map("is_super_access")
+  createdAt        DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@map("rental_listings")
 }
