@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, MapPin, Radio, Users } from 'lucide-react';
 import { fetchEvents, subscribeToTable } from '@/lib/supabase';
-import { Loader } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 import { Link } from 'react-router-dom';
 import { Event } from '@/types/content';
@@ -45,7 +45,7 @@ const Events = () => {
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
         <NavBar />
         <div className="container py-12 flex justify-center items-center">
-          <Loader className="h-8 w-8 animate-spin text-green-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-green-500" />
         </div>
       </div>
     );

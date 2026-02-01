@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import NavBar from '@/components/navigation/NavBar';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Calendar, ArrowRight, Loader, Newspaper } from 'lucide-react';
+import { Calendar, ArrowRight, Loader2, Newspaper } from 'lucide-react';
 import { fetchNews, subscribeToTable } from '@/lib/supabase';
 import { NewsItem } from '@/types/content';
 
@@ -40,7 +40,7 @@ const News = () => {
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
         <NavBar />
         <div className="container py-12 flex justify-center items-center">
-          <Loader className="h-8 w-8 animate-spin text-green-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-green-500" />
         </div>
       </div>
     );

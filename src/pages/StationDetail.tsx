@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import NavBar from '@/components/navigation/NavBar';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Play, Radio, Info, Loader } from 'lucide-react';
+import { ArrowLeft, Play, Radio, Info, Loader2 } from 'lucide-react';
 import { getStationBySlug } from '@/lib/supabase';
 import { Station } from '@/types/content';
 import { useToast } from '@/components/ui/use-toast';
@@ -14,7 +14,7 @@ const StationDetail = () => {
     const [station, setStation] = useState<Station | null>(null);
     const [loading, setLoading] = useState(true);
     const { toast } = useToast();
-    const { playStation, isPlaying, currentStation } = useAudio();
+    const { changeStation, isPlaying, currentStation, togglePlay } = useAudio();
 
     useEffect(() => {
         const fetchStation = async () => {
@@ -55,7 +55,7 @@ const StationDetail = () => {
             <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
                 <NavBar />
                 <div className="container py-24 flex justify-center">
-                    <Loader className="h-8 w-8 animate-spin text-green-500" />
+                    <Loader2 className="h-8 w-8 animate-spin text-green-500" />
                 </div>
             </div>
         );
@@ -77,18 +77,26 @@ const StationDetail = () => {
         );
     }
 
-    const isCurrentStation = currentStation?.name === station.name;
+    // Map station name to key used in AudioProvider
+    const stationKeys: Record<string, string> = {
+        'Web3 Radio': 'web3',
+        'Oz Radio Jakarta': 'ozradio',
+        'i-Radio': 'iradio',
+        'Female Radio': 'female',
+        'Delta FM': 'delta',
+        'Prambors FM': 'prambors'
+    };
+
+    const stationKey = stationKeys[station.name] || 'web3';
+    const isCurrentStation = currentStation === stationKey;
     const isPlayingThis = isCurrentStation && isPlaying;
 
     const handlePlay = () => {
-        if (isPlayingThis) {
-            // Pause logic if needed, or just stop
-            // Currently AudioProvider might only expose playStation
-            // Assuming playStation also handles logic or we need a pause method
-            // For now, re-triggering playStation usually restarts or toggles depending on implementation
-            playStation(station as any); // Casting since Station type might slightly differ in Context
+        if (!isCurrentStation) {
+            changeStation(stationKey);
+            if (!isPlaying) togglePlay();
         } else {
-            playStation(station as any);
+            togglePlay();
         }
     };
 

@@ -98,6 +98,21 @@ export const getStationBySlug = async (slug: string) => {
     .single();
 };
 
+export const fetchPages = async () => {
+  return await supabase
+    .from('pages')
+    .select('*')
+    .order('title', { ascending: true });
+};
+
+export const getPageBySlug = async (slug: string) => {
+  return await supabase
+    .from('pages')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+};
+
 // Real-time subscription helper
 export const subscribeToTable = (tableName: string, callback: (payload: any) => void) => {
   return supabase

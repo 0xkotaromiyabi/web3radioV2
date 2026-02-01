@@ -10,8 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "compile": "hardhat compile --config hardhat.config.cjs",
-    "deploy:sepolia": "hardhat run scripts/deploy.cjs --network baseSepolia --config hardhat.config.cjs",
-    "postinstall": "prisma generate"
+    "deploy:sepolia": "hardhat run scripts/deploy.cjs --network baseSepolia --config hardhat.config.cjs"
   },
   "dependencies": {
     "@coinbase/onchainkit": "^1.1.2",
@@ -54,9 +53,6 @@
     "viem": "^2.45.0",
     "wagmi": "^2.19.5",
     "zod": "^3.23.8",
-    "prisma": "^7.3.0",
-    "@prisma/client": "^7.3.0",
-    "@prisma/extension-accelerate": "^3.0.1",
     "@vercel/node": "^3.0.0"
   },
   "devDependencies": {

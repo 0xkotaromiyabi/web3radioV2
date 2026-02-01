@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import NavBar from '@/components/navigation/NavBar';
 import { getPageBySlug } from '@/lib/supabase';
-import { Loader } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 type Page = {
@@ -48,7 +48,7 @@ const DynamicPage = () => {
             <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
                 <NavBar />
                 <div className="container py-12 flex justify-center items-center">
-                    <Loader className="h-8 w-8 animate-spin text-green-500" />
+                    <Loader2 className="h-8 w-8 animate-spin text-green-500" />
                 </div>
             </div>
         );

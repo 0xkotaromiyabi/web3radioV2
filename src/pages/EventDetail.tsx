@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import NavBar from '@/components/navigation/NavBar';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Calendar, MapPin, Loader, Share2 } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Loader2, Share2 } from 'lucide-react';
 import { getEventBySlug } from '@/lib/supabase';
 import { Event } from '@/types/content';
 import { useToast } from '@/components/ui/use-toast';
@@ -53,7 +53,7 @@ const EventDetail = () => {
             <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
                 <NavBar />
                 <div className="container py-24 flex justify-center">
-                    <Loader className="h-8 w-8 animate-spin text-green-500" />
+                    <Loader2 className="h-8 w-8 animate-spin text-green-500" />
                 </div>
             </div>
         );

@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Radio, Play, Pause, Music, Volume2, ExternalLink, Disc3, Newspaper, Users } from 'lucide-react';
 import { fetchStations, subscribeToTable } from '@/lib/supabase';
-import { Loader } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 import { Link } from 'react-router-dom';
@@ -181,7 +181,7 @@ const Stations = () => {
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
         <NavBar />
         <div className="container py-12 flex justify-center items-center">
-          <Loader className="h-8 w-8 animate-spin text-green-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-green-500" />
         </div>
       </div>
     );
