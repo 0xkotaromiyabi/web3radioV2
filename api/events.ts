@@ -1,10 +1,10 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { Pool } from 'pg';
+import { PrismaClient } from '@prisma/client';
+import { withAccelerate } from '@prisma/extension-accelerate';
 
-const pool = new Pool({
-    connectionString: process.env.DIRECT_URL || process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
-});
+const prisma = new PrismaClient({
+    accelerateUrl: process.env.DATABASE_URL
+}).$extends(withAccelerate());
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -17,19 +17,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (req.method === 'GET') {
             const { slug } = req.query;
             if (slug) {
-                const query = /^\d+$/.test(slug as string)
-                    ? 'SELECT * FROM events WHERE id = $1'
-                    : 'SELECT * FROM events WHERE slug = $1';
-                const result = await pool.query(query, [slug]);
+                const isId = /^\d+$/.test(slug as string);
+                const event = isId
+                    ? await prisma.event.findUnique({ where: { id: parseInt(slug as string) } })
+                    : await prisma.event.findUnique({ where: { slug: slug as string } });
 
-                if (result.rows.length === 0) {
+                if (!event) {
                     return res.status(404).json({ data: null, error: 'Event not found' });
                 }
-                return res.status(200).json({ data: result.rows[0], error: null });
+                return res.status(200).json({ data: event, error: null });
             }
 
-            const result = await pool.query('SELECT * FROM events ORDER BY date ASC');
-            return res.status(200).json({ data: result.rows, error: null });
+            const events = await prisma.event.findMany({
+                orderBy: { date: 'asc' }
+            });
+            return res.status(200).json({ data: events, error: null });
         }
 
         if (req.method === 'POST') {
@@ -38,11 +40,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 return res.status(400).json({ data: null, error: 'Required fields missing' });
             }
             const finalSlug = slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-            const result = await pool.query(
-                'INSERT INTO events (title, date, location, description, image_url, slug) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-                [title, date, location, description, image_url || null, finalSlug]
-            );
-            return res.status(200).json({ data: result.rows, error: null });
+
+            const event = await prisma.event.create({
+                data: {
+                    title,
+                    date,
+                    location,
+                    description,
+                    imageUrl: image_url || null,
+                    slug: finalSlug
+                }
+            });
+            return res.status(200).json({ data: event, error: null });
         }
 
         return res.status(405).json({ error: 'Method not allowed' });

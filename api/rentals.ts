@@ -1,11 +1,12 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { Pool } from 'pg';
+import { PrismaClient } from '@prisma/client';
+import { withAccelerate } from '@prisma/extension-accelerate';
 
-// Database connection pool for Vercel Serverless
-const pool = new Pool({
-    connectionString: process.env.DIRECT_URL || process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
-});
+// In serverless environment, it's best to initialize prisma outside the handler
+// but be careful with connection pooling. Prisma Accelerate handles this via the URL.
+const prisma = new PrismaClient({
+    accelerateUrl: process.env.DATABASE_URL
+}).$extends(withAccelerate());
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     // CORS headers
@@ -20,8 +21,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
         if (req.method === 'GET') {
             // Get all active listings from production DB
-            const result = await pool.query('SELECT * FROM rental_listings WHERE is_active = true ORDER BY created_at DESC');
-            return res.status(200).json({ data: result.rows, error: null });
+            const listings = await prisma.rentalListing.findMany({
+                where: { isActive: true },
+                orderBy: { createdAt: 'desc' }
+            });
+
+            // Format to match old structure if necessary
+            const formatted = listings.map(l => ({
+                ...l,
+                token_id: l.tokenId,
+                lender: l.lender,
+                price_per_hour: l.pricePerHour.toString(),
+                max_duration_hours: l.maxDurationHours,
+                is_super_access: l.isSuperAccess
+            }));
+
+            return res.status(200).json({ data: formatted, error: null });
         }
 
         if (req.method === 'POST') {
@@ -31,19 +46,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 return res.status(400).json({ data: null, error: 'Missing required fields' });
             }
 
-            const result = await pool.query(
-                'INSERT INTO rental_listings (token_id, lender, price_per_hour, max_duration_hours, is_super_access) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-                [token_id, lender, price_per_hour, max_duration_hours, is_super_access || false]
-            );
+            const listing = await prisma.rentalListing.create({
+                data: {
+                    tokenId: parseInt(token_id),
+                    lender,
+                    pricePerHour: price_per_hour,
+                    maxDurationHours: parseInt(max_duration_hours),
+                    isSuperAccess: is_super_access || false
+                }
+            });
 
-            return res.status(200).json({ data: result.rows[0], error: null });
+            return res.status(200).json({ data: listing, error: null });
         }
 
         if (req.method === 'DELETE') {
             const { id } = req.query;
             if (!id) return res.status(400).json({ error: 'ID required' });
 
-            await pool.query('UPDATE rental_listings SET is_active = false WHERE id = $1', [id]);
+            await prisma.rentalListing.update({
+                where: { id: parseInt(id as string) },
+                data: { isActive: false }
+            });
+
             return res.status(200).json({ message: 'Listing deactivated successfully', error: null });
         }
 
