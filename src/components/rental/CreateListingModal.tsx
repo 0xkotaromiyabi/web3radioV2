@@ -142,15 +142,39 @@ const CreateListingModal = () => {
     };
 
     React.useEffect(() => {
-        if (isMarketSuccess) {
-            toast({
-                title: "Listing Created",
-                description: `Pass #${tokenId} listed for rent successfully!`,
-            });
-            setOpen(false);
-            // Refresh logic omitted here, assumes parent or real-time handles it
-        }
-    }, [isMarketSuccess, tokenId, toast]);
+        const syncListingToDatabase = async () => {
+            if (isMarketSuccess && address) {
+                try {
+                    const baseUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3001');
+                    await fetch(`${baseUrl}/api/rentals`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            token_id: tokenId,
+                            lender: address,
+                            price_per_hour: price,
+                            max_duration_hours: duration,
+                            is_super_access: isSuper
+                        })
+                    });
+                    
+                    toast({
+                        title: "Listing Created! 🎉",
+                        description: `Pass #${tokenId} is now available for rent in the marketplace.`,
+                    });
+                } catch (err) {
+                    console.error('Failed to sync listing to database:', err);
+                    toast({
+                        title: "Listing Created On-Chain",
+                        description: `Pass #${tokenId} listed on-chain. Database sync may be delayed.`,
+                    });
+                }
+                setOpen(false);
+            }
+        };
+        
+        syncListingToDatabase();
+    }, [isMarketSuccess, tokenId, address, price, duration, isSuper, toast]);
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
