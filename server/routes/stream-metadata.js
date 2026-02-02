@@ -3,34 +3,67 @@ const fetch = require('node-fetch');
 
 const router = express.Router();
 
-// Station metadata sources configuration
+// Station metadata sources configuration with static fallback info
 const STATION_METADATA = {
     'web3': {
-        type: 'icecast',
-        // metadataUrl: 'https://web3radio.cloud/status-json.xsl', // Obsolete
-        metadataUrl: 'https://streaming.ozradiojakarta.com:8443/status-json.xsl',
-        mount: '/ozjakarta'
+        type: 'static', // No live metadata available
+        name: 'Oz Radio Jakarta',
+        defaultArtist: 'Oz Radio Jakarta',
+        defaultTitle: 'Live Broadcast',
+        defaultAlbum: 'Web3 Radio Network',
+        defaultArtwork: 'https://upload.wikimedia.org/wikipedia/id/1/13/OZ_Radio_logo.png',
+        genre: 'Top 40 / Pop'
     },
     'ozradio': {
         type: 'icecast',
         metadataUrl: 'https://streaming.ozradiojakarta.com:8443/status-json.xsl',
-        mount: '/ozjakarta'
+        mount: '/ozjakarta',
+        name: 'Oz Radio Jakarta',
+        defaultArtist: 'Oz Radio Jakarta',
+        defaultTitle: 'Live Broadcast',
+        defaultAlbum: 'Top 40 Hits',
+        defaultArtwork: 'https://upload.wikimedia.org/wikipedia/id/1/13/OZ_Radio_logo.png',
+        genre: 'Top 40 / Pop'
     },
     'iradio': {
         type: 'radiojar',
         metadataUrl: 'https://api.radiojar.com/api/stations/4ywdgup3bnzuv/now_playing/',
+        name: 'i-Radio',
+        defaultArtist: 'i-Radio Indonesia',
+        defaultTitle: 'Live Broadcast',
+        defaultAlbum: 'Top 40 Hits',
+        defaultArtwork: 'https://pbs.twimg.com/profile_images/1478253252506554368/KY8bV8Xq_400x400.jpg',
+        genre: 'Pop / CHR'
     },
     'female': {
         type: 'shoutcast',
         metadataUrl: 'https://s1.cloudmu.id/listen/female_radio/currentsong?sid=1',
+        name: 'Female Radio',
+        defaultArtist: 'Female Radio',
+        defaultTitle: 'Live Broadcast',
+        defaultAlbum: 'Urban Contemporary',
+        defaultArtwork: 'https://pbs.twimg.com/profile_images/910697330/LogoFR_400x400.jpg',
+        genre: 'Urban / Pop'
     },
     'delta': {
         type: 'shoutcast',
         metadataUrl: 'https://s1.cloudmu.id/listen/delta_fm/currentsong?sid=1',
+        name: 'Delta FM',
+        defaultArtist: 'Delta FM',
+        defaultTitle: 'Live Broadcast',
+        defaultAlbum: 'Easy Listening',
+        defaultArtwork: 'https://pbs.twimg.com/profile_images/1397855976538632195/cNdKclCQ_400x400.jpg',
+        genre: 'Adult Contemporary'
     },
     'prambors': {
         type: 'shoutcast',
         metadataUrl: 'https://s2.cloudmu.id/listen/prambors/currentsong?sid=1',
+        name: 'Prambors FM',
+        defaultArtist: 'Prambors FM',
+        defaultTitle: 'Live Broadcast',
+        defaultAlbum: 'Top 40 Indonesia',
+        defaultArtwork: 'https://pbs.twimg.com/profile_images/1587680139067346944/gqtFkz6a_400x400.jpg',
+        genre: 'Top 40 / Pop'
     }
 };
 
@@ -165,6 +198,26 @@ router.get('/:station', async (req, res) => {
     // Disable caching
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
 
+    // Helper function to return default/static metadata
+    const getDefaultMetadata = () => ({
+        title: stationConfig.defaultTitle || 'Live Broadcast',
+        artist: stationConfig.defaultArtist || stationConfig.name || stationId,
+        album: stationConfig.defaultAlbum || 'Live Stream',
+        artwork: stationConfig.defaultArtwork || null,
+        genre: stationConfig.genre || 'Radio',
+        source: 'static'
+    });
+
+    // For static stations (no live metadata), return default immediately
+    if (stationConfig.type === 'static' || !stationConfig.metadataUrl) {
+        return res.json({
+            station: stationId,
+            stationName: stationConfig.name,
+            nowPlaying: getDefaultMetadata(),
+            timestamp: new Date().toISOString()
+        });
+    }
+
     try {
         console.log(`Fetching metadata for station: ${stationId}`);
 
@@ -225,37 +278,42 @@ router.get('/:station', async (req, res) => {
         }
 
         if (metadata) {
-            // Try to fetch album art if not already present
-            if (!metadata.artwork && metadata.artist && metadata.title) {
-                const artwork = await fetchAlbumArt(metadata.artist, metadata.title);
-                if (artwork) {
-                    metadata.artwork = artwork;
+            // Use default artwork if none found from live metadata
+            if (!metadata.artwork) {
+                // Try to fetch album art from iTunes
+                if (metadata.artist && metadata.title) {
+                    const artwork = await fetchAlbumArt(metadata.artist, metadata.title);
+                    metadata.artwork = artwork || stationConfig.defaultArtwork;
+                } else {
+                    metadata.artwork = stationConfig.defaultArtwork;
                 }
             }
 
             res.json({
                 station: stationId,
+                stationName: stationConfig.name,
                 nowPlaying: metadata,
                 timestamp: new Date().toISOString()
             });
         } else {
+            // Fallback to static default metadata
             res.json({
                 station: stationId,
-                nowPlaying: {
-                    title: 'Live Broadcast',
-                    artist: stationId,
-                    album: 'Live Stream',
-                    source: 'fallback'
-                },
+                stationName: stationConfig.name,
+                nowPlaying: getDefaultMetadata(),
                 timestamp: new Date().toISOString()
             });
         }
 
     } catch (error) {
-        console.error(`Error fetching metadata for ${stationId}:`, error);
-        res.status(500).json({
-            error: error.message,
-            station: stationId
+        console.error(`Error fetching metadata for ${stationId}:`, error.message);
+        // Return default static metadata on error instead of 500
+        res.json({
+            station: stationId,
+            stationName: stationConfig.name,
+            nowPlaying: getDefaultMetadata(),
+            timestamp: new Date().toISOString(),
+            fallback: true
         });
     }
 });
