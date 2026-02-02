@@ -82,23 +82,26 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         audioRef.current = audio;
         audio.volume = volume / 100;
 
-        // Fetch metadata immediately on mount
-        fetchMetadata(currentStation);
-
-        // Set up periodic metadata refresh (every 30 seconds)
-        const interval = setInterval(() => fetchMetadata(currentStation), 30000);
+        // DON'T fetch metadata on mount - wait until play is pressed
+        // Metadata will be fetched when play event fires
 
         // Audio Event Listeners
         const onPlay = () => {
             setIsPlaying(true);
             setIsLoading(false);
-            fetchMetadata(currentStation); // Also refresh on play
+            // Fetch metadata when play starts
+            fetchMetadata(currentStation);
         };
-        const onPause = () => setIsPlaying(false);
+        const onPause = () => {
+            setIsPlaying(false);
+            // Clear metadata when paused for consistent display
+            setCurrentSong(null);
+        };
         const onError = (e: Event) => {
             console.error("Audio Error:", e);
             setIsPlaying(false);
             setIsLoading(false);
+            setCurrentSong(null); // Clear metadata on error
             toast({
                 title: "Playback Error",
                 description: "Unable to play this station right now.",
@@ -121,15 +124,35 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             audio.removeEventListener('error', onError);
             audio.removeEventListener('waiting', onWaiting);
             audio.removeEventListener('playing', onPlaying);
-            clearInterval(interval);
             audioRef.current = null;
         };
     }, []); // Run once on mount
+
+    // Effect for periodic metadata refresh ONLY when playing
+    useEffect(() => {
+        if (!isPlaying) return; // Only refresh metadata when playing
+
+        // Fetch immediately when effect runs (on play or station change while playing)
+        fetchMetadata(currentStation);
+
+        // Set up periodic metadata refresh (every 30 seconds) only while playing
+        const interval = setInterval(() => {
+            if (isPlaying) {
+                fetchMetadata(currentStation);
+            }
+        }, 30000);
+
+        return () => clearInterval(interval);
+    }, [isPlaying, currentStation]);
 
     // Re-implementing effect for Station Change to update src properly
     useEffect(() => {
         if (audioRef.current) {
             const wasPlaying = isPlaying;
+
+            // Clear old metadata immediately when station changes
+            setCurrentSong(null);
+
             audioRef.current.src = STATIONS[currentStation];
             audioRef.current.load(); // Reload with new source
             if (wasPlaying) {
@@ -141,9 +164,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                     });
                 }
             }
-
-            // Fetch metadata immediately when station changes
-            fetchMetadata(currentStation);
+            // Metadata will be fetched by the isPlaying effect when play event fires
         }
     }, [currentStation]);
 

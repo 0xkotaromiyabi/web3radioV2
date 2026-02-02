@@ -75,7 +75,7 @@ const RadioPlayer = () => {
           <AudioVisualizer />
 
           {/* Now Playing Info */}
-          {currentSong && (
+          {currentSong ? (
             <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/50 shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
               {currentSong.artwork ? (
                 <img
@@ -92,6 +92,17 @@ const RadioPlayer = () => {
                 <h3 className="font-medium text-gray-900 truncate">{currentSong.title}</h3>
                 <p className="text-sm text-gray-500 truncate">{currentSong.artist}</p>
                 <p className="text-xs text-gray-400 truncate">{currentSong.album}</p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/60 backdrop-blur-sm border border-white/30 shadow-[0_4px_16px_rgba(0,0,0,0.02)]">
+              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center flex-shrink-0">
+                <Music className="w-6 h-6 text-gray-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-medium text-gray-500">{stationNames[currentStation] || currentStation}</h3>
+                <p className="text-sm text-gray-400">Press play to start listening</p>
+                <p className="text-xs text-gray-300">Live Radio Stream</p>
               </div>
             </div>
           )}
