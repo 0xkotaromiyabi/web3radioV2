@@ -135,9 +135,9 @@ export default function BroadcastControls({ onStatusChange }: BroadcastControlsP
             ws.send(JSON.stringify({
                 type: 'connect',
                 config: {
-                    host: 'web3radio.cloud',
+                    host: 'localhost',
                     port: 8000,
-                    password: 'passweb3radio', // In production, get field inputs
+                    password: 'Web3RadioXYZ', // In production, get field inputs
                     mountpoint: '/stream'
                 }
             }));
@@ -176,8 +176,8 @@ export default function BroadcastControls({ onStatusChange }: BroadcastControlsP
                     interleaved[i * 2 + 1] = right[i];
                 }
 
-                // Send raw float32 buffer to backend
-                ws.send(JSON.stringify({ type: 'audio', buffer: Array.from(interleaved) }));
+                // Send raw float32 buffer to backend as binary
+                ws.send(interleaved.buffer);
             }
         };
 
