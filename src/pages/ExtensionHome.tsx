@@ -51,7 +51,7 @@ const ExtensionHome = () => {
         setViewMode('player');
     };
 
-    const openWeb = () => window.open('https://web3radio.app', '_blank');
+    const openWeb = () => window.open('https://webthreeradio.xyz', '_blank');
 
     return (
         <div className="w-[400px] h-[600px] bg-background flex flex-col overflow-hidden text-foreground">

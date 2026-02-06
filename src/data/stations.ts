@@ -23,7 +23,7 @@ export const STATIONS: Station[] = [
         mockMetadata: {
             title: "Decentralized Beats",
             artist: "Miner 49er",
-            artwork: "https://web3radio.app/assets/web3radio-logo.png"
+            artwork: "https://webthreeradio.xyz/assets/web3radio-logo.png"
         }
     },
     {

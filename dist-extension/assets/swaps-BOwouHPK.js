@@ -1,4 +1,4 @@
-import{c as I,a as A,i as D,C as $,J as s,K as h,b as c,t as V,L as W,o as O,R as S,f as z,M,g as F,W as K,r as B,e as Q,P as E}from"./vendor-reown-Bwym5ktI.js";import{r as a,n as w}from"./index-DuNFVP-2.js";import"./index-BFrtvJkC.js";import"./vendor-solana-CNam3Qu9.js";import"./vendor-react-C1_IFK5p.js";import"./vendor-wagmi-D3eR__VX.js";import"./vendor-ui-DTnz5oem.js";const q=I`
+import{c as I,a as A,i as D,C as $,J as s,K as h,b as c,t as V,L as W,o as O,R as S,f as z,M,g as F,W as K,r as B,e as Q,P as E}from"./vendor-reown-Bk8zy3CX.js";import{r as a,n as w}from"./index-Bth9Z0LU.js";import"./index-D99PeE_N.js";import"./vendor-solana-CNam3Qu9.js";import"./vendor-react-C1_IFK5p.js";import"./vendor-wagmi-D3eR__VX.js";import"./vendor-ui-DTnz5oem.js";const q=I`
   :host {
     width: 100%;
   }

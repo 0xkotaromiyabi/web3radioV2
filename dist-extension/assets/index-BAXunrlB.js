@@ -1,4 +1,4 @@
-import{c as d,r as m,e as c,a as f,i as v,v as y,b as h,U as b}from"./vendor-reown-Bwym5ktI.js";import{n as r,e as g,a as w}from"./index-DuNFVP-2.js";const x=d`
+import{c as d,r as m,e as c,a as f,i as v,v as y,b as h,U as b}from"./vendor-reown-Bk8zy3CX.js";import{n as r,e as g,a as w}from"./index-Bth9Z0LU.js";const x=d`
   :host {
     position: relative;
     display: inline-block;

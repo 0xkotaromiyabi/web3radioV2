@@ -5,7 +5,17 @@
     "description": "Web3 Radio Application",
     "action": {
         "default_title": "Open Web3 Radio",
-        "default_popup": "index.html"
+        "default_popup": "index.html",
+        "default_icon": {
+            "16": "web3radio-logo.png",
+            "48": "web3radio-logo.png",
+            "128": "web3radio-logo.png"
+        }
+    },
+    "icons": {
+        "16": "web3radio-logo.png",
+        "48": "web3radio-logo.png",
+        "128": "web3radio-logo.png"
     },
     "permissions": [],
     "host_permissions": [

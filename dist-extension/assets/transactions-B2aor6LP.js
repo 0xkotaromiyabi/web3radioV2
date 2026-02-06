@@ -1,4 +1,4 @@
-import{d as f,i as a,b as p,a as d}from"./vendor-reown-Bwym5ktI.js";import"./index-DuNFVP-2.js";import"./vendor-solana-CNam3Qu9.js";import"./vendor-react-C1_IFK5p.js";import"./vendor-wagmi-D3eR__VX.js";import"./vendor-ui-DTnz5oem.js";const m=f`
+import{d as f,i as a,b as p,a as d}from"./vendor-reown-Bk8zy3CX.js";import"./index-Bth9Z0LU.js";import"./vendor-solana-CNam3Qu9.js";import"./vendor-react-C1_IFK5p.js";import"./vendor-wagmi-D3eR__VX.js";import"./vendor-ui-DTnz5oem.js";const m=f`
   :host > wui-flex:first-child {
     height: 500px;
     overflow-y: auto;

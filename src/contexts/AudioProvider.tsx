@@ -65,7 +65,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             // Use absolute URL for extension to hit the deployed backend
             // or relative if in development context (though extension should use absolute)
             const apiUrl = import.meta.env.MODE === 'extension'
-                ? `https://web3radio.app/api/stream-metadata/${stationId}`
+                ? `https://webthreeradio.xyz/api/stream-metadata/${stationId}`
                 : `/api/stream-metadata/${stationId}`;
 
             const response = await fetch(apiUrl);
