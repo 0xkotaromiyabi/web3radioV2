@@ -4,7 +4,7 @@ import path from "path";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 // https://vitejs.dev/config/
-export default defineConfig(() => ({
+export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
@@ -29,7 +29,21 @@ export default defineConfig(() => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  base: "/",
+  base: mode === 'extension' ? './' : '/',
+  build: {
+    outDir: mode === 'extension' ? 'dist-extension' : 'dist',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-ui': ['@radix-ui/react-slot', '@radix-ui/react-label', 'lucide-react', 'class-variance-authority', 'clsx', 'tailwind-merge'],
+          'vendor-solana': ['@solana/web3.js', '@solana/wallet-adapter-react', '@solana/wallet-adapter-react-ui'],
+          'vendor-wagmi': ['wagmi', 'viem', '@tanstack/react-query'],
+          'vendor-reown': ['@reown/appkit', '@walletconnect/ethereum-provider'],
+        },
+      },
+    },
+  },
   define: {
     global: "globalThis",
   },

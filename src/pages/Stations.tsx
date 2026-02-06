@@ -13,59 +13,33 @@ import { Station } from '@/types/content';
 
 type GenreCategory = 'all' | 'pop' | 'rock' | 'news' | 'community';
 
-const stationUrls: { [key: string]: string } = {
-  'Web3 Radio': 'https://web3radio.cloud/stream',
-  'Oz Radio Jakarta': 'https://streaming.ozradiojakarta.com:8443/ozjakarta',
-  'i-Radio': 'https://n04.radiojar.com/4ywdgup3bnzuv?1744076195=&rj-tok=AAABlhMxTIcARnjabAV4uyOIpA&rj-ttl=5',
-  'Female Radio': 'https://s1.cloudmu.id/listen/female_radio/radio.mp3',
-  'Delta FM': 'https://s1.cloudmu.id/listen/delta_fm/radio.mp3',
-  'Prambors FM': 'https://s2.cloudmu.id/listen/prambors/stream',
-  'Hard Rock FM': 'https://example.com/hardrock',
-  'Indie Nation': 'https://example.com/indie',
-  'BBC World Service': 'https://example.com/bbc',
-  'Metro News FM': 'https://example.com/metronews',
-  'Local Voice Radio': 'https://example.com/localvoice',
-  'Campus FM': 'https://example.com/campus'
-};
-
-const stationWebsites: { [key: string]: string } = {
-  'Oz Radio Jakarta': 'https://ozradiojakarta.com/',
-  'i-Radio': 'https://iswaranetwork.com/',
-  'Female Radio': 'https://femaleradio.co.id/',
-  'Delta FM': 'https://deltafm.net/'
-};
+import { STATIONS as CENTRAL_STATIONS } from '@/data/stations';
 
 const Stations = () => {
   const [stations, setStations] = useState<Station[]>([]);
   const [loading, setLoading] = useState(true);
-  const [playingStationId, setPlayingStationId] = useState<number | null>(null);
+  const [playingStationId, setPlayingStationId] = useState<string | number | null>(null);
   const [volume, setVolume] = useState(80);
   const [selectedGenre, setSelectedGenre] = useState<GenreCategory>('all');
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
 
-  // Sample station data for each genre category
-  const sampleStations: Station[] = [
-    // Pop / Top 40
-    { id: 101, name: 'Prambors FM', genre: 'pop', description: 'Jakarta\'s #1 Hit Music Station', streaming: true, image_url: '', slug: 'prambors-fm' },
-    { id: 102, name: 'Female Radio', genre: 'pop', description: 'Music & Lifestyle for Modern Women', streaming: true, image_url: '', slug: 'female-radio' },
-    { id: 103, name: 'i-Radio', genre: 'pop', description: 'Today\'s Best Music', streaming: true, image_url: '', slug: 'i-radio' },
+  // Map Central Stations to Station type used here
+  const sampleStations: Station[] = CENTRAL_STATIONS.map(s => ({
+    id: s.id as any,
+    name: s.name,
+    genre: s.genre as any,
+    description: s.description,
+    streaming: !s.streamUrl.includes('example.com'),
+    image_url: s.image_url || '',
+    slug: s.id
+  }));
 
-    // Rock (Classic Rock, Alternative, Indie)
-    { id: 201, name: 'Hard Rock FM', genre: 'rock', description: 'Classic Rock Anthems 24/7', streaming: false, image_url: '', slug: 'hard-rock-fm' },
-    { id: 202, name: 'Indie Nation', genre: 'rock', description: 'Alternative & Indie Rock Hits', streaming: false, image_url: '', slug: 'indie-nation' },
-    { id: 203, name: 'Delta FM', genre: 'rock', description: 'Rock & Alternative Music', streaming: true, image_url: '', slug: 'delta-fm' },
+  const stationUrls: { [key: string]: string } = CENTRAL_STATIONS.reduce((acc, s) => {
+    acc[s.name] = s.streamUrl;
+    return acc;
+  }, {} as any);
 
-    // News
-    { id: 301, name: 'BBC World Service', genre: 'news', description: 'Global News & Current Affairs', streaming: false, image_url: '', slug: 'bbc-world-service' },
-    { id: 302, name: 'Metro News FM', genre: 'news', description: 'Your Source for Local & National News', streaming: false, image_url: '', slug: 'metro-news-fm' },
-    { id: 303, name: 'Oz Radio Jakarta', genre: 'news', description: 'News, Talk & Information', streaming: true, image_url: '', slug: 'oz-radio-jakarta' },
-
-    // Community Radio
-    { id: 401, name: 'Web3 Radio', genre: 'community', description: 'Community-Powered Web3 Broadcasting', streaming: true, image_url: '', slug: 'web3-radio' },
-    { id: 402, name: 'Local Voice Radio', genre: 'community', description: 'Your Community, Your Voice', streaming: false, image_url: '', slug: 'local-voice-radio' },
-    { id: 403, name: 'Campus FM', genre: 'community', description: 'Student-Run Campus Radio', streaming: false, image_url: '', slug: 'campus-fm' },
-  ];
 
   useEffect(() => {
     const loadStations = async () => {

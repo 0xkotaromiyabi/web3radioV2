@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "compile": "hardhat compile --config hardhat.config.cjs",
-    "deploy:sepolia": "hardhat run scripts/deploy.cjs --network baseSepolia --config hardhat.config.cjs"
+    "deploy:sepolia": "hardhat run scripts/deploy.cjs --network baseSepolia --config hardhat.config.cjs",
+    "build:extension": "tsc && vite build --mode extension"
   },
   "dependencies": {
     "@coinbase/onchainkit": "^1.1.2",

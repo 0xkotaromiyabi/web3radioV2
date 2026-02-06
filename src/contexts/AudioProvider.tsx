@@ -22,26 +22,9 @@ interface AudioContextType {
     isLoading: boolean;
 }
 
+import { STATIONS as STATION_DATA, getStationById } from '@/data/stations';
+
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
-
-// Station Config (Shared with RadioPlayer logic basically)
-const STATIONS: Record<string, string> = {
-    web3: 'https://web3radio.cloud/stream',
-    ozradio: 'https://streaming.ozradiojakarta.com:8443/ozjakarta',
-    iradio: 'https://n04.radiojar.com/4ywdgup3bnzuv?1744076195=&rj-tok=AAABlhMxTIcARnjabAV4uyOIpA&rj-ttl=5',
-    female: 'https://s1.cloudmu.id/listen/female_radio/radio.mp3',
-    delta: 'https://s1.cloudmu.id/listen/delta_fm/radio.mp3',
-    prambors: 'https://s2.cloudmu.id/listen/prambors/stream'
-};
-
-const STATION_NAMES: Record<string, string> = {
-    web3: 'Web3 Radio',
-    ozradio: 'Oz Radio Jakarta',
-    iradio: 'i-Radio',
-    female: 'Female Radio',
-    delta: 'Delta FM',
-    prambors: 'Prambors FM'
-};
 
 export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [isPlaying, setIsPlaying] = useState(false);
@@ -54,12 +37,32 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
-    // Fetch metadata function - moved outside useEffect for reusability
-    const fetchMetadata = async (station: string) => {
-        if (!Object.keys(STATIONS).includes(station)) return;
+    // Helper to get stream URL safely
+    const getStreamUrl = (stationId: string) => {
+        const station = getStationById(stationId);
+        return station ? station.streamUrl : '';
+    };
 
+    // Fetch metadata function
+    const fetchMetadata = async (stationId: string) => {
+        const station = getStationById(stationId);
+        if (!station) return;
+
+        // Use mock metadata from database immediately to verify UI
+        if (station.mockMetadata) {
+            setCurrentSong({
+                title: station.mockMetadata.title,
+                artist: station.mockMetadata.artist,
+                album: station.name,
+                artwork: station.mockMetadata.artwork
+            });
+        }
+
+        // Optionally try to fetch real metadata if API exists? 
+        // For now, consistent mock data is better than flickering/missing data.
+        /**
         try {
-            const response = await fetch(`/api/stream-metadata/${station}`);
+            const response = await fetch(`/api/stream-metadata/${stationId}`);
             if (response.ok) {
                 const data = await response.json();
                 if (data.nowPlaying) {
@@ -74,37 +77,34 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         } catch (error) {
             console.error("Error fetching metadata:", error);
         }
+        **/
     };
 
     useEffect(() => {
         // Initialize Audio
-        const audio = new Audio(STATIONS[currentStation]);
+        const streamUrl = getStreamUrl(currentStation);
+        if (!streamUrl) return;
+
+        const audio = new Audio(streamUrl);
         audioRef.current = audio;
         audio.volume = volume / 100;
 
-        // DON'T fetch metadata on mount - wait until play is pressed
-        // Metadata will be fetched when play event fires
-
-        // Audio Event Listeners
         const onPlay = () => {
             setIsPlaying(true);
             setIsLoading(false);
-            // Fetch metadata when play starts
             fetchMetadata(currentStation);
         };
         const onPause = () => {
             setIsPlaying(false);
-            // Clear metadata when paused for consistent display
-            setCurrentSong(null);
+            // setCurrentSong(null); // Keep metadata visible while paused? User preference.
         };
         const onError = (e: Event) => {
             console.error("Audio Error:", e);
             setIsPlaying(false);
             setIsLoading(false);
-            setCurrentSong(null); // Clear metadata on error
             toast({
                 title: "Playback Error",
-                description: "Unable to play this station right now.",
+                description: "Unable to play this station right now (Stream might be offline).",
                 variant: "destructive"
             });
         };
@@ -126,16 +126,13 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             audio.removeEventListener('playing', onPlaying);
             audioRef.current = null;
         };
-    }, []); // Run once on mount
+    }, []);
 
-    // Effect for periodic metadata refresh ONLY when playing
     useEffect(() => {
-        if (!isPlaying) return; // Only refresh metadata when playing
-
-        // Fetch immediately when effect runs (on play or station change while playing)
+        if (!isPlaying) return;
         fetchMetadata(currentStation);
 
-        // Set up periodic metadata refresh (every 30 seconds) only while playing
+        // Refresh metadata
         const interval = setInterval(() => {
             if (isPlaying) {
                 fetchMetadata(currentStation);
@@ -145,26 +142,28 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return () => clearInterval(interval);
     }, [isPlaying, currentStation]);
 
-    // Re-implementing effect for Station Change to update src properly
+    // Station Change Effect
     useEffect(() => {
         if (audioRef.current) {
             const wasPlaying = isPlaying;
 
-            // Clear old metadata immediately when station changes
-            setCurrentSong(null);
+            // Update Metadata immediately for new station
+            fetchMetadata(currentStation);
 
-            audioRef.current.src = STATIONS[currentStation];
-            audioRef.current.load(); // Reload with new source
-            if (wasPlaying) {
-                const playPromise = audioRef.current.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(error => {
-                        console.error("Auto-play prevented", error);
-                        setIsPlaying(false);
-                    });
+            const newUrl = getStreamUrl(currentStation);
+            if (newUrl) {
+                audioRef.current.src = newUrl;
+                audioRef.current.load();
+                if (wasPlaying) {
+                    const playPromise = audioRef.current.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(error => {
+                            console.error("Auto-play prevented", error);
+                            setIsPlaying(false);
+                        });
+                    }
                 }
             }
-            // Metadata will be fetched by the isPlaying effect when play event fires
         }
     }, [currentStation]);
 
@@ -181,7 +180,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             } else {
                 audioRef.current.play().catch(e => {
                     console.error("Play failed", e);
-                    toast({ title: "Error", description: "Click again to play", variant: "destructive" });
+                    toast({ title: "Error", description: "Stream might be offline", variant: "destructive" });
                 });
             }
         }

@@ -1,0 +1,14 @@
+{
+    "manifest_version": 3,
+    "name": "Web3 Radio",
+    "version": "0.1.0",
+    "description": "Web3 Radio Application",
+    "action": {
+        "default_title": "Open Web3 Radio",
+        "default_popup": "index.html"
+    },
+    "permissions": [],
+    "host_permissions": [
+        "https://*/*"
+    ]
+}

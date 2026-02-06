@@ -101,9 +101,26 @@
     font-feature-settings: 'cv11', 'ss01';
     letter-spacing: -0.011em;
   }
+
+  body.extension-mode {
+    width: 400px;
+    height: 600px;
+    min-width: 400px;
+    min-height: 600px;
+    overflow: hidden;
+    /* Prevent scrolling on the body */
+    margin: 0;
+    padding: 0;
+  }
+
+  html.extension-mode {
+    width: 400px;
+    height: 600px;
+  }
 }
 
 @layer utilities {
+
   /* Frosted Glass Effect */
   .glass {
     background: var(--glass-bg);
@@ -219,17 +236,24 @@
   /* Apple-style Divider */
   .divider-apple {
     @apply h-px w-full;
-    background: linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent);
+    background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.1), transparent);
   }
 
   .dark .divider-apple {
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
   }
 
   /* Subtle Animation */
   @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-5px);
+    }
   }
 
   .animate-float {
@@ -237,12 +261,17 @@
   }
 
   @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+    0% {
+      background-position: -200% 0;
+    }
+
+    100% {
+      background-position: 200% 0;
+    }
   }
 
   .animate-shimmer {
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
     background-size: 200% 100%;
     animation: shimmer 2s infinite;
   }
