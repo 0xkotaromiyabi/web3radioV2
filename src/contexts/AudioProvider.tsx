@@ -60,24 +60,30 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
         // Optionally try to fetch real metadata if API exists? 
         // For now, consistent mock data is better than flickering/missing data.
-        /**
+        // Attempt to fetch real metadata
         try {
-            const response = await fetch(`/api/stream-metadata/${stationId}`);
+            // Use absolute URL for extension to hit the deployed backend
+            // or relative if in development context (though extension should use absolute)
+            const apiUrl = import.meta.env.MODE === 'extension'
+                ? `https://web3radio.app/api/stream-metadata/${stationId}`
+                : `/api/stream-metadata/${stationId}`;
+
+            const response = await fetch(apiUrl);
             if (response.ok) {
                 const data = await response.json();
                 if (data.nowPlaying) {
                     setCurrentSong({
-                        title: data.nowPlaying.title || 'Unknown Title',
-                        artist: data.nowPlaying.artist || 'Unknown Artist',
-                        album: data.nowPlaying.album || 'Live Stream',
-                        artwork: data.nowPlaying.artwork
+                        title: data.nowPlaying.title || station.mockMetadata?.title || 'Unknown Title',
+                        artist: data.nowPlaying.artist || station.mockMetadata?.artist || 'Unknown Artist',
+                        album: data.nowPlaying.album || station.name,
+                        artwork: data.nowPlaying.artwork || station.mockMetadata?.artwork
                     });
                 }
             }
         } catch (error) {
             console.error("Error fetching metadata:", error);
+            // Fallback to mock is already set above
         }
-        **/
     };
 
     useEffect(() => {
