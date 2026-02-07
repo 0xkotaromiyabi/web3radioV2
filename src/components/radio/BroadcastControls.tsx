@@ -135,9 +135,11 @@ export default function BroadcastControls({ onStatusChange }: BroadcastControlsP
             ws.send(JSON.stringify({
                 type: 'connect',
                 config: {
-                    host: 'localhost',
+                    protocol: 'shoutcast1',
+                    host: '100.67.23.46',
                     port: 8000,
-                    password: 'Web3RadioXYZ', // In production, get field inputs
+                    user: 'admin',
+                    password: 'changeme123',
                     mountpoint: '/stream'
                 }
             }));
