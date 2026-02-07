@@ -2,7 +2,7 @@ const { Pool } = require('pg');
 require('dotenv').config();
 
 // Helper to parse DATABASE_URL
-let config = {};
+let config = null;
 
 // Use DIRECT_URL for pg pool if available (for Prisma Accelerate compatibility)
 const connectionString = process.env.DIRECT_URL || process.env.DATABASE_URL;
@@ -25,46 +25,57 @@ if (connectionString) {
                 throw new Error('DIRECT_URL missing for Prisma Accelerate setup.');
             }
         } else {
-            const url = new URL(cleanUrl);
-            config = {
-                user: url.username,
-                password: url.password,
-                host: url.hostname,
-                port: url.port,
-                database: url.pathname.split('/')[1],
-                ssl: url.searchParams.get('sslmode') !== 'disable' && url.hostname !== 'localhost' ? { rejectUnauthorized: false } : false
-            };
+            try {
+                const url = new URL(cleanUrl);
+                config = {
+                    user: url.username,
+                    password: url.password,
+                    host: url.hostname,
+                    port: url.port,
+                    database: url.pathname.split('/')[1],
+                    ssl: url.searchParams.get('sslmode') !== 'disable' && url.hostname !== 'localhost' ? { rejectUnauthorized: false } : false
+                };
+            } catch (urlError) {
+                // Fallback if URL parsing fails but string exists
+                config = {
+                    connectionString: cleanUrl,
+                    ssl: { rejectUnauthorized: false }
+                };
+            }
         }
-        console.log(`Database connected to production host: ${config.host || 'remote'}`);
+        console.log(`Database connected to production host: ${config?.host || 'remote'}`);
     } catch (e) {
-        console.error('Error parsing Connection String, falling back to basic connection:', e.message);
-        config = {
-            connectionString: connectionString.replace(/"/g, ''),
-            ssl: { rejectUnauthorized: false }
-        };
+        console.error('Error parsing Connection String:', e.message);
     }
-} else {
-    console.error('CRITICAL: DATABASE_URL is not defined!');
-    // Fallback for local dev
-    config = {
-        user: 'web3radio',
-        password: 'web3radio_local_dev',
-        host: 'localhost',
-        port: 5433,
-        database: 'web3radio'
-    };
 }
 
-const pool = new Pool(config);
-
-// Test connection on startup
-pool.query('SELECT NOW()', (err, res) => {
-    if (err) {
-        console.error('Database connection error:', err);
-    } else {
-        console.log('Database connected to Production/Prisma at:', res.rows[0].now);
-    }
-});
+// Create pool or mock
+let pool;
+if (config) {
+    pool = new Pool(config);
+    // Test connection on startup
+    pool.connect().then(client => {
+        return client.query('SELECT NOW()')
+            .then(res => {
+                client.release();
+                console.log('Database connected to Production/Prisma at:', res.rows[0].now);
+            })
+            .catch(err => {
+                client.release();
+                console.error('Database connection test failed:', err.message);
+            });
+    }).catch(err => {
+        console.error('Database pool connection error:', err.message);
+        console.warn('⚠️  Server running in RELAY-ONLY mode (Database unavailable)');
+    });
+} else {
+    console.warn('⚠️  DATABASE_URL not defined. Server running in RELAY-ONLY mode.');
+    // Mock pool for Relay-only mode
+    pool = {
+        query: async () => { throw new Error('Database not configured'); },
+        connect: async () => { throw new Error('Database not configured'); }
+    };
+}
 
 module.exports = {
     query: (text, params) => pool.query(text, params),

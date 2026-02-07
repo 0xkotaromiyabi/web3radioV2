@@ -33,28 +33,50 @@ interface CachedAccess {
  * @returns AdminAccessResult with access status and messages
  */
 export function useAdminAccess(address: string | undefined): AdminAccessResult {
-    const [cachedAccess, setCachedAccess] = useState<CachedAccess | null>(null);
-
-    // Check sessionStorage on mount
-    useEffect(() => {
-        if (address) {
-            try {
-                const stored = sessionStorage.getItem(SESSION_KEY);
-                if (stored) {
-                    const parsed: CachedAccess = JSON.parse(stored);
-                    // Validate it's for the same address
-                    if (parsed.address.toLowerCase() === address.toLowerCase()) {
-                        setCachedAccess(parsed);
-                    }
+    // Lazy initialize state from sessionStorage to avoid initial loading flash
+    const [cachedAccess, setCachedAccess] = useState<CachedAccess | null>(() => {
+        if (!address) return null;
+        try {
+            const stored = sessionStorage.getItem(SESSION_KEY);
+            if (stored) {
+                const parsed: CachedAccess = JSON.parse(stored);
+                // Validate it's for the same address
+                if (parsed.address.toLowerCase() === address.toLowerCase()) {
+                    return parsed;
                 }
-            } catch (e) {
-                console.warn('Failed to read cached access', e);
             }
+        } catch (e) {
+            console.warn('Failed to read cached access', e);
         }
+        return null;
+    });
+
+    // Update state if address changes
+    useEffect(() => {
+        if (!address) {
+            setCachedAccess(null);
+            return;
+        }
+
+        // Check cache again when address changes
+        try {
+            const stored = sessionStorage.getItem(SESSION_KEY);
+            if (stored) {
+                const parsed: CachedAccess = JSON.parse(stored);
+                if (parsed.address.toLowerCase() === address.toLowerCase()) {
+                    setCachedAccess(parsed);
+                    return;
+                }
+            }
+        } catch (e) {
+            // ignore
+        }
+        setCachedAccess(null);
     }, [address]);
 
     // Only query on-chain if we don't have a valid cache
-    const shouldQueryChain = !cachedAccess || cachedAccess.address.toLowerCase() !== address?.toLowerCase();
+    // This calculation must be consistent with the state
+    const shouldQueryChain = !cachedAccess || (address && cachedAccess.address.toLowerCase() !== address.toLowerCase());
 
     const { data: hasAccessNow, isLoading, isError } = useReadContract({
         address: WEB3_RADIO_ACCESS_PASS_ADDRESS,
@@ -83,7 +105,7 @@ export function useAdminAccess(address: string | undefined): AdminAccessResult {
         return `${witaHour.toString().padStart(2, '0')}:${witaMinutes} WITA`;
     }, []);
 
-    // Cache successful access in sessionStorage
+    // Cache access result in sessionStorage (whether granted or denied)
     useEffect(() => {
         if (address && !isLoading && hasAccessNow !== undefined) {
             const accessData: CachedAccess = {
@@ -95,19 +117,17 @@ export function useAdminAccess(address: string | undefined): AdminAccessResult {
                 timestamp: Date.now()
             };
 
-            if (accessData.hasAccess) {
-                try {
-                    sessionStorage.setItem(SESSION_KEY, JSON.stringify(accessData));
-                    setCachedAccess(accessData);
-                } catch (e) {
-                    console.warn('Failed to cache access', e);
-                }
+            try {
+                sessionStorage.setItem(SESSION_KEY, JSON.stringify(accessData));
+                setCachedAccess(accessData);
+            } catch (e) {
+                console.warn('Failed to cache access', e);
             }
         }
     }, [address, hasAccessNow, hasRegularAccess, isLoading]);
 
     const result = useMemo(() => {
-        // Return cached result if available
+        // 1. Return cached result if available in state
         if (cachedAccess && address && cachedAccess.address.toLowerCase() === address.toLowerCase()) {
             return {
                 hasAccess: cachedAccess.hasAccess,
@@ -118,6 +138,30 @@ export function useAdminAccess(address: string | undefined): AdminAccessResult {
                 message: null,
                 isLoading: false
             };
+        }
+
+        // 2. Escape Hatch: Try direct read from sessionStorage to prevent flicker
+        // This handles the render cycle where address is defined but state hasn't updated yet
+        if (address) {
+            try {
+                const stored = sessionStorage.getItem(SESSION_KEY);
+                if (stored) {
+                    const parsed: CachedAccess = JSON.parse(stored);
+                    if (parsed.address.toLowerCase() === address.toLowerCase()) {
+                        return {
+                            hasAccess: parsed.hasAccess,
+                            isAdmin: parsed.isAdmin,
+                            hasTimeRestriction: parsed.hasTimeRestriction,
+                            allowedSlot: parsed.allowedSlot,
+                            currentTimeWITA,
+                            message: null,
+                            isLoading: false
+                        };
+                    }
+                }
+            } catch (e) {
+                // Ignore errors here
+            }
         }
 
         if (!address) {

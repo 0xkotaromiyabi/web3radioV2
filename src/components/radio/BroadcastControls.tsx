@@ -127,11 +127,15 @@ export default function BroadcastControls({ onStatusChange }: BroadcastControlsP
         onStatusChange?.('connecting');
 
         // Connect to WebSocket Server (Backend)
-        const ws = new WebSocket('ws://localhost:3001'); // Adjust port as needed
+        // Use environment variable for production, fallback to localhost for dev
+        const wsUrl = import.meta.env.VITE_WS_RELAY_URL || 'ws://localhost:3001';
+        console.log('🎙️ Connecting to relay server:', wsUrl);
+
+        const ws = new WebSocket(wsUrl);
         wsRef.current = ws;
 
         ws.onopen = () => {
-            console.log('WS Connected');
+            console.log('✅ WS Connected to relay server');
             ws.send(JSON.stringify({
                 type: 'connect',
                 config: {
@@ -143,20 +147,41 @@ export default function BroadcastControls({ onStatusChange }: BroadcastControlsP
                     mountpoint: '/stream'
                 }
             }));
-            setStatus('connected');
-            setIsBroadcasting(true);
-            onStatusChange?.('connected');
+        };
+
+        ws.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                console.log('📡 Server message:', data);
+
+                if (data.type === 'connected') {
+                    setStatus('connected');
+                    setIsBroadcasting(true);
+                    onStatusChange?.('connected');
+                } else if (data.type === 'disconnected') {
+                    setStatus('disconnected');
+                    setIsBroadcasting(false);
+                    onStatusChange?.('disconnected');
+                } else if (data.type === 'error') {
+                    console.error('🔴 Relay error:', data.message);
+                    setStatus('disconnected');
+                    setIsBroadcasting(false);
+                    onStatusChange?.('disconnected');
+                }
+            } catch (e) {
+                // Non-JSON message, ignore
+            }
         };
 
         ws.onclose = () => {
-            console.log('WS Closed');
+            console.log('🔌 WS Closed');
             setStatus('disconnected');
             setIsBroadcasting(false);
             onStatusChange?.('disconnected');
         };
 
         ws.onerror = (err) => {
-            console.error('WS Error', err);
+            console.error('❌ WS Error', err);
             setStatus('disconnected');
             setIsBroadcasting(false);
         };
@@ -191,6 +216,10 @@ export default function BroadcastControls({ onStatusChange }: BroadcastControlsP
 
     const stopBroadcast = useCallback(() => {
         if (wsRef.current) {
+            // Tell server to disconnect from Shoutcast
+            if (wsRef.current.readyState === WebSocket.OPEN) {
+                wsRef.current.send(JSON.stringify({ type: 'disconnect' }));
+            }
             wsRef.current.close();
             wsRef.current = null;
         }

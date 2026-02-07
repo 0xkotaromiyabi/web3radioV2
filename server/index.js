@@ -44,9 +44,9 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: err.message || 'Internal server error' });
 });
 
-// --- WebSocket & Audio Relay ---
+// --- WebSocket & Audio Relay for Shoutcast ---
 const WebSocket = require('ws');
-const ffmpeg = require('fluent-ffmpeg');
+const { spawn } = require('child_process');
 
 const server = app.listen(PORT, () => {
     console.log(`Web3Radio API server running on port ${PORT}`);
@@ -55,81 +55,139 @@ const server = app.listen(PORT, () => {
 const wss = new WebSocket.Server({ server });
 
 wss.on('connection', (ws) => {
-    console.log('Client connected to Audio Relay');
+    console.log('🎙️ Client connected to Audio Relay');
 
     let ffmpegProcess = null;
+    let isStreaming = false;
 
     ws.on('message', (message) => {
         try {
             // Check if binary (audio data) or JSON (config)
             if (Buffer.isBuffer(message)) {
-                if (ffmpegProcess && ffmpegProcess.stdin.writable) {
+                if (ffmpegProcess && ffmpegProcess.stdin && ffmpegProcess.stdin.writable) {
                     ffmpegProcess.stdin.write(message);
                 }
             } else {
-                const data = JSON.parse(message);
+                const data = JSON.parse(message.toString());
 
                 if (data.type === 'connect') {
-                    const { host, port, password, mountpoint } = data.config;
-                    console.log(`Starting broadcast to ${host}:${port}${mountpoint}`);
+                    const config = data.config || {};
+                    const protocol = config.protocol || 'shoutcast1';
+                    const host = config.host || '100.67.23.46';
+                    const port = config.port || 8000;
+                    const password = config.password || 'changeme123';
+                    const mountpoint = config.mountpoint || '/stream';
+                    const user = config.user || 'admin';
 
-                    // Spawn FFmpeg to transcode Raw PCM -> MP3 -> Shoutcast
-                    ffmpegProcess = ffmpeg()
-                        .input('pipe:0')
-                        .inputFormat('f32le') // Input from browser is Float32 PCM
-                        .inputOptions([
-                            '-ac 2',        // Stereo
-                            '-ar 44100'     // 44.1kHz
-                        ])
-                        .audioCodec('libmp3lame')
-                        .audioBitrate('128k')
-                        .outputFormat('mp3')
-                        .output(`icecast://${host}:${port}${mountpoint}`) // Shoutcast v2 supports ICY/Icecast protocol usually
-                        .outputOptions([
-                            `-ice_name "Web3Radio Live"`,
-                            `-ice_description "Live from Dashboard"`,
-                            `-ice_genre "Variety"`,
-                            `-content_type audio/mpeg`,
-                            // Shoutcast auth usually: source:password or admin:password
-                            // For standard Shoutcast v1/v2 legacy source: just password
-                            // We might need to construct URL carefully: tcp://source:password@host:port
-                        ])
-                        // For basic Shoutcast Source Protocol (v1), ffmpeg uses:
-                        // output: 'tcp://hostname:port'
-                        // and option: '-password', 'yourpassword'
-                        // Let's try standard legacy protocol first which is most common for simple tools
-                        .output(`tcp://${host}:${port}`)
-                        .outputOptions([
-                            '-content_type', 'audio/mpeg',
-                            '-password', password,
-                            '-icy_name', 'Web3Radio Live',
-                            '-icy_genre', 'Variety'
-                        ])
+                    console.log(`📡 Starting broadcast to ${host}:${port}${mountpoint} (${protocol})`);
+                    console.log(`   User: ${user}, Password: ${password ? '****' : 'none'}`);
 
-                        .on('start', (cmd) => {
-                            console.log('FFmpeg started:', cmd);
-                        })
-                        .on('error', (err) => {
-                            console.error('FFmpeg error:', err.message);
+                    // Kill existing process if any
+                    if (ffmpegProcess) {
+                        ffmpegProcess.kill();
+                        ffmpegProcess = null;
+                    }
+
+                    // Build FFmpeg command for Shoutcast
+                    // Shoutcast v1 uses legacy source protocol on source port (usually 8001 or main port)
+                    // Format: icy://source:password@host:port/mountpoint
+
+                    let outputUrl;
+                    if (protocol === 'shoutcast1') {
+                        // Shoutcast v1 legacy protocol
+                        outputUrl = `icy://${user}:${password}@${host}:${port}${mountpoint}`;
+                    } else {
+                        // Icecast or Shoutcast v2
+                        outputUrl = `icecast://${user}:${password}@${host}:${port}${mountpoint}`;
+                    }
+
+                    // Spawn FFmpeg: PCM Float32 stereo -> MP3 -> Shoutcast
+                    const ffmpegArgs = [
+                        '-f', 'f32le',          // Input format: 32-bit float little-endian
+                        '-ar', '44100',         // Sample rate: 44.1kHz
+                        '-ac', '2',             // Channels: stereo
+                        '-i', 'pipe:0',         // Input from stdin
+                        '-acodec', 'libmp3lame',
+                        '-ab', '128k',          // Bitrate: 128kbps
+                        '-ar', '44100',
+                        '-f', 'mp3',            // Output format
+                        '-content_type', 'audio/mpeg',
+                        '-ice_name', 'Web3Radio Live',
+                        '-ice_description', 'Live broadcast from Web3Radio Dashboard',
+                        '-ice_genre', 'Variety',
+                        outputUrl
+                    ];
+
+                    console.log(`🔧 FFmpeg command: ffmpeg ${ffmpegArgs.join(' ')}`);
+
+                    ffmpegProcess = spawn('ffmpeg', ffmpegArgs);
+                    isStreaming = true;
+
+                    ffmpegProcess.stdout.on('data', (data) => {
+                        console.log(`FFmpeg stdout: ${data}`);
+                    });
+
+                    ffmpegProcess.stderr.on('data', (data) => {
+                        const msg = data.toString();
+                        // Only log important messages, not the continuous progress
+                        if (msg.includes('Error') || msg.includes('error') || msg.includes('Opening')) {
+                            console.log(`FFmpeg: ${msg}`);
+                        }
+                    });
+
+                    ffmpegProcess.on('close', (code) => {
+                        console.log(`FFmpeg process exited with code ${code}`);
+                        isStreaming = false;
+                        if (ws.readyState === WebSocket.OPEN) {
+                            ws.send(JSON.stringify({ type: 'disconnected', code }));
+                        }
+                    });
+
+                    ffmpegProcess.on('error', (err) => {
+                        console.error('FFmpeg spawn error:', err);
+                        isStreaming = false;
+                        if (ws.readyState === WebSocket.OPEN) {
                             ws.send(JSON.stringify({ type: 'error', message: err.message }));
-                        })
-                        .on('end', () => {
-                            console.log('FFmpeg finished');
-                        });
+                        }
+                    });
 
-                    ffmpegProcess.run();
+                    // Notify client that connection is established
+                    ws.send(JSON.stringify({ type: 'connected', protocol, host, port }));
+
+                } else if (data.type === 'disconnect') {
+                    console.log('🛑 Client requested disconnect');
+                    if (ffmpegProcess) {
+                        ffmpegProcess.stdin.end();
+                        ffmpegProcess.kill();
+                        ffmpegProcess = null;
+                        isStreaming = false;
+                    }
+                    ws.send(JSON.stringify({ type: 'disconnected' }));
                 }
             }
         } catch (e) {
             console.error('Error processing message:', e);
+            ws.send(JSON.stringify({ type: 'error', message: e.message }));
         }
     });
 
     ws.on('close', () => {
-        console.log('Client disconnected');
+        console.log('🔌 Client disconnected');
+        if (ffmpegProcess) {
+            ffmpegProcess.stdin.end();
+            ffmpegProcess.kill();
+            ffmpegProcess = null;
+        }
+    });
+
+    ws.on('error', (err) => {
+        console.error('WebSocket error:', err);
         if (ffmpegProcess) {
             ffmpegProcess.kill();
+            ffmpegProcess = null;
         }
     });
 });
+
+console.log('🎧 Audio relay WebSocket ready on same port as HTTP');
 
