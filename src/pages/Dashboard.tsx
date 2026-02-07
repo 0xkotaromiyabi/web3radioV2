@@ -14,7 +14,7 @@ import RadioHub from '@/components/radio/RadioHub';
 import { useAppKit } from '@reown/appkit/react';
 import { useAccount, useDisconnect } from 'wagmi';
 import logo from '@/assets/web3radio-logo.png';
-import { useAdminAccess } from '@/hooks/useAdminAccess';
+import { useAdminAccess, clearAdminAccessCache } from '@/hooks/useAdminAccess';
 
 // Type definitions
 type NewsItem = {
@@ -141,6 +141,7 @@ const Dashboard = () => {
   };
 
   const handleLogout = () => {
+    clearAdminAccessCache(); // Clear session cache so verification is required again
     disconnect();
     toast({ title: "Disconnected", description: "Wallet disconnected successfully" });
   };

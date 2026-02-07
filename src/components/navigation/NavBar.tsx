@@ -27,10 +27,9 @@ const NavBar = () => {
     { to: '/', label: 'Home', icon: Home },
     { to: '/news', label: 'News', icon: Newspaper },
     { to: '/events', label: 'Events', icon: Calendar },
-    { to: '/stations', label: 'Radio Stations', icon: Radio },
     { to: '/rental', label: 'Rental Access', icon: Calendar },
     { to: '/ply', label: 'PLY', icon: Gift },
-    { to: '/dao', label: 'Web3Radio DAO', icon: Users }, // Updated from 17an Onchain
+    { to: '/dao', label: 'Web3Radio DAO', icon: Users },
   ];
 
   const isActive = (path: string) => location.pathname === path;
