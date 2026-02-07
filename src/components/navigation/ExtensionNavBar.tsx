@@ -7,7 +7,7 @@ import logo from '@/assets/web3radio-logo.png';
 
 const ExtensionNavBar = () => {
     const openExternal = (path: string) => {
-        window.open(`https://web3radio.app${path}`, '_blank');
+        window.open(`https://webthreeradio.xyz${path}`, '_blank');
     };
 
     const navLinks = [

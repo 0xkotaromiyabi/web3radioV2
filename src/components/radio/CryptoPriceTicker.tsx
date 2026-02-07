@@ -21,23 +21,33 @@ const CryptoPriceTicker = ({ isMobile }: CryptoPriceTickerProps) => {
         const response = await fetch(
           "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,binancecoin,cardano,polkadot&vs_currencies=usd"
         );
+        if (!response.ok) throw new Error('API error');
         const data = await response.json();
         const prices: CryptoPrice[] = [
-          { symbol: 'BTC', price: data.bitcoin.usd },
-          { symbol: 'ETH', price: data.ethereum.usd },
-          { symbol: 'SOL', price: data.solana.usd },
-          { symbol: 'BNB', price: data.binancecoin.usd },
-          { symbol: 'ADA', price: data.cardano.usd },
-          { symbol: 'DOT', price: data.polkadot.usd },
+          { symbol: 'BTC', price: data.bitcoin?.usd || 0 },
+          { symbol: 'ETH', price: data.ethereum?.usd || 0 },
+          { symbol: 'SOL', price: data.solana?.usd || 0 },
+          { symbol: 'BNB', price: data.binancecoin?.usd || 0 },
+          { symbol: 'ADA', price: data.cardano?.usd || 0 },
+          { symbol: 'DOT', price: data.polkadot?.usd || 0 },
         ];
         setCryptoPrices(prices);
       } catch (error) {
-        console.error("Error fetching crypto prices:", error);
+        // CORS or network error - use fallback static data
+        console.warn("CoinGecko API unavailable, using fallback data");
+        setCryptoPrices([
+          { symbol: 'BTC', price: 95000 },
+          { symbol: 'ETH', price: 3200 },
+          { symbol: 'SOL', price: 180 },
+          { symbol: 'BNB', price: 580 },
+          { symbol: 'ADA', price: 0.85 },
+          { symbol: 'DOT', price: 7.5 },
+        ]);
       }
     };
 
     fetchPrices();
-    const interval = setInterval(fetchPrices, 30000);
+    const interval = setInterval(fetchPrices, 60000); // Reduce frequency to avoid rate limits
 
     return () => clearInterval(interval);
   }, []);

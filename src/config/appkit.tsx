@@ -22,8 +22,8 @@ createAppKit({
     metadata: {
         name: 'Web3Radio',
         description: 'Web3Radio - IDRX Buy & Tip Platform',
-        url: 'https://web3radio.app', // Update with your domain
-        icons: ['https://web3radio.app/icon.png'], // Update with your icon
+        url: 'https://webthreeradio.xyz',
+        icons: ['https://webthreeradio.xyz/web3radio-logo.png'],
     },
     features: {
         analytics: true,

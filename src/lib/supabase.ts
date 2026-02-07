@@ -115,10 +115,11 @@ export const getPageBySlug = async (slug: string) => {
     .single();
 };
 
-// Real-time subscription helper
+// Real-time subscription helper with unique channel ID
 export const subscribeToTable = (tableName: string, callback: (payload: any) => void) => {
+  const uniqueId = `${tableName}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   return supabase
-    .channel(`${tableName}-changes`)
+    .channel(uniqueId)
     .on(
       'postgres_changes',
       {
