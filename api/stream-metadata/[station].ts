@@ -5,8 +5,8 @@ const STATION_METADATA: Record<string, { type: string; metadataUrl: string; moun
     'web3': {
         type: 'icecast',
         // metadataUrl: 'https://web3radio.cloud/status-json.xsl', // Obsolete
-        metadataUrl: 'https://streaming.ozradiojakarta.com:8443/status-json.xsl',
-        mount: '/ozjakarta'
+        metadataUrl: 'https://shoutcast.webthreeradio.xyz/currentsong?sid=1',
+        mount: '/stream'
     },
     'ozradio': {
         type: 'icecast',

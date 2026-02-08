@@ -48,15 +48,13 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const station = getStationById(stationId);
         if (!station) return;
 
-        // Use mock metadata from database immediately to verify UI
-        if (station.mockMetadata) {
-            setCurrentSong({
-                title: station.mockMetadata.title,
-                artist: station.mockMetadata.artist,
-                album: station.name,
-                artwork: station.mockMetadata.artwork
-            });
-        }
+        // Use station's own data as initial metadata
+        setCurrentSong({
+            title: station.description,
+            artist: station.name,
+            album: station.genre.toUpperCase(),
+            artwork: station.image_url
+        });
 
         // Optionally try to fetch real metadata if API exists? 
         // For now, consistent mock data is better than flickering/missing data.
@@ -73,10 +71,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 const data = await response.json();
                 if (data.nowPlaying) {
                     setCurrentSong({
-                        title: data.nowPlaying.title || station.mockMetadata?.title || 'Unknown Title',
-                        artist: data.nowPlaying.artist || station.mockMetadata?.artist || 'Unknown Artist',
-                        album: data.nowPlaying.album || station.name,
-                        artwork: data.nowPlaying.artwork || station.mockMetadata?.artwork
+                        title: data.nowPlaying.title || station.description,
+                        artist: data.nowPlaying.artist || station.name,
+                        album: data.nowPlaying.album || station.genre.toUpperCase(),
+                        artwork: data.nowPlaying.artwork || station.image_url
                     });
                 }
             }
