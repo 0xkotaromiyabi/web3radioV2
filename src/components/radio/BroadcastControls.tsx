@@ -140,7 +140,7 @@ export default function BroadcastControls({ onStatusChange }: BroadcastControlsP
                 type: 'connect',
                 config: {
                     protocol: 'shoutcast1',
-                    host: '100.67.23.46',
+                    host: 'shoutcast.webthreeradio.xyz',
                     port: 8000,
                     user: 'admin',
                     password: 'changeme123',

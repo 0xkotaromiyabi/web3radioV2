@@ -17,7 +17,7 @@ export const STATIONS: Station[] = [
     {
         id: 'web3',
         name: 'Web3 Radio',
-        streamUrl: 'http://100.67.23.46:8000/stream',
+        streamUrl: 'http://shoutcast.webthreeradio.xyz:8000/stream',
         genre: 'community',
         description: 'Community-Powered Web3 Broadcasting',
         mockMetadata: {
