@@ -3,7 +3,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 // Station metadata sources configuration
 const STATION_METADATA: Record<string, { type: string; metadataUrl: string; mount?: string }> = {
     'web3': {
-        type: 'icecast',
+        type: 'shoutcast',
         // metadataUrl: 'https://web3radio.cloud/status-json.xsl', // Obsolete
         metadataUrl: 'https://shoutcast.webthreeradio.xyz/currentsong?sid=1',
         mount: '/stream'
