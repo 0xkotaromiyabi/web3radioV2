@@ -5,6 +5,7 @@ import { Home, Newspaper, Calendar, Radio, Menu, X, Users, LogIn, Gift } from 'l
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import logo from '@/assets/web3radio-logo.png';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 
 const NavBar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -75,15 +76,21 @@ const NavBar = () => {
           ))}
         </nav>
 
-        {/* Login Button - Desktop */}
-        <Link to="/dashboard" className="hidden md:block">
-          <Button
-            className="btn-apple-primary flex items-center gap-2"
-          >
-            <LogIn className="h-4 w-4" />
-            <span>Login</span>
-          </Button>
-        </Link>
+
+        {/* Solana Wallet & Login Button - Desktop */}
+        <div className="hidden md:flex items-center gap-3">
+          <div className="solana-wallet-button-container">
+            <WalletMultiButton />
+          </div>
+          <Link to="/dashboard">
+            <Button
+              className="btn-apple-primary flex items-center gap-2"
+            >
+              <LogIn className="h-4 w-4" />
+              <span>Login</span>
+            </Button>
+          </Link>
+        </div>
 
         {/* Mobile Menu Toggle */}
         <button
@@ -126,12 +133,17 @@ const NavBar = () => {
               </Link>
             ))}
             <div className="h-px bg-border/50 my-2" />
-            <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
-              <Button className="w-full btn-apple-primary justify-center">
-                <LogIn className="h-4 w-4 mr-2" />
-                <span>Login</span>
-              </Button>
-            </Link>
+            <div className="flex flex-col gap-2">
+              <div className="solana-wallet-button-container w-full">
+                <WalletMultiButton className="w-full justify-center" />
+              </div>
+              <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                <Button className="w-full btn-apple-primary justify-center">
+                  <LogIn className="h-4 w-4 mr-2" />
+                  <span>Login</span>
+                </Button>
+              </Link>
+            </div>
           </div>
         </nav>
         {/* Backdrop */}
