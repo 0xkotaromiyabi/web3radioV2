@@ -46,8 +46,7 @@ function App() {
               ) : (
                 <BrowserRouter>
                   <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/v2" element={<IndexV2 />} />
+                    <Route path="/" element={<IndexV2 />} />
                     <Route path="/marketplace" element={<Marketplace />} />
                     <Route path="/news" element={<News />} />
                     <Route path="/news/:slug" element={<NewsDetail />} />

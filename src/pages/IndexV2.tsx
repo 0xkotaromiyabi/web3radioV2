@@ -5,6 +5,7 @@ import { STATIONS } from '@/data/stations';
 import { useAppKit, useAppKitAccount, useAppKitNetwork } from '@reown/appkit/react';
 import { useDisconnect } from 'wagmi';
 import UnifiedTipComponent from '@/components/wallet/UnifiedTipComponent';
+import CryptoTicker from '@/components/ui/CryptoTicker';
 
 const IndexV2 = () => {
   const { isPlaying, togglePlay, currentStation, currentSong, changeStation } = useAudio();
@@ -319,10 +320,13 @@ const IndexV2 = () => {
 
       <div className="flex flex-col items-center mb-12 px-4 mt-8">
         <div className="text-center">
-          <p className="text-[10px] uppercase tracking-[0.4em] font-bold opacity-30 mb-2">Decentralized Radio Station</p>
           <h1 className="text-2xl font-bold tracking-tighter text-[#515044]/80">WEB3RADIO</h1>
+          <p className="text-[10px] uppercase tracking-[0.4em] font-bold opacity-30 mb-2">Decentralized Radio Station</p>
         </div>
       </div>
+
+      {/* Crypto Price Ticker */}
+      <CryptoTicker />
 
       <div className="music-player-wrapper">
         <div className={`music-player-container ${isPlaying ? 'is-playing' : ''}`}>

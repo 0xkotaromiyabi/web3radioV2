@@ -1,16 +1,24 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAppKit, useAppKitAccount, useAppKitNetwork } from '@reown/appkit/react';
+import { useDisconnect } from 'wagmi';
 import { Home, Newspaper, Calendar, Radio, Menu, X, Users, LogIn, Gift } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import logo from '@/assets/web3radio-logo.png';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 
 const NavBar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+
+  // Unified AppKit State
+  const { open: openAppKit } = useAppKit();
+  const { address, isConnected } = useAppKitAccount();
+  const { caipNetwork } = useAppKitNetwork();
+  const { disconnect } = useDisconnect();
+
+  const networkName = caipNetwork?.name || 'Unknown';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -74,24 +82,27 @@ const NavBar = () => {
               </button>
             </Link>
           ))}
-        </nav>
-
-
-        {/* Solana Wallet & Login Button - Desktop */}
-        <div className="hidden md:flex items-center gap-3">
-          <div className="solana-wallet-button-container">
-            <WalletMultiButton />
-          </div>
-          <Link to="/dashboard">
+        </nav>        {/* Unified Wallet Connection - Desktop */}
+        <div className="hidden md:flex items-center">
+          {!isConnected ? (
             <Button
-              className="btn-apple-primary flex items-center gap-2"
+              onClick={() => openAppKit()}
+              className="bg-[#515044] hover:bg-black text-white rounded-xl px-6 h-10 font-bold text-xs shadow-lg transition-all flex items-center gap-2"
             >
-              <LogIn className="h-4 w-4" />
-              <span>Login</span>
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Connect Wallet
             </Button>
-          </Link>
+          ) : (
+            <button
+              onClick={() => openAppKit({ view: 'Account' })}
+              className="px-4 py-2 bg-white border border-[#515044]/10 text-[#515044] rounded-xl font-mono text-[10px] shadow-sm hover:bg-gray-50 transition-all flex items-center gap-2"
+            >
+              <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+              <span className="font-bold text-[9px] uppercase tracking-wider text-[#515044]/50">{networkName}</span>
+              {address?.slice(0, 4)}...{address?.slice(-4)}
+            </button>
+          )}
         </div>
-
         {/* Mobile Menu Toggle */}
         <button
           className="flex md:hidden items-center justify-center w-10 h-10 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
@@ -132,17 +143,37 @@ const NavBar = () => {
                 <span>{link.label}</span>
               </Link>
             ))}
+
             <div className="h-px bg-border/50 my-2" />
-            <div className="flex flex-col gap-2">
-              <div className="solana-wallet-button-container w-full">
-                <WalletMultiButton className="w-full justify-center" />
-              </div>
-              <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                <Button className="w-full btn-apple-primary justify-center">
-                  <LogIn className="h-4 w-4 mr-2" />
-                  <span>Login</span>
+
+            <div className="flex flex-col gap-2 pt-2">
+              {!isConnected ? (
+                <Button
+                  onClick={() => { openAppKit(); setMobileMenuOpen(false); }}
+                  className="w-full bg-[#515044] text-white justify-center h-12 rounded-xl font-bold"
+                >
+                  Connect Wallet
                 </Button>
-              </Link>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={() => { openAppKit({ view: 'Account' }); setMobileMenuOpen(false); }}
+                    className="w-full px-4 py-3 bg-white border border-[#515044]/10 text-[#515044] rounded-xl font-mono text-xs flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-green-500" />
+                      <span className="font-bold text-[10px] uppercase tracking-wider text-[#515044]/50">{networkName}</span>
+                    </div>
+                    <span>{address?.slice(0, 6)}...{address?.slice(-4)}</span>
+                  </button>
+                  <button
+                    onClick={() => { disconnect(); setMobileMenuOpen(false); }}
+                    className="w-full py-2 text-xs font-bold text-red-500/60 hover:text-red-500"
+                  >
+                    Disconnect
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </nav>
