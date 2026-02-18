@@ -318,7 +318,7 @@ const IndexV2 = () => {
 
       <NavBar />
 
-      <div className="flex flex-col items-center mb-12 px-4 mt-8">
+      <div className="flex flex-col items-center mb-12 px-4 mt-20 md:mt-24">
         <div className="text-center">
           <h1 className="text-2xl font-bold tracking-tighter text-[#515044]/80">WEB3RADIO</h1>
           <p className="text-[10px] uppercase tracking-[0.4em] font-bold opacity-30 mb-2">Decentralized Radio Station</p>
