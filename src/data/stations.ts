@@ -15,7 +15,7 @@ export const STATIONS: Station[] = [
         streamUrl: 'https://shoutcast.webthreeradio.xyz/stream',
         genre: 'community',
         description: 'Community-Powered Web3 Broadcasting',
-        image_url: "https://webthreeradio.xyz/assets/web3radio-logo.png"
+        image_url: "https://storage.googleapis.com/papyrus_images/727fda00ec477888d92a63593993f66a.jpg"
     },
     {
         id: 'ozradio',
@@ -23,7 +23,7 @@ export const STATIONS: Station[] = [
         streamUrl: 'https://streaming.ozradiojakarta.com:8443/ozjakarta',
         genre: 'news',
         description: 'News, Talk & Information',
-        image_url: "https://pbs.twimg.com/profile_images/1615234149959602177/X9q9p7G0_400x400.jpg"
+        image_url: "https://p.kindpng.com/picc/s/376-3768602_oz-radio-logo-clipart-png-download-oz-radio.png"
     },
     {
         id: 'female',
@@ -31,7 +31,7 @@ export const STATIONS: Station[] = [
         streamUrl: 'https://s1.cloudmu.id/listen/female_radio/radio.mp3',
         genre: 'pop',
         description: 'Music & Lifestyle for Modern Women',
-        image_url: "https://i.scdn.co/image/ab67616d0000b273f429d0bc2080443ec9423602"
+        image_url: "https://femalecircle.id/img/coverArt.png"
     },
     {
         id: 'delta',
@@ -39,7 +39,7 @@ export const STATIONS: Station[] = [
         streamUrl: 'https://s1.cloudmu.id/listen/delta_fm/radio.mp3',
         genre: 'rock',
         description: 'Rock & Alternative Music',
-        image_url: "https://i.scdn.co/image/ab67616d0000b273e6a9ee2b2b1d072f518e3290"
+        image_url: "https://deltafm.net/img/coverArt.png"
     },
     {
         id: 'prambors',
