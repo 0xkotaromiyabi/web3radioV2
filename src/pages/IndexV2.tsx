@@ -176,20 +176,20 @@ const IndexV2 = () => {
         }
 
         .control-btn {
-          filter: brightness(95%);
+          filter: grayscale(1) brightness(0);
           border-radius: 100%;
           display: inline-block;
           height: 44px;
           width: 44px;
           cursor: pointer;
-          transition: filter 200ms;
+          transition: all 200ms;
           background-size: cover;
           background-position: center;
           background-repeat: no-repeat;
         }
 
         .control-btn:hover {
-          filter: brightness(85%);
+          opacity: 0.7;
         }
 
         .control-back { background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/83141/backwards.svg'); }

@@ -15,7 +15,7 @@ export const STATIONS: Station[] = [
         streamUrl: 'https://shoutcast.webthreeradio.xyz/stream',
         genre: 'community',
         description: 'Community-Powered Web3 Broadcasting',
-        image_url: "https://storage.googleapis.com/papyrus_images/727fda00ec477888d92a63593993f66a.jpg"
+        image_url: "https://i.imgur.com/RbUjvJM.png"
     },
     {
         id: 'ozradio',
@@ -23,7 +23,7 @@ export const STATIONS: Station[] = [
         streamUrl: 'https://streaming.ozradiojakarta.com:8443/ozjakarta',
         genre: 'news',
         description: 'News, Talk & Information',
-        image_url: "https://p.kindpng.com/picc/s/376-3768602_oz-radio-logo-clipart-png-download-oz-radio.png"
+        image_url: "https://images.noiceid.cc/catalog/content-1631518434114.png"
     },
     {
         id: 'female',
