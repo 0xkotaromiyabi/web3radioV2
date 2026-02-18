@@ -26,28 +26,31 @@ export default function CryptoTicker() {
                     'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false&price_change_percentage=24h'
                 );
 
-                if (!res.ok) throw new Error('CORS or API error');
+                if (!res.ok) {
+                    setCoins(shuffle(fallbackData));
+                    return;
+                }
 
                 const data: CoinData[] = await res.json();
                 setCoins(shuffle(data));
             } catch (err) {
-                console.error('Failed to fetch crypto prices:', err);
-                // Fallback data if API is blocked by CORS
-                const fallbackData: CoinData[] = [
-                    { id: 'bitcoin', symbol: 'btc', current_price: 94500, price_change_percentage_24h: 1.2 },
-                    { id: 'ethereum', symbol: 'eth', current_price: 2550, price_change_percentage_24h: -0.5 },
-                    { id: 'solana', symbol: 'sol', current_price: 185, price_change_percentage_24h: 4.8 },
-                    { id: 'binancecoin', symbol: 'bnb', current_price: 610, price_change_percentage_24h: 0.2 },
-                    { id: 'ripple', symbol: 'xrp', current_price: 2.3, price_change_percentage_24h: 15.4 },
-                    { id: 'cardano', symbol: 'ada', current_price: 0.95, price_change_percentage_24h: -1.2 },
-                    { id: 'polkadot', symbol: 'dot', current_price: 7.2, price_change_percentage_24h: 2.1 },
-                    { id: 'dogecoin', symbol: 'doge', current_price: 0.38, price_change_percentage_24h: 5.6 },
-                    { id: 'chainlink', symbol: 'link', current_price: 22.5, price_change_percentage_24h: 0.8 },
-                    { id: 'tron', symbol: 'trx', current_price: 0.22, price_change_percentage_24h: 0.1 }
-                ];
+                // Catch CORS or Network errors silently and use fallback
                 setCoins(shuffle(fallbackData));
             }
         };
+
+        const fallbackData: CoinData[] = [
+            { id: 'bitcoin', symbol: 'btc', current_price: 94500, price_change_percentage_24h: 1.2 },
+            { id: 'ethereum', symbol: 'eth', current_price: 2550, price_change_percentage_24h: -0.5 },
+            { id: 'solana', symbol: 'sol', current_price: 185, price_change_percentage_24h: 4.8 },
+            { id: 'binancecoin', symbol: 'bnb', current_price: 610, price_change_percentage_24h: 0.2 },
+            { id: 'ripple', symbol: 'xrp', current_price: 2.3, price_change_percentage_24h: 15.4 },
+            { id: 'cardano', symbol: 'ada', current_price: 0.95, price_change_percentage_24h: -1.2 },
+            { id: 'polkadot', symbol: 'dot', current_price: 7.2, price_change_percentage_24h: 2.1 },
+            { id: 'dogecoin', symbol: 'doge', current_price: 0.38, price_change_percentage_24h: 5.6 },
+            { id: 'chainlink', symbol: 'link', current_price: 22.5, price_change_percentage_24h: 0.8 },
+            { id: 'tron', symbol: 'trx', current_price: 0.22, price_change_percentage_24h: 0.1 }
+        ];
         fetchPrices();
         const interval = setInterval(fetchPrices, 60000);
         return () => clearInterval(interval);

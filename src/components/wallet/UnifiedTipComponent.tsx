@@ -5,7 +5,8 @@ import { parseEther } from 'viem';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { Transaction, SystemProgram, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Heart, ExternalLink, ShieldCheck, AlertTriangle, RefreshCw } from "lucide-react";
+import { Loader2, Heart, ExternalLink, ShieldCheck, AlertTriangle, RefreshCw, Coins, Wallet } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 const EVM_DESTINATION = "0x242dfb7849544ee242b2265ca7e585bdec60456b";
 const SOLANA_DESTINATION = "9xhz4Cb4C2Z4z9xdD2geCafovNYVngC4E4XpWtQmeEuv";
@@ -14,8 +15,8 @@ const IDR_PRESETS = [
     { label: '1K', value: 1000 },
     { label: '5K', value: 5000 },
     { label: '10K', value: 10000 },
-    { label: '20K', value: 20000 },
     { label: '50K', value: 50000 },
+    { label: '100K', value: 100000 },
 ];
 
 function getCoinGeckoId(chainName: string | undefined, isSolana: boolean): string {
@@ -57,7 +58,7 @@ export default function UnifiedTipComponent() {
     const fetchPrice = useCallback(async () => {
         setIsLoadingPrice(true);
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
 
         try {
             const res = await fetch(
@@ -71,7 +72,6 @@ export default function UnifiedTipComponent() {
             if (price) setPriceIdr(price);
         } catch (err: any) {
             console.error('Failed to fetch price:', err);
-            // Fallback price if API fails (approximate)
             if (!priceIdr) {
                 if (coinGeckoId === 'ethereum') setPriceIdr(45000000);
                 if (coinGeckoId === 'solana') setPriceIdr(1500000);
@@ -93,14 +93,10 @@ export default function UnifiedTipComponent() {
 
     useEffect(() => {
         if (isEvmSuccess) {
-            toast({ title: "Tip Sent! 💖", description: "Thank you for your tip!" });
+            toast({ title: "Tip Sent! 💖", description: "Thank you for supporting Web3Radio!" });
             setIsProcessing(false);
         }
-    }, [isEvmSuccess]);
-
-    useEffect(() => {
-        if (evmHash && !isEvmConfirming && !isEvmSuccess) setIsProcessing(false);
-    }, [isEvmConfirming]);
+    }, [isEvmSuccess, toast]);
 
     const handleTipClick = () => {
         const activeIdr = isCustom ? (parseFloat(customIdr) || 0) : idrAmount;
@@ -117,14 +113,11 @@ export default function UnifiedTipComponent() {
 
         try {
             setIsProcessing(true);
-            toast({ title: "⏳ Waiting for Wallet Approval", description: "Please approve the transaction in your wallet..." });
 
             if (isEvm) {
                 sendEvmTx({ to: EVM_DESTINATION as `0x${string}`, value: parseEther(cryptoAmount) });
             } else if (isSolana && solanaPubKey) {
-                // Optimize Solana: Fetch fresh blockhash immediately
                 const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('finalized');
-
                 const recipientPubKey = new PublicKey(SOLANA_DESTINATION);
                 const transaction = new Transaction({
                     recentBlockhash: blockhash,
@@ -138,13 +131,7 @@ export default function UnifiedTipComponent() {
                 );
 
                 const signature = await sendSolanaTx(transaction, connection);
-
-                // Modern confirmation strategy
-                await connection.confirmTransaction({
-                    signature,
-                    blockhash,
-                    lastValidBlockHeight
-                }, 'processed');
+                await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, 'processed');
 
                 toast({ title: "Tip Sent! 💖", description: `Thank you for tipping ${cryptoAmount} SOL!` });
                 setIsProcessing(false);
@@ -165,64 +152,108 @@ export default function UnifiedTipComponent() {
     const activeIdr = isCustom ? (parseFloat(customIdr) || 0) : idrAmount;
 
     return (
-        <>
+        <div className="w-full max-w-sm font-['Raleway',_sans-serif]">
+            <style>{`
+                @import url('https://fonts.googleapis.com/css?family=Raleway:400,300,700');
+            `}</style>
+
             {/* Confirmation Overlay */}
             {showConfirm && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowConfirm(false)}>
-                    <div className="bg-white rounded-2xl shadow-2xl p-6 w-[90%] max-w-sm mx-4 animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex flex-col items-center gap-4">
-                            <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center">
-                                <ShieldCheck className="w-6 h-6 text-amber-600" />
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300" onClick={() => setShowConfirm(false)}>
+                    <div className="bg-white/95 backdrop-blur-2xl rounded-[40px] shadow-2xl p-8 w-full max-w-sm border border-[#515044]/10 animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
+                        <div className="space-y-6">
+                            <div className="flex flex-col items-center text-center space-y-2">
+                                <div className="w-14 h-14 rounded-3xl bg-[#515044]/5 flex items-center justify-center mb-2">
+                                    <ShieldCheck className="w-7 h-7 text-[#515044]/60" />
+                                </div>
+                                <h3 className="text-xl font-bold text-[#515044]">Confirm Support</h3>
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/30 leading-relaxed max-w-[200px]">
+                                    Verify your transaction details before approving in your wallet.
+                                </p>
                             </div>
-                            <h3 className="text-base font-bold text-[#515044]">Confirm Transaction</h3>
-                            <div className="w-full bg-[#fef29c]/30 rounded-xl p-4 space-y-3 border border-[#515044]/5">
-                                <div className="flex justify-between text-xs"><span className="text-[#515044]/50">Network</span><span className="font-bold text-[#515044]">{networkLabel}</span></div>
-                                <div className="flex justify-between text-xs"><span className="text-[#515044]/50">Tip (IDR)</span><span className="font-bold text-[#515044]">Rp {activeIdr.toLocaleString('id-ID')}</span></div>
-                                <div className="flex justify-between text-xs"><span className="text-[#515044]/50">Amount</span><span className="font-bold text-[#515044]">{cryptoAmount} {nativeSymbol}</span></div>
-                                <div className="flex justify-between text-xs"><span className="text-[#515044]/50">From</span><span className="font-mono text-[10px] text-[#515044]">{address?.slice(0, 8)}...{address?.slice(-6)}</span></div>
-                                <div className="flex justify-between text-xs"><span className="text-[#515044]/50">To</span><span className="font-mono text-[10px] text-[#515044]">{destination.slice(0, 8)}...{destination.slice(-6)}</span></div>
+
+                            <div className="bg-[#fef29c]/30 rounded-[32px] p-6 space-y-4 border border-[#515044]/5">
+                                <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
+                                    <span className="text-[#515044]/40">Network</span>
+                                    <span className="text-[#515044]">{networkLabel}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
+                                    <span className="text-[#515044]/40">Amount</span>
+                                    <div className="text-right">
+                                        <div className="text-[#515044]">Rp {activeIdr.toLocaleString('id-ID')}</div>
+                                        <div className="text-[#515044]/30 text-[8px]">{cryptoAmount} {nativeSymbol}</div>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
+                                    <span className="text-[#515044]/40">To</span>
+                                    <span className="font-mono text-[#515044]">{destination.slice(0, 6)}...{destination.slice(-4)}</span>
+                                </div>
                             </div>
-                            <div className="flex items-start gap-2 p-3 bg-amber-50 rounded-lg w-full">
-                                <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
-                                <p className="text-[10px] text-amber-700 leading-relaxed">Your wallet will ask for a <strong>second approval</strong>. Always verify the details before signing.</p>
+
+                            <div className="flex items-start gap-3 p-4 bg-[#515044]/5 rounded-2xl">
+                                <AlertTriangle className="w-4 h-4 text-[#515044]/40 flex-shrink-0 mt-0.5" />
+                                <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-[#515044]/40 leading-relaxed">
+                                    Approval required in your <strong>wallet extension</strong>. Double check address & chains.
+                                </p>
                             </div>
-                            <div className="flex gap-3 w-full">
-                                <button onClick={() => setShowConfirm(false)} className="flex-1 px-4 py-3 border border-[#515044]/20 rounded-xl text-xs font-bold text-[#515044] hover:bg-gray-50 transition-all">Cancel</button>
-                                <button onClick={handleConfirmSend} className="flex-1 px-4 py-3 bg-[#515044] text-white rounded-xl text-xs font-bold hover:bg-black transition-all flex items-center justify-center gap-2"><ShieldCheck className="w-3.5 h-3.5" />Confirm & Send</button>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <button
+                                    onClick={() => setShowConfirm(false)}
+                                    className="px-6 py-4 rounded-2xl border border-[#515044]/10 text-[10px] font-bold uppercase tracking-widest text-[#515044]/60 hover:bg-white transition-all"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleConfirmSend}
+                                    className="px-6 py-4 bg-[#515044] hover:bg-black text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all shadow-xl shadow-[#515044]/10"
+                                >
+                                    Confirm
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Tip Card */}
-            <div className="mt-6 p-6 bg-white/80 backdrop-blur-md rounded-2xl border border-[#515044]/10 shadow-xl animate-in zoom-in-95 duration-300 w-full max-w-sm">
-                <div className="flex flex-col items-center gap-4">
-                    <div className="text-center">
-                        <h3 className="text-sm font-bold text-[#515044] mb-1">Support the Broadcaster</h3>
-                        <div className="flex items-center justify-center gap-2">
-                            <p className="text-[10px] text-[#515044]/60 uppercase tracking-widest">via {networkLabel}</p>
+            {/* Main Tip Card */}
+            <div className="bg-white/90 backdrop-blur-2xl rounded-[40px] p-8 border border-[#515044]/5 shadow-2xl relative overflow-hidden">
+                {/* Decorative background element */}
+                <div className="absolute top-0 right-0 p-8 opacity-[0.03]">
+                    <Coins className="w-32 h-32 text-[#515044]" />
+                </div>
+
+                <div className="relative space-y-8">
+                    <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                            <Badge className="bg-[#515044]/5 text-[#515044]/60 hover:bg-[#515044]/10 border-none px-3 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest">
+                                Community support
+                            </Badge>
+                            <h2 className="text-xl font-bold text-[#515044] tracking-tight">Direct Tip</h2>
+                        </div>
+                        <div className="text-right">
+                            <div className="flex items-center justify-end gap-2 text-[10px] font-bold uppercase tracking-widest text-[#515044]/40">
+                                <div className={`w-1.5 h-1.5 rounded-full ${isEvmConfirming ? 'bg-amber-500 animate-pulse' : 'bg-green-500'}`} />
+                                {networkLabel}
+                                {!isLoadingPrice && (
+                                    <button onClick={fetchPrice} className="hover:text-[#515044] transition-colors"><RefreshCw className="w-3 h-3" /></button>
+                                )}
+                            </div>
                             {!isLoadingPrice && priceIdr > 0 && (
-                                <button onClick={fetchPrice} className="text-[#515044]/30 hover:text-[#515044]/60 transition-colors"><RefreshCw className="w-3 h-3" /></button>
+                                <p className="text-[9px] font-bold text-[#515044]/20 mt-0.5">1 {nativeSymbol} = Rp {Math.floor(priceIdr).toLocaleString('id-ID')}</p>
                             )}
                         </div>
-                        {!isLoadingPrice && priceIdr > 0 && (
-                            <p className="text-[9px] text-[#515044]/40 mt-1">1 {nativeSymbol} ≈ Rp {priceIdr.toLocaleString('id-ID')}</p>
-                        )}
-                        {isLoadingPrice && (
-                            <p className="text-[9px] text-[#515044]/40 mt-1 flex items-center justify-center gap-1"><Loader2 className="w-2 h-2 animate-spin" /> Loading price...</p>
-                        )}
                     </div>
 
-                    {/* IDR Preset Buttons */}
-                    <div className="flex flex-wrap justify-center gap-2 w-full">
+                    {/* Presets Grid */}
+                    <div className="grid grid-cols-2 gap-3">
                         {IDR_PRESETS.map((preset) => (
                             <button
                                 key={preset.value}
                                 onClick={() => { setIdrAmount(preset.value); setIsCustom(false); }}
-                                className={`px-3 py-2 rounded-lg text-[11px] font-bold transition-all border ${!isCustom && idrAmount === preset.value
-                                    ? 'bg-[#515044] text-white border-[#515044] shadow-md scale-105'
-                                    : 'bg-white text-[#515044] border-[#515044]/15 hover:border-[#515044]/40'
+                                className={`px-4 py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all border ${!isCustom && idrAmount === preset.value
+                                    ? 'bg-[#515044] text-white border-[#515044] shadow-lg shadow-[#515044]/20'
+                                    : 'bg-white/50 text-[#515044]/60 border-[#515044]/5 hover:border-[#515044]/20 hover:bg-white'
                                     }`}
                             >
                                 Rp {preset.label}
@@ -230,60 +261,73 @@ export default function UnifiedTipComponent() {
                         ))}
                         <button
                             onClick={() => setIsCustom(true)}
-                            className={`px-3 py-2 rounded-lg text-[11px] font-bold transition-all border ${isCustom
-                                ? 'bg-[#515044] text-white border-[#515044] shadow-md scale-105'
-                                : 'bg-white text-[#515044] border-[#515044]/15 hover:border-[#515044]/40'
+                            className={`px-4 py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all border ${isCustom
+                                ? 'bg-[#515044] text-white border-[#515044] shadow-lg shadow-[#515044]/20'
+                                : 'bg-white/50 text-[#515044]/60 border-[#515044]/5 hover:border-[#515044]/20 hover:bg-white'
                                 }`}
                         >
                             Custom
                         </button>
                     </div>
 
-                    {/* Custom IDR Input */}
-                    {isCustom && (
-                        <div className="relative w-full">
-                            <span className="absolute left-3 top-3 text-[10px] font-bold text-[#515044]/40">Rp</span>
-                            <input
-                                type="number"
-                                value={customIdr}
-                                onChange={(e) => setCustomIdr(e.target.value)}
-                                className="w-full pl-9 pr-4 py-3 bg-[#fef29c]/20 border border-[#515044]/10 rounded-xl text-sm font-bold text-[#515044] focus:outline-none focus:border-[#515044]/40 transition-all"
-                                step="1000" min="100" placeholder="Enter amount in IDR"
-                            />
-                        </div>
-                    )}
+                    {/* Input/Estimation Box */}
+                    <div className="bg-[#515044]/2 rounded-3xl p-6 border border-[#515044]/5 space-y-4">
+                        {isCustom ? (
+                            <div className="relative">
+                                <span className="absolute left-0 top-1/2 -translate-y-1/2 text-[10px] font-bold text-[#515044]/30">Rp</span>
+                                <input
+                                    type="number"
+                                    value={customIdr}
+                                    onChange={(e) => setCustomIdr(e.target.value)}
+                                    className="w-full pl-6 bg-transparent border-none text-xl font-bold text-[#515044] focus:outline-none placeholder-[#515044]/10"
+                                    placeholder="0"
+                                    autoFocus
+                                />
+                                <div className="absolute bottom-0 left-0 right-0 h-px bg-[#515044]/10" />
+                            </div>
+                        ) : (
+                            <div className="text-center">
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/30 mb-1">Estimated Value</p>
+                                <div className="text-2xl font-bold text-[#515044]">
+                                    {isLoadingPrice ? (
+                                        <Loader2 className="w-5 h-5 animate-spin mx-auto opacity-20" />
+                                    ) : (
+                                        <>
+                                            {cryptoAmount} <span className="text-sm font-light text-[#515044]/40">{nativeSymbol}</span>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                        )}
 
-                    {/* Crypto Equivalent */}
-                    <div className="w-full bg-[#fef29c]/20 rounded-xl p-3 text-center border border-[#515044]/5">
-                        <p className="text-[10px] text-[#515044]/50 mb-1">You'll send approximately</p>
-                        <p className="text-lg font-bold text-[#515044]">
-                            {parseFloat(cryptoAmount) > 0 ? cryptoAmount : '—'} <span className="text-sm font-normal text-[#515044]/60">{nativeSymbol}</span>
-                        </p>
-                        <p className="text-[9px] text-[#515044]/40">≈ Rp {activeIdr.toLocaleString('id-ID')}</p>
+                        {!isCustom && (
+                            <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-[#515044]/20 text-center">
+                                Approx. Rp {activeIdr.toLocaleString('id-ID')}
+                            </p>
+                        )}
                     </div>
 
-                    {/* Send Button */}
                     <button
                         onClick={handleTipClick}
                         disabled={isProcessing || isEvmConfirming || isLoadingPrice || parseFloat(cryptoAmount) <= 0}
-                        className="w-full px-6 py-3.5 bg-[#515044] text-white rounded-xl text-xs font-bold hover:bg-black transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        className="w-full bg-[#515044] hover:bg-black text-white font-bold py-5 rounded-[24px] transition-all shadow-xl shadow-[#515044]/10 uppercase text-[10px] tracking-[0.3em] disabled:opacity-20 disabled:grayscale flex items-center justify-center gap-3 group"
                     >
-                        {isProcessing || isEvmConfirming ? <Loader2 className="w-4 h-4 animate-spin" /> : <Heart className="w-4 h-4 fill-current" />}
-                        Send Tip
+                        {isProcessing || isEvmConfirming ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                            <>
+                                <Heart className="w-4 h-4 transition-transform group-hover:scale-125 group-hover:fill-current" />
+                                Send Tip
+                            </>
+                        )}
                     </button>
 
-                    <div className="flex flex-col items-center gap-1">
-                        <p className="text-[9px] text-[#515044]/40 break-all font-mono text-center">
-                            To: <span className="text-[#515044]/60">{destination.slice(0, 10)}...{destination.slice(-8)}</span>
-                        </p>
-                        {evmHash && isEvm && (
-                            <a href={`${caipNetwork?.blockExplorers?.default?.url}/tx/${evmHash}`} target="_blank" rel="noopener noreferrer" className="text-[9px] text-blue-500 hover:underline flex items-center gap-1">
-                                View Transaction <ExternalLink className="w-2 h-2" />
-                            </a>
-                        )}
-                    </div>
+                    <p className="text-[9px] font-bold uppercase tracking-widest text-[#515044]/20 text-center flex items-center justify-center gap-2">
+                        <Wallet className="w-2.5 h-2.5" />
+                        Secure Transact via {networkLabel}
+                    </p>
                 </div>
             </div>
-        </>
+        </div>
     );
 }

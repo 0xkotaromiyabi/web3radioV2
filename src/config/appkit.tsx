@@ -41,8 +41,8 @@ const wagmiAdapter = new WagmiAdapter({
     networks: [mainnet, base, arbitrum, optimism, polygon, bsc, lisk, sepolia],
     projectId,
     transports: {
-        [mainnet.id]: http(),
-        [base.id]: http(),
+        [mainnet.id]: http('https://eth-mainnet.g.alchemy.com/v2/' + projectId),
+        [base.id]: http('https://mainnet.base.org'),
         [arbitrum.id]: http(),
         [optimism.id]: http(),
         [polygon.id]: http(),

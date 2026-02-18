@@ -321,7 +321,7 @@ async function handleCheckEligibility(userAddress: string) {
     const totalClaimed = claimedRewards?.reduce((sum, claim) => sum + parseInt(claim.reward_amount), 0) || 0
     const totalEligible = eligibleHours * 100
     const availableRewards = Math.max(0, totalEligible - totalClaimed)
-    
+
     const timeToNextReward = 3600 - (userStats.verified_listening_time % 3600)
 
     return {
@@ -339,7 +339,7 @@ async function handleCheckEligibility(userAddress: string) {
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
@@ -347,7 +347,7 @@ serve(async (req) => {
 
     // Parse request body
     let requestData: APIRequest = {}
-    
+
     if (req.method === 'POST') {
       try {
         requestData = await req.json()
@@ -368,7 +368,7 @@ serve(async (req) => {
         const sessionData = requestData as ListeningSession
         const result = await handleSubmitSession(sessionData)
         return Response.json(result, { headers: corsHeaders })
-      
+
       case 'get_listening_time':
         if (!requestData.userAddress) {
           return Response.json(
@@ -378,7 +378,7 @@ serve(async (req) => {
         }
         const timeResult = await handleGetListeningTime(requestData.userAddress)
         return Response.json(timeResult, { headers: corsHeaders })
-      
+
       case 'claim_reward':
         if (!requestData.userAddress) {
           return Response.json(
@@ -388,7 +388,7 @@ serve(async (req) => {
         }
         const claimResult = await handleRewardClaim(requestData.userAddress)
         return Response.json(claimResult, { headers: corsHeaders })
-      
+
       case 'check_eligibility':
         if (!requestData.userAddress) {
           return Response.json(
@@ -398,7 +398,7 @@ serve(async (req) => {
         }
         const eligibilityResult = await handleCheckEligibility(requestData.userAddress)
         return Response.json(eligibilityResult, { headers: corsHeaders })
-      
+
       default:
         return Response.json(
           { error: 'Invalid action' },

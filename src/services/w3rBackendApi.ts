@@ -41,110 +41,109 @@ export class W3RBackendApi {
         method: 'POST'
       });
 
-      if (error) {
-        if (error.message?.includes('Failed to fetch') || error.name === 'FunctionsFetchError') {
-          console.warn('W3R API: CORS or Network error during session submission.');
-        } else {
-          console.error('Error calling edge function:', error);
-        }
-        return { success: false, verifiedTime: 0 };
+      if (error.message?.includes('Failed to fetch') || error.name === 'FunctionsFetchError') {
+        console.warn('W3R API: Edge Function unreachable (likely CORS or Network issue).');
+      } else {
+        console.error('Error calling edge function:', error);
       }
-
-      console.log('Session submitted successfully:', data);
-      return {
-        success: data?.success || false,
-        verifiedTime: data?.verifiedTime || 0,
-        sessionId: data?.sessionId
-      };
-    } catch (error) {
-      console.error('Error submitting listening session:', error);
       return { success: false, verifiedTime: 0 };
     }
+
+      console.log('Session submitted successfully:', data);
+    return {
+      success: data?.success || false,
+      verifiedTime: data?.verifiedTime || 0,
+      sessionId: data?.sessionId
+    };
+  } catch(error) {
+    console.error('Error submitting listening session:', error);
+    return { success: false, verifiedTime: 0 };
   }
+}
 
   // Get verified listening time for user
-  async getVerifiedListeningTime(userAddress: string): Promise<number> {
-    try {
-      const { data, error } = await supabase.functions.invoke('w3r-api', {
-        body: {
-          action: 'get_listening_time',
-          userAddress
-        },
-        method: 'POST'
-      });
+  async getVerifiedListeningTime(userAddress: string): Promise < number > {
+  try {
+    const { data, error } = await supabase.functions.invoke('w3r-api', {
+      body: {
+        action: 'get_listening_time',
+        userAddress
+      },
+      method: 'POST'
+    });
 
-      if (error) {
-        if (error.message?.includes('Failed to fetch') || error.name === 'FunctionsFetchError') {
-          console.warn('W3R API: CORS or Network error getting listening time.');
-        } else {
-          console.error('Error getting listening time:', error);
-        }
-        return 0;
+    if(error) {
+      if (error.message?.includes('Failed to fetch') || error.name === 'FunctionsFetchError') {
+        console.warn('W3R API: CORS or Network error getting listening time.');
+      } else {
+        console.error('Error getting listening time:', error);
       }
-
-      return data?.totalListeningTime || 0;
-    } catch (error) {
-      console.error('Error getting verified listening time:', error);
       return 0;
     }
+
+      return data?.totalListeningTime || 0;
+  } catch(error) {
+    console.error('Error getting verified listening time:', error);
+    return 0;
   }
+}
 
   // Request reward claim signature
-  async requestRewardSignature(userAddress: string): Promise<RewardClaim | null> {
-    try {
-      const { data, error } = await supabase.functions.invoke('w3r-api', {
-        body: {
-          action: 'claim_reward',
-          userAddress
-        },
-        method: 'POST'
-      });
+  async requestRewardSignature(userAddress: string): Promise < RewardClaim | null > {
+  try {
+    const { data, error } = await supabase.functions.invoke('w3r-api', {
+      body: {
+        action: 'claim_reward',
+        userAddress
+      },
+      method: 'POST'
+    });
 
-      if (error) {
-        if (error.message?.includes('Failed to fetch') || error.name === 'FunctionsFetchError') {
-          console.warn('W3R API: CORS or Network error requesting reward signature.');
-        } else {
-          console.error('Error requesting reward signature:', error);
-        }
-        return null;
+    if(error) {
+      if (error.message?.includes('Failed to fetch') || error.name === 'FunctionsFetchError') {
+        console.warn('W3R API: CORS or Network error requesting reward signature.');
+      } else {
+        console.error('Error requesting reward signature:', error);
       }
-
-      return data || null;
-    } catch (error) {
-      console.error('Error requesting reward signature:', error);
       return null;
     }
+
+      return data || null;
+  } catch(error) {
+    console.error('Error requesting reward signature:', error);
+    return null;
   }
+}
 
   // Verify user eligibility for rewards
-  async checkRewardEligibility(userAddress: string): Promise<{
-    eligible: boolean;
-    nextRewardIn: number;
-    availableRewards: number;
-  }> {
-    try {
-      const { data, error } = await supabase.functions.invoke('w3r-api', {
-        body: {
-          action: 'check_eligibility',
-          userAddress
-        },
-        method: 'POST'
-      });
+  async checkRewardEligibility(userAddress: string): Promise < {
+  eligible: boolean;
+  nextRewardIn: number;
+  availableRewards: number;
+} > {
+  try {
+    const { data, error } = await supabase.functions.invoke('w3r-api', {
+      body: {
+        action: 'check_eligibility',
+        userAddress
+      },
+      method: 'POST'
+    });
 
-      if (error) {
-        // Handle CORS or network errors gracefully
-        if (error.message?.includes('Failed to fetch') || error.name === 'FunctionsFetchError') {
-          console.warn('W3R API: CORS or Network error. Features requiring backend may be limited.');
-        } else {
-          console.error('Error checking reward eligibility:', error);
-        }
-        return { eligible: false, nextRewardIn: 0, availableRewards: 0 };
+    if(error) {
+      // Handle CORS or network errors gracefully
+      if (error.message?.includes('Failed to fetch') || error.name === 'FunctionsFetchError') {
+        console.warn('W3R API: CORS or Network error. Features requiring backend may be limited.');
+      } else {
+        console.error('Error checking reward eligibility:', error);
       }
-
-      return data || { eligible: false, nextRewardIn: 0, availableRewards: 0 };
-    } catch (error) {
-      console.error('Error checking reward eligibility:', error);
       return { eligible: false, nextRewardIn: 0, availableRewards: 0 };
     }
+
+      return data || { eligible: false, nextRewardIn: 0, availableRewards: 0 };
+  } catch(error) {
+    console.error('Error checking reward eligibility:', error);
+    return { eligible: false, nextRewardIn: 0, availableRewards: 0 };
   }
+}
 }
