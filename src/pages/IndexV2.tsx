@@ -31,11 +31,12 @@ const IndexV2 = () => {
       <style>{`
         @import url('https://fonts.googleapis.com/css?family=Raleway:400,300,700');
 
+        /* ===== DESKTOP (769px+) — Original horizontal layout ===== */
         .music-player-wrapper {
           width: 100%;
           display: flex;
           justify-content: center;
-          padding-top: 100px;
+          padding-top: 80px;
           padding-bottom: 20px;
         }
 
@@ -45,24 +46,6 @@ const IndexV2 = () => {
           position: relative;
           width: 460px;
           z-index: 10;
-          transition: transform 0.3s ease;
-        }
-
-        @media (max-width: 640px) {
-          .music-player-wrapper {
-            padding-top: 60px;
-          }
-          .music-player-container {
-            transform: scale(0.7);
-            margin-bottom: -50px;
-          }
-        }
-
-        @media (max-width: 400px) {
-          .music-player-container {
-            transform: scale(0.55);
-            margin-bottom: -80px;
-          }
         }
 
         .music-player-container:after {
@@ -184,19 +167,6 @@ const IndexV2 = () => {
           100% { transform: rotate(360deg); }
         }
 
-        .no-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .no-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-
-        .mask-fade {
-          -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-          mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-        }
-
         .music-player-controls {
           text-align: center;
           display: flex;
@@ -228,6 +198,120 @@ const IndexV2 = () => {
         }
         .is-playing .control-play { 
           background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/83141/pause.svg'); 
+        }
+
+        /* ===== TABLET (481px — 768px) — Compact horizontal ===== */
+        @media (max-width: 768px) {
+          .music-player-wrapper {
+            padding-top: 60px;
+          }
+          .music-player-container {
+            width: 360px;
+            height: 290px;
+          }
+          .music-player {
+            width: 360px;
+            height: 290px;
+            padding: 24px 200px 24px 24px;
+          }
+          .artist-name { font-size: 20px; }
+          .album-title { font-size: 17px; margin-bottom: 1.2em; }
+          .song-title { font-size: 14px; }
+          .album {
+            height: 240px;
+            width: 240px;
+            margin-left: 200px;
+            margin-top: 25px;
+          }
+          .album-art {
+            height: 240px;
+            width: 240px;
+          }
+          .vinyl {
+            height: 230px;
+            width: 230px;
+            top: 5px;
+          }
+          .control-btn {
+            height: 38px;
+            width: 38px;
+          }
+        }
+
+        /* ===== MOBILE (≤480px) — Stacked vertical layout ===== */
+        @media (max-width: 480px) {
+          .music-player-wrapper {
+            padding-top: 30px;
+            padding-bottom: 10px;
+          }
+          .music-player-container {
+            width: 90vw;
+            max-width: 320px;
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+          }
+          .music-player-container:after {
+            display: none;
+          }
+          .music-player {
+            position: relative;
+            width: 100%;
+            height: auto;
+            padding: 20px;
+            text-align: center;
+            border-radius: 0 0 16px 16px;
+            order: 2;
+          }
+          .player-content-container {
+            position: static;
+            transform: none;
+          }
+          .artist-name {
+            font-size: 18px;
+            margin-bottom: 0.4em;
+          }
+          .album-title {
+            font-size: 15px;
+            margin-bottom: 0.8em;
+          }
+          .song-title {
+            font-size: 13px;
+            margin-bottom: 1em;
+          }
+          .music-player-controls {
+            justify-content: center;
+          }
+          .control-btn {
+            height: 40px;
+            width: 40px;
+          }
+          .album {
+            position: relative;
+            margin-left: 0;
+            margin-top: 0;
+            width: 100%;
+            height: 0;
+            padding-bottom: 100%;
+            border-radius: 16px 16px 0 0;
+            overflow: hidden;
+            order: 1;
+          }
+          .album-art {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 16px 16px 0 0;
+          }
+          .vinyl {
+            display: none;
+          }
+          .is-playing .vinyl {
+            display: none;
+          }
         }
       `}</style>
 
