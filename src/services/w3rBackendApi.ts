@@ -42,7 +42,11 @@ export class W3RBackendApi {
       });
 
       if (error) {
-        console.error('Error calling edge function:', error);
+        if (error.message?.includes('Failed to fetch') || error.name === 'FunctionsFetchError') {
+          console.warn('W3R API: CORS or Network error during session submission.');
+        } else {
+          console.error('Error calling edge function:', error);
+        }
         return { success: false, verifiedTime: 0 };
       }
 
@@ -70,7 +74,11 @@ export class W3RBackendApi {
       });
 
       if (error) {
-        console.error('Error getting listening time:', error);
+        if (error.message?.includes('Failed to fetch') || error.name === 'FunctionsFetchError') {
+          console.warn('W3R API: CORS or Network error getting listening time.');
+        } else {
+          console.error('Error getting listening time:', error);
+        }
         return 0;
       }
 
@@ -93,7 +101,11 @@ export class W3RBackendApi {
       });
 
       if (error) {
-        console.error('Error requesting reward signature:', error);
+        if (error.message?.includes('Failed to fetch') || error.name === 'FunctionsFetchError') {
+          console.warn('W3R API: CORS or Network error requesting reward signature.');
+        } else {
+          console.error('Error requesting reward signature:', error);
+        }
         return null;
       }
 

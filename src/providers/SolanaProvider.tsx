@@ -15,8 +15,8 @@ interface SolanaProviderProps {
 }
 
 export const SolanaProvider: FC<SolanaProviderProps> = ({ children }) => {
-  // Use Mainnet-beta for better reliability if not specified, or fallback to clusterApiUrl
-  const endpoint = useMemo(() => clusterApiUrl("mainnet-beta"), []);
+  // Use a hardcoded string to ensure it's always valid
+  const endpoint = "https://api.mainnet-beta.solana.com";
 
   return (
     <ConnectionProvider endpoint={endpoint}>
