@@ -183,22 +183,22 @@ const Dashboard = () => {
 
   // Time-Restricted Access Popup
   const TimeRestrictedPopup = () => (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center animate-in fade-in zoom-in duration-300">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-100 flex items-center justify-center">
-          <Clock className="h-8 w-8 text-amber-600" />
+    <div className="fixed inset-0 bg-[#515044]/20 backdrop-blur-md flex items-center justify-center z-50 p-4">
+      <div className="bg-white/95 backdrop-blur-xl rounded-[40px] shadow-2xl max-w-md w-full p-10 text-center animate-in fade-in zoom-in duration-500 border border-[#515044]/5">
+        <div className="w-20 h-20 mx-auto mb-8 rounded-3xl bg-[#515044]/5 flex items-center justify-center">
+          <Clock className="h-10 w-10 text-[#515044]/40" />
         </div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">Akses Terbatas</h2>
-        <p className="text-gray-600 mb-4">{adminAccess.message}</p>
+        <h2 className="text-2xl font-bold text-[#515044] mb-3">Akses Terbatas</h2>
+        <p className="text-[#515044]/60 mb-8 font-light leading-relaxed">{adminAccess.message}</p>
 
-        <div className="bg-gray-100 rounded-xl p-4 mb-6">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">Slot Akses Anda:</span>
-            <span className="font-medium text-gray-900">{adminAccess.allowedSlot}</span>
+        <div className="bg-[#515044]/5 rounded-[24px] p-6 mb-10 space-y-3">
+          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest">
+            <span className="text-[#515044]/40">Slot Akses Anda:</span>
+            <span className="text-[#515044]">{adminAccess.allowedSlot}</span>
           </div>
-          <div className="flex items-center justify-between text-sm mt-2">
-            <span className="text-gray-500">Waktu Saat Ini:</span>
-            <span className="font-medium text-gray-900">{adminAccess.currentTimeWITA}</span>
+          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest">
+            <span className="text-[#515044]/40">Waktu Saat Ini:</span>
+            <span className="text-[#515044]">{adminAccess.currentTimeWITA}</span>
           </div>
         </div>
 
@@ -207,7 +207,7 @@ const Dashboard = () => {
             setShowTimeRestrictedPopup(false);
             handleLogout();
           }}
-          className="w-full bg-gray-900 hover:bg-gray-800 text-white font-medium py-3 rounded-xl transition-all"
+          className="w-full bg-[#515044] hover:bg-black text-white font-bold py-5 rounded-2xl transition-all shadow-xl shadow-[#515044]/10 uppercase text-xs tracking-widest"
         >
           Disconnect Wallet
         </button>
@@ -218,72 +218,92 @@ const Dashboard = () => {
   // Render loading state while checking access
   if (adminAccess.isLoading) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
-        <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
-        <h2 className="text-xl font-semibold">Verifying Access...</h2>
-        <p className="text-muted-foreground mt-2">Checking your Temporal Access Pass on-chain</p>
+      <div className="min-h-screen bg-[#fef29c] font-['Raleway',_sans-serif] text-[#515044] flex flex-col items-center justify-center p-6 text-center">
+        <style>{`
+          @import url('https://fonts.googleapis.com/css?family=Raleway:400,300,700');
+          body { font-family: 'Raleway', sans-serif; }
+        `}</style>
+        <Loader2 className="w-12 h-12 text-[#515044]/40 animate-spin mb-6" />
+        <h2 className="text-2xl font-bold tracking-tight">Verifying Access...</h2>
+        <p className="text-[10px] font-bold uppercase tracking-[0.4em] opacity-30 mt-3">Checking your Temporal Access Pass on-chain</p>
       </div>
     );
   }
 
-  // Login page - Apple style wallet connect
+  // Login page
   if (!adminAccess.hasAccess) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-[#fef29c] font-['Raleway',_sans-serif] text-[#515044] flex items-center justify-center p-6">
+        <style>{`
+          @import url('https://fonts.googleapis.com/css?family=Raleway:400,300,700');
+          body { font-family: 'Raleway', sans-serif; }
+        `}</style>
         {/* Time Restricted Popup */}
         {showTimeRestrictedPopup && <TimeRestrictedPopup />}
 
-        <div className="panel-float w-full max-w-md p-8 text-center">
+        <div className="bg-white/90 backdrop-blur-xl rounded-[48px] w-full max-w-md p-12 text-center shadow-2xl border border-[#515044]/5 flex flex-col items-center">
           {/* Logo */}
-          <img
-            src={logo}
-            alt="Web3Radio"
-            className="w-20 h-20 mx-auto mb-6 rounded-2xl shadow-apple-md"
-          />
+          <div className="w-24 h-24 mb-10 rounded-3xl overflow-hidden shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-500">
+            <img
+              src={logo}
+              alt="Web3Radio"
+              className="w-full h-full object-cover"
+            />
+          </div>
 
-          <h1 className="text-2xl font-semibold text-foreground mb-2">CMS Dashboard</h1>
-          <p className="text-muted-foreground mb-8">Connect your wallet to access the dashboard</p>
+          <div className="space-y-2 mb-10">
+            <h1 className="text-3xl font-bold tracking-tight">CMS Dashboard</h1>
+            <p className="text-[10px] font-bold uppercase tracking-[0.4em] opacity-30">Connect wallet to access the control panel</p>
+          </div>
 
           {isConnected && address ? (
-            <div className="space-y-4">
+            <div className="space-y-6 w-full">
               {adminAccess.isAdmin && !adminAccess.hasAccess ? (
                 // Admin but time-restricted
-                <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
-                  <Clock className="h-8 w-8 text-amber-500 mx-auto mb-2" />
-                  <p className="text-amber-600 font-medium">Akses Terbatas Waktu</p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Slot Anda: {adminAccess.allowedSlot}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Waktu sekarang: {adminAccess.currentTimeWITA}
-                  </p>
+                <div className="p-6 rounded-[24px] bg-[#515044]/5 border border-[#515044]/5 space-y-4">
+                  <div className="w-12 h-12 mx-auto rounded-2xl bg-white flex items-center justify-center shadow-sm">
+                    <Clock className="h-6 w-6 text-[#515044]/40" />
+                  </div>
+                  <div>
+                    <p className="text-[#515044] font-bold text-sm">Akses Terbatas Waktu</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/40 mt-1">
+                      Slot: {adminAccess.allowedSlot}
+                    </p>
+                    <p className="text-[8px] font-bold uppercase tracking-widest text-[#515044]/30 mt-1">
+                      Waktu sekarang: {adminAccess.currentTimeWITA}
+                    </p>
+                  </div>
                 </div>
               ) : (
                 // Not admin at all
-                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20">
-                  <ShieldCheck className="h-8 w-8 text-red-500 mx-auto mb-2" />
-                  <p className="text-red-500 font-medium">Access Denied</p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Wallet {address.slice(0, 6)}...{address.slice(-4)} is not authorized.
-                  </p>
+                <div className="p-6 rounded-[24px] bg-red-500/5 border border-red-500/10 space-y-4">
+                  <div className="w-12 h-12 mx-auto rounded-2xl bg-white flex items-center justify-center shadow-sm">
+                    <ShieldCheck className="h-6 w-6 text-red-400" />
+                  </div>
+                  <div>
+                    <p className="text-red-500 font-bold text-sm">Access Denied</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-red-500/40 mt-1">
+                      Wallet {address.slice(0, 6)}...{address.slice(-4)} is not authorized
+                    </p>
+                  </div>
                 </div>
               )}
               <button
                 onClick={handleLogout}
-                className="w-full btn-apple-secondary text-red-500 py-3 rounded-xl transition-all"
+                className="w-full bg-[#515044]/5 hover:bg-[#515044]/10 text-[#515044] font-bold py-5 rounded-2xl transition-all uppercase text-xs tracking-widest"
               >
                 Disconnect Wallet
               </button>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-6 w-full">
               <button
                 onClick={() => open()}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3.5 px-8 rounded-xl flex items-center justify-center transition-all shadow-md hover:shadow-lg"
+                className="w-full bg-[#515044] hover:bg-black text-white font-bold py-5 px-8 rounded-2xl flex items-center justify-center transition-all shadow-xl shadow-[#515044]/10 uppercase text-xs tracking-widest"
               >
                 Connect Wallet
               </button>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-[9px] font-bold uppercase tracking-widest opacity-20">
                 Only authorized wallets can access the CMS
               </p>
             </div>
@@ -309,10 +329,10 @@ const Dashboard = () => {
         return (
           <div className="space-y-4 sm:space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-              <h2 className="text-xl sm:text-2xl font-semibold text-foreground">News Management</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-[#515044]">News Management</h2>
               <button
                 onClick={() => setShowEditor(!showEditor)}
-                className="btn-apple-primary flex items-center gap-2 text-sm w-full sm:w-auto justify-center"
+                className="bg-[#515044] hover:bg-black text-white font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#515044]/10 uppercase text-[10px] tracking-widest w-full sm:w-auto"
               >
                 <Plus className="h-4 w-4" />
                 {showEditor ? 'Hide Editor' : 'Add Article'}
@@ -321,38 +341,38 @@ const Dashboard = () => {
 
             {showEditor && <NewsEditor onSave={handleSaveComplete} />}
 
-            <div className="card-apple">
-              <div className="p-6 border-b border-border/30">
-                <h3 className="font-medium text-foreground">Published Articles</h3>
-                <p className="text-sm text-muted-foreground">Manage your news articles</p>
+            <div className="bg-white/80 backdrop-blur-xl rounded-[32px] overflow-hidden border border-[#515044]/5 shadow-xl">
+              <div className="p-8 border-b border-[#515044]/5">
+                <h3 className="font-bold text-[#515044] text-lg">Published Articles</h3>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/30 mt-1">Manage your news articles</p>
               </div>
-              <div className="divide-y divide-border/30">
+              <div className="divide-y divide-[#515044]/5">
                 {newsItems.length > 0 ? (
                   newsItems.map((item) => (
-                    <div key={item.id} className="flex items-center gap-4 p-4 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                    <div key={item.id} className="flex items-center gap-6 p-6 hover:bg-[#515044]/5 transition-colors">
                       {item.image_url ? (
-                        <img src={item.image_url} alt={item.title} className="w-12 h-12 object-cover rounded-lg" />
+                        <img src={item.image_url} alt={item.title} className="w-16 h-16 object-cover rounded-2xl shadow-md" />
                       ) : (
-                        <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
-                          <Edit className="h-4 w-4 text-muted-foreground" />
+                        <div className="w-16 h-16 rounded-2xl bg-[#515044]/5 flex items-center justify-center">
+                          <Edit className="h-6 w-6 text-[#515044]/20" />
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-foreground truncate">{item.title}</p>
-                        <p className="text-sm text-muted-foreground">{item.date}</p>
+                        <p className="font-bold text-[#515044] truncate">{item.title}</p>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/30 mt-1">{item.date}</p>
                       </div>
-                      <div className="flex gap-2">
-                        <button onClick={() => navigate(`/news`)} className="p-2 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground transition-colors">
+                      <div className="flex gap-3">
+                        <button onClick={() => navigate(`/news`)} className="p-3 rounded-xl bg-white/50 hover:bg-white text-[#515044]/40 hover:text-[#515044] transition-all shadow-sm">
                           <Eye className="h-4 w-4" />
                         </button>
-                        <button onClick={() => handleDeleteNewsItem(item.id)} className="p-2 rounded-lg hover:bg-red-500/10 text-red-500 transition-colors">
+                        <button onClick={() => handleDeleteNewsItem(item.id)} className="p-3 rounded-xl bg-red-500/5 hover:bg-red-500 text-red-500/40 hover:text-white transition-all shadow-sm">
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="p-8 text-center text-muted-foreground">No news articles found</div>
+                  <div className="p-12 text-center text-[#515044]/30 font-bold uppercase text-[10px] tracking-[0.2em]">No news articles found</div>
                 )}
               </div>
             </div>
@@ -363,10 +383,10 @@ const Dashboard = () => {
         return (
           <div className="space-y-4 sm:space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-              <h2 className="text-xl sm:text-2xl font-semibold text-foreground">Events Management</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-[#515044]">Events Management</h2>
               <button
                 onClick={() => setShowEditor(!showEditor)}
-                className="btn-apple-primary flex items-center gap-2 text-sm w-full sm:w-auto justify-center"
+                className="bg-[#515044] hover:bg-black text-white font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#515044]/10 uppercase text-[10px] tracking-widest w-full sm:w-auto"
               >
                 <Plus className="h-4 w-4" />
                 {showEditor ? 'Hide Editor' : 'Add Event'}
@@ -375,38 +395,38 @@ const Dashboard = () => {
 
             {showEditor && <EventEditor onSave={handleSaveComplete} />}
 
-            <div className="card-apple">
-              <div className="p-6 border-b border-border/30">
-                <h3 className="font-medium text-foreground">Upcoming Events</h3>
-                <p className="text-sm text-muted-foreground">Manage your events</p>
+            <div className="bg-white/80 backdrop-blur-xl rounded-[32px] overflow-hidden border border-[#515044]/5 shadow-xl">
+              <div className="p-8 border-b border-[#515044]/5">
+                <h3 className="font-bold text-[#515044] text-lg">Upcoming Events</h3>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/30 mt-1">Manage your events</p>
               </div>
-              <div className="divide-y divide-border/30">
+              <div className="divide-y divide-[#515044]/5">
                 {events.length > 0 ? (
                   events.map((event) => (
-                    <div key={event.id} className="flex items-center gap-4 p-4 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                    <div key={event.id} className="flex items-center gap-6 p-6 hover:bg-[#515044]/5 transition-colors">
                       {event.image_url ? (
-                        <img src={event.image_url} alt={event.title} className="w-12 h-12 object-cover rounded-lg" />
+                        <img src={event.image_url} alt={event.title} className="w-16 h-16 object-cover rounded-2xl shadow-md" />
                       ) : (
-                        <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
-                          <Edit className="h-4 w-4 text-muted-foreground" />
+                        <div className="w-16 h-16 rounded-2xl bg-[#515044]/5 flex items-center justify-center">
+                          <Edit className="h-6 w-6 text-[#515044]/20" />
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-foreground truncate">{event.title}</p>
-                        <p className="text-sm text-muted-foreground">{event.date} • {event.location}</p>
+                        <p className="font-bold text-[#515044] truncate">{event.title}</p>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/30 mt-1">{event.date} • {event.location}</p>
                       </div>
-                      <div className="flex gap-2">
-                        <button onClick={() => navigate(`/events`)} className="p-2 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground transition-colors">
+                      <div className="flex gap-3">
+                        <button onClick={() => navigate(`/events`)} className="p-3 rounded-xl bg-white/50 hover:bg-white text-[#515044]/40 hover:text-[#515044] transition-all shadow-sm">
                           <Eye className="h-4 w-4" />
                         </button>
-                        <button onClick={() => handleDeleteEvent(event.id)} className="p-2 rounded-lg hover:bg-red-500/10 text-red-500 transition-colors">
+                        <button onClick={() => handleDeleteEvent(event.id)} className="p-3 rounded-xl bg-red-500/5 hover:bg-red-500 text-red-500/40 hover:text-white transition-all shadow-sm">
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="p-8 text-center text-muted-foreground">No events found</div>
+                  <div className="p-12 text-center text-[#515044]/30 font-bold uppercase text-[10px] tracking-[0.2em]">No events found</div>
                 )}
               </div>
             </div>
@@ -417,10 +437,10 @@ const Dashboard = () => {
         return (
           <div className="space-y-4 sm:space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-              <h2 className="text-xl sm:text-2xl font-semibold text-foreground">Radio Stations</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-[#515044]">Radio Stations</h2>
               <button
                 onClick={() => setShowEditor(!showEditor)}
-                className="btn-apple-primary flex items-center gap-2 text-sm w-full sm:w-auto justify-center"
+                className="bg-[#515044] hover:bg-black text-white font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#515044]/10 uppercase text-[10px] tracking-widest w-full sm:w-auto"
               >
                 <Plus className="h-4 w-4" />
                 {showEditor ? 'Hide Editor' : 'Add Station'}
@@ -429,41 +449,41 @@ const Dashboard = () => {
 
             {showEditor && <StationEditor onSave={handleSaveComplete} />}
 
-            <div className="card-apple">
-              <div className="p-6 border-b border-border/30">
-                <h3 className="font-medium text-foreground">Radio Stations</h3>
-                <p className="text-sm text-muted-foreground">Manage your radio stations</p>
+            <div className="bg-white/80 backdrop-blur-xl rounded-[32px] overflow-hidden border border-[#515044]/5 shadow-xl">
+              <div className="p-8 border-b border-[#515044]/5">
+                <h3 className="font-bold text-[#515044] text-lg">Radio Stations</h3>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/30 mt-1">Manage your radio stations</p>
               </div>
-              <div className="divide-y divide-border/30">
+              <div className="divide-y divide-[#515044]/5">
                 {stations.length > 0 ? (
                   stations.map((station) => (
-                    <div key={station.id} className="flex items-center gap-4 p-4 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                    <div key={station.id} className="flex items-center gap-6 p-6 hover:bg-[#515044]/5 transition-colors">
                       {station.image_url ? (
-                        <img src={station.image_url} alt={station.name} className="w-12 h-12 object-cover rounded-lg" />
+                        <img src={station.image_url} alt={station.name} className="w-16 h-16 object-cover rounded-2xl shadow-md" />
                       ) : (
-                        <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
-                          <Radio className="h-4 w-4 text-muted-foreground" />
+                        <div className="w-16 h-16 rounded-2xl bg-[#515044]/5 flex items-center justify-center">
+                          <Radio className="h-6 w-6 text-[#515044]/20" />
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-foreground truncate">{station.name}</p>
-                        <p className="text-sm text-muted-foreground">{station.genre}</p>
+                        <p className="font-bold text-[#515044] truncate">{station.name}</p>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/30 mt-1">{station.genre}</p>
                       </div>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${station.streaming ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                      <span className={`px-4 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-widest ${station.streaming ? 'bg-green-500/10 text-green-600' : 'bg-red-500/10 text-red-600'}`}>
                         {station.streaming ? 'Live' : 'Offline'}
                       </span>
-                      <div className="flex gap-2">
-                        <button onClick={() => navigate(`/stations`)} className="p-2 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground transition-colors">
+                      <div className="flex gap-3">
+                        <button onClick={() => navigate(`/stations`)} className="p-3 rounded-xl bg-white/50 hover:bg-white text-[#515044]/40 hover:text-[#515044] transition-all shadow-sm">
                           <Eye className="h-4 w-4" />
                         </button>
-                        <button onClick={() => handleDeleteStation(station.id)} className="p-2 rounded-lg hover:bg-red-500/10 text-red-500 transition-colors">
+                        <button onClick={() => handleDeleteStation(station.id)} className="p-3 rounded-xl bg-red-500/5 hover:bg-red-500 text-red-500/40 hover:text-white transition-all shadow-sm">
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="p-8 text-center text-muted-foreground">No radio stations found</div>
+                  <div className="p-12 text-center text-[#515044]/30 font-bold uppercase text-[10px] tracking-[0.2em]">No radio stations found</div>
                 )}
               </div>
             </div>
@@ -481,9 +501,13 @@ const Dashboard = () => {
     }
   };
 
-  // Dashboard with Apple-style sidebar
+  // Dashboard
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex">
+    <div className="min-h-screen w-full bg-[#fef29c] font-['Raleway',_sans-serif] text-[#515044] flex relative overflow-hidden">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css?family=Raleway:400,300,700');
+        body { font-family: 'Raleway', sans-serif; }
+      `}</style>
       {/* Sidebar */}
       <CMSSidebar
         onLogout={handleLogout}
@@ -495,27 +519,27 @@ const Dashboard = () => {
       />
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto min-w-0">
+      <div className="flex-1 overflow-y-auto min-w-0 h-screen">
         {/* Top Bar */}
-        <div className="glass-subtle sticky top-0 z-10 border-b border-border/30 px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2 ml-12 lg:ml-0">
-            <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0" />
-            <span className="text-xs sm:text-sm font-medium text-foreground">Super Admin</span>
+        <div className="bg-white/50 backdrop-blur-xl sticky top-0 z-20 border-b border-[#515044]/5 px-6 sm:px-10 py-5 flex justify-between items-center shadow-sm">
+          <div className="flex items-center gap-3 ml-12 lg:ml-0">
+            <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse" />
+            <span className="text-xs font-bold uppercase tracking-widest text-[#515044]">Super Admin</span>
           </div>
-          <div className="flex items-center gap-2 sm:gap-4">
-            <span className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
+          <div className="flex items-center gap-6">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/40 hidden sm:block">
               {address?.slice(0, 6)}...{address?.slice(-4)}
             </span>
             <button
               onClick={handleLogout}
-              className="btn-apple-secondary text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2"
+              className="bg-[#515044]/5 hover:bg-[#515044]/10 text-[#515044] text-[10px] font-bold uppercase tracking-widest px-5 py-2.5 rounded-xl transition-all"
             >
               Disconnect
             </button>
           </div>
         </div>
 
-        <div className="p-4 sm:p-6">
+        <div className="p-4 sm:p-10 pb-20">
           {renderContent()}
         </div>
       </div>

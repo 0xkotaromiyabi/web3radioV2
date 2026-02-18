@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ShoppingCart, Wallet, Coins } from "lucide-react";
+import { Loader2, ShoppingCart, Wallet, Coins, Search } from "lucide-react";
 import NFTCard from './NFTCard';
 import BuyNFTDialog from './BuyNFTDialog';
 import WalletConnectButton from './WalletConnectButton';
@@ -24,7 +25,6 @@ const NFTMarketplace = () => {
   const [selectedNft, setSelectedNft] = useState<NFTData | null>(null);
   const [showBuyDialog, setShowBuyDialog] = useState(false);
 
-  // Mock Data since we removed Thirdweb SDK
   const nfts: NFTData[] = [
     {
       id: "1",
@@ -52,6 +52,15 @@ const NFTMarketplace = () => {
       tokenId: "3",
       price: "0.005",
       isListed: true
+    },
+    {
+      id: "4",
+      name: "Radio NFT #4",
+      description: "Exclusive access to premium radio content",
+      image: "",
+      tokenId: "4",
+      price: "0.005",
+      isListed: true
     }
   ];
 
@@ -66,76 +75,80 @@ const NFTMarketplace = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="space-y-12">
       {/* Header */}
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold text-white bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-          NFT Marketplace
+      <div className="text-center space-y-6">
+        <Badge className="bg-[#515044]/5 text-[#515044] hover:bg-[#515044]/10 border-[#515044]/10 px-4 py-1.5 rounded-full text-[10px] uppercase tracking-widest font-bold">
+          Digital Collectibles
+        </Badge>
+        <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold text-[#515044] tracking-tight">
+          Marketplace
         </h1>
-        <div className="flex flex-wrap gap-2 justify-center">
-          <Badge variant="outline" className="bg-gray-800 text-blue-400 border-gray-600">
+        <div className="flex flex-wrap gap-3 justify-center">
+          <Badge variant="outline" className="bg-white/50 text-[#515044]/60 border-[#515044]/10 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest">
             Base Network
           </Badge>
-          <Badge variant="outline" className="bg-gray-800 text-green-400 border-gray-600">
-            {filteredNfts.length} NFTs Available
+          <Badge variant="outline" className="bg-white/50 text-[#515044]/60 border-[#515044]/10 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest">
+            {filteredNfts.length} Available
           </Badge>
-          <Badge variant="outline" className="bg-gray-800 text-purple-400 border-gray-600">
+          <Badge variant="outline" className="bg-white/50 text-[#515044]/60 border-[#515044]/10 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest">
             0.005 ETH Each
           </Badge>
         </div>
       </div>
 
-      {/* Wallet Connection */}
-      <Card className="bg-gradient-to-r from-gray-800 to-gray-900 border-gray-600">
-        <CardContent className="p-6 text-center">
-          <div className="flex items-center justify-center mb-4">
-            <Wallet className="w-8 h-8 text-blue-400 mr-2" />
-            <Coins className="w-8 h-8 text-green-400" />
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        {/* Left Column: Search & Status */}
+        <div className="lg:col-span-4 space-y-6">
+          <div className="bg-white/90 backdrop-blur-xl rounded-[40px] p-10 shadow-xl border border-[#515044]/5">
+            <div className="flex items-center gap-4 mb-8">
+              <div className="w-14 h-14 rounded-2xl bg-[#515044]/5 flex items-center justify-center">
+                <Wallet className="w-6 h-6 text-[#515044]/40" />
+              </div>
+              <div>
+                <h3 className="font-bold text-[#515044]">Collector Access</h3>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/30 mt-1">Connect your wallet</p>
+              </div>
+            </div>
+            <WalletConnectButton />
           </div>
-          <h3 className="text-xl font-semibold text-white mb-2">Connect Your Wallet</h3>
-          <p className="text-gray-300 mb-4">Connect your wallet to buy NFTs with USDC or ETH</p>
-          <WalletConnectButton />
-        </CardContent>
-      </Card>
 
-      {/* Search */}
-      <Card className="bg-gray-800 border-gray-600">
-        <CardContent className="p-4">
-          <Input
-            placeholder="Search NFTs by name, description, or token ID..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
-          />
-        </CardContent>
-      </Card>
-
-      {/* NFT Grid */}
-      {filteredNfts.length === 0 ? (
-        <Card className="bg-gray-800 border-gray-600">
-          <CardContent className="p-8 text-center">
-            <ShoppingCart className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">No NFTs Found</h3>
-            <p className="text-gray-400">
-              {searchTerm
-                ? 'Try adjusting your search terms'
-                : 'No NFTs available in this collection yet'}
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredNfts.map((nft) => (
-            <NFTCard
-              key={nft.id}
-              nft={nft}
-              onBuy={() => handleBuyNFT(nft)}
-              contract={null}
-              client={null}
-            />
-          ))}
+          <div className="bg-white/40 backdrop-blur-xl rounded-[40px] p-8 border border-[#515044]/5">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#515044]/30" />
+              <Input
+                placeholder="Search collections..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="bg-white/50 border-none pl-12 h-14 rounded-2xl text-[#515044] placeholder-[#515044]/30 focus-visible:ring-1 focus-visible:ring-[#515044]/10"
+              />
+            </div>
+          </div>
         </div>
-      )}
+
+        {/* Right Column: NFT Grid */}
+        <div className="lg:col-span-8">
+          {filteredNfts.length === 0 ? (
+            <div className="bg-white/40 backdrop-blur-xl rounded-[40px] p-20 text-center border border-[#515044]/5">
+              <ShoppingCart className="w-12 h-12 text-[#515044]/10 mx-auto mb-6" />
+              <h3 className="text-xl font-bold text-[#515044]">No Assets Found</h3>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/30 mt-2">Try adjusting your search filters</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {filteredNfts.map((nft) => (
+                <NFTCard
+                  key={nft.id}
+                  nft={nft}
+                  onBuy={() => handleBuyNFT(nft)}
+                  contract={null}
+                  client={null}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Buy Dialog */}
       {selectedNft && (

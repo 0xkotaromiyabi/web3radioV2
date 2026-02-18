@@ -51,23 +51,20 @@ const NewsDetail = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
-                <NavBar />
-                <div className="container py-24 flex justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-green-500" />
-                </div>
+            <div className="min-h-screen bg-[#fef29c] flex justify-center items-center">
+                <Loader2 className="h-8 w-8 animate-spin text-[#515044]/50" />
             </div>
         );
     }
 
     if (!newsItem) {
         return (
-            <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
+            <div className="min-h-screen bg-[#fef29c] flex flex-col items-center">
                 <NavBar />
-                <div className="container py-24 text-center">
-                    <h1 className="text-2xl font-bold text-white mb-4">News Item Not Found</h1>
+                <div className="container mt-32 text-center">
+                    <h1 className="text-2xl font-bold text-[#515044] mb-4 uppercase tracking-widest opacity-50">News Item Not Found</h1>
                     <Link to="/news">
-                        <Button variant="outline" className="border-green-500 text-green-400 hover:bg-green-900">
+                        <Button variant="outline" className="border-[#515044]/20 text-[#515044] hover:bg-white rounded-2xl">
                             <ArrowLeft className="mr-2 h-4 w-4" /> Back to News
                         </Button>
                     </Link>
@@ -77,30 +74,33 @@ const NewsDetail = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
+        <div className="min-h-screen w-full bg-[#fef29c] relative overflow-y-auto font-['Raleway',_sans-serif] text-[#515044] flex flex-col items-center">
+            <style>{`
+                @import url('https://fonts.googleapis.com/css?family=Raleway:400,300,700');
+                body { font-family: 'Raleway', sans-serif; }
+            `}</style>
             <NavBar />
-            <div className="container py-12 max-w-4xl">
+            <div className="w-[92%] md:w-[60%] mt-24 md:mt-28 mb-32">
                 <Link to="/news" className="mb-8 inline-block">
-                    <Button variant="ghost" className="text-gray-400 hover:text-green-400 pl-0">
-                        <ArrowLeft className="mr-2 h-4 w-4" /> Back to Market Intelligence
+                    <Button variant="ghost" className="text-[#515044]/50 hover:text-[#515044] hover:bg-transparent pl-0 uppercase text-[10px] font-bold tracking-[0.2em]">
+                        <ArrowLeft className="mr-2 h-4 w-4" /> Back to Intelligence
                     </Button>
                 </Link>
 
-                <article className="bg-gray-800/50 rounded-xl overflow-hidden border border-gray-700 shadow-xl">
+                <article className="bg-white/95 backdrop-blur rounded-[40px] overflow-hidden shadow-2xl border border-[#515044]/5">
                     {newsItem.image_url && (
-                        <div className="w-full h-64 md:h-96 relative">
+                        <div className="w-full h-64 md:h-[450px] relative">
                             <img
                                 src={newsItem.image_url}
                                 alt={newsItem.title}
                                 className="w-full h-full object-cover"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-80" />
                         </div>
                     )}
 
-                    <div className="p-8">
-                        <div className="flex items-center gap-2 mb-4 text-sm text-green-400">
-                            <Calendar className="h-4 w-4" />
+                    <div className="p-8 md:p-14">
+                        <div className="flex items-center gap-2 mb-6 text-[10px] font-bold uppercase tracking-widest text-[#515044]/40">
+                            <Calendar className="h-3 w-3" />
                             <span>{new Date(newsItem.date).toLocaleDateString(undefined, {
                                 year: 'numeric',
                                 month: 'long',
@@ -108,13 +108,13 @@ const NewsDetail = () => {
                             })}</span>
                         </div>
 
-                        <h1 className="text-3xl md:text-5xl font-bold text-white mb-8 leading-tight">
+                        <h1 className="text-3xl md:text-5xl font-bold text-[#515044] mb-10 leading-[1.1] tracking-tight">
                             {newsItem.title}
                         </h1>
 
-                        <div className="prose prose-invert prose-lg max-w-none text-gray-300">
+                        <div className="prose prose-lg max-w-none text-[#515044]/80 leading-relaxed font-light">
                             {newsItem.content.split('\n').map((paragraph, idx) => (
-                                <p key={idx} className="mb-4 leading-relaxed">
+                                <p key={idx} className="mb-6">
                                     {paragraph}
                                 </p>
                             ))}

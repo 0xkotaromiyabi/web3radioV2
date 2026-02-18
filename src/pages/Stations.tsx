@@ -153,60 +153,76 @@ const Stations = () => {
 
   const currentStation = filteredStations[currentStationIndex] || stations[0];
 
-  if (loading || !currentStation) return <div className="min-h-screen bg-[#1e1e2d] flex items-center justify-center text-white">Loading...</div>;
+  if (loading || !currentStation) return (
+    <div className="min-h-screen bg-[#fef29c] flex items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-[#515044]/50" />
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-[#1e1e2d] text-white font-sans overflow-hidden">
-      <style>{styles}</style>
+    <div className="min-h-screen w-full bg-[#fef29c] relative overflow-y-auto font-['Raleway',_sans-serif] text-[#515044] flex flex-col items-center">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css?family=Raleway:400,300,700');
+        body { font-family: 'Raleway', sans-serif; }
+        ${styles}
+      `}</style>
       <NavBar />
 
-      <div className="container mx-auto px-4 py-8 flex flex-col h-[calc(100vh-80px)]">
+      <div className="w-[90%] md:w-[70%] mt-24 md:mt-28 mb-12 flex flex-col min-h-[calc(100vh-140px)]">
 
-        {/* Navigation Tabs */}
-        <div className="flex justify-center space-x-6 mb-8 overflow-x-auto pb-2">
+        {/* Header */}
+        <div className="mb-10 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-[#515044]/80 uppercase">Stations Hub</h1>
+          <p className="text-[10px] md:text-xs uppercase tracking-[0.4em] font-bold opacity-30 mt-2">
+            Global Web3 Frequencies
+          </p>
+        </div>
+
+        {/* Navigation Tabs (Frequency Style) */}
+        <div className="flex flex-wrap justify-center gap-3 mb-12">
           {['all', 'pop', 'rock', 'news', 'community'].map((genre) => (
             <button
               key={genre}
               onClick={() => {
                 setSelectedGenre(genre as GenreCategory);
-                setCurrentStationIndex(0); // Reset to first when changing genre
+                setCurrentStationIndex(0);
               }}
-              className={`text-lg font-medium transition-colors px-4 py-2 rounded-full whitespace-nowrap
+              className={`px-5 py-2.5 rounded-2xl text-[10px] font-bold uppercase tracking-wider transition-all border whitespace-nowrap
                         ${selectedGenre === genre
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                  : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                  ? 'bg-[#515044] text-white border-[#515044] scale-105 shadow-lg'
+                  : 'bg-white/90 text-[#515044] border-[#515044]/10 hover:bg-white hover:border-[#515044]/30 shadow-md hover:shadow-lg'}`}
             >
-              {genre.charAt(0).toUpperCase() + genre.slice(1)}
+              {genre}
             </button>
           ))}
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col items-center justify-center gap-8 relative">
+        <div className="flex-1 flex flex-col items-center justify-center gap-12 relative pb-20">
 
           {/* Swiper Coverflow */}
-          <div className="w-full max-w-4xl h-[300px] mb-8 relative z-10">
+          <div className="w-full max-w-4xl h-[280px] md:h-[350px] relative z-10 flex items-center">
             <Swiper
               effect={'coverflow'}
               grabCursor={true}
               centeredSlides={true}
               slidesPerView={'auto'}
               coverflowEffect={{
-                rotate: 50,
+                rotate: 20,
                 stretch: 0,
-                depth: 100,
+                depth: 150,
                 modifier: 1,
-                slideShadows: true,
+                slideShadows: false,
               }}
-              pagination={true}
+              pagination={false}
               modules={[EffectCoverflow, Pagination]}
               className="w-full h-full"
               onSlideChange={handleSlideChange}
             >
               {filteredStations.map((station, idx) => (
-                <SwiperSlide key={station.id} className="w-[300px] h-[300px] bg-transparent flex items-center justify-center">
-                  <div className={`w-full h-full rounded-2xl overflow-hidden shadow-2xl transition-all duration-500 border-4 
-                                ${currentStationIndex === idx ? 'border-purple-500 scale-105' : 'border-transparent opacity-50 blur-[2px]'}`}>
+                <SwiperSlide key={station.id} className="w-[240px] md:w-[320px] h-[240px] md:h-[320px] bg-transparent flex items-center justify-center pt-8">
+                  <div className={`w-full h-full rounded-[40px] overflow-hidden shadow-2xl transition-all duration-700 border-2 
+                                ${currentStationIndex === idx ? 'border-[#515044]/20 scale-105 shadow-[#515044]/10' : 'border-transparent opacity-40 blur-[1px] scale-90'}`}>
                     <img
                       src={station.image_url || 'https://via.placeholder.com/300?text=Radio'}
                       alt={station.name}
@@ -218,45 +234,48 @@ const Stations = () => {
             </Swiper>
           </div>
 
-          {/* Music Player Controls Card */}
-          <div className="bg-[#242436] rounded-[40px] p-8 w-full max-w-md shadow-2xl border border-white/5 relative z-20">
-            {/* Rotating Album Art */}
-            <div className="flex justify-center mb-6 -mt-16">
-              <div className={`w-32 h-32 rounded-full border-4 border-[#1e1e2d] shadow-xl overflow-hidden relative bg-black
+          {/* Music Player Controls Card - Premium Glassmorphism */}
+          <div className="bg-white/95 backdrop-blur-xl rounded-[48px] p-8 md:p-10 w-full max-w-md shadow-2xl border border-[#515044]/5 relative z-20">
+            {/* Rotating Album Art (Vinyl Style) */}
+            <div className="flex justify-center mb-8 -mt-24">
+              <div className={`w-36 h-36 rounded-full border-[6px] border-[#fef29c] shadow-2xl overflow-hidden relative bg-[#121212]
                         ${isPlaying ? 'animate-spin-slow' : 'animate-spin-slow paused-animation'}`}>
                 <img
                   src={currentStation.image_url || 'https://via.placeholder.com/150'}
                   alt="Vinyl"
-                  className="w-full h-full object-cover opacity-90"
+                  className="w-full h-full object-cover opacity-80"
                 />
-                <div className="absolute inset-0 bg-black/20 rounded-full"></div>
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-[#1e1e2d] rounded-full flex items-center justify-center">
-                  <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent"></div>
+                {/* Vinyl Ring Texture Simulation */}
+                <div className="absolute inset-0 border-[20px] border-black/10 rounded-full"></div>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-[#fef29c] rounded-full flex items-center justify-center border-2 border-black/10 shadow-inner">
+                  <div className="w-2 h-2 bg-[#515044] rounded-full opacity-60"></div>
                 </div>
               </div>
             </div>
 
             {/* Station Info */}
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-1">
+            <div className="text-center mb-10">
+              <h2 className="text-2xl font-bold text-[#515044] mb-2 tracking-tight">
                 {currentStation.name}
               </h2>
-              <p className="text-gray-400 text-sm uppercase tracking-wider">{currentStation.genre}</p>
+              <p className="text-[#515044]/40 text-[10px] font-bold uppercase tracking-[0.3em]">{currentStation.genre}</p>
             </div>
 
-            {/* Progress Bar (Visual) */}
-            <div className="mb-8">
-              <div className="w-full bg-[#151520] h-1.5 rounded-full overflow-hidden">
+            {/* Progress Bar (Minimalist) */}
+            <div className="mb-10 px-4">
+              <div className="w-full bg-[#515044]/5 h-1.5 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-purple-500 to-pink-500 relative"
-                  style={{ width: `${progress}%`, transition: 'width 1s linear' }}
-                >
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.5)]"></div>
-                </div>
+                  className="h-full bg-[#515044] opacity-80 transition-all duration-1000 linear"
+                  style={{ width: `${progress}%` }}
+                />
               </div>
-              <div className="flex justify-between text-xs text-gray-500 mt-2 font-mono">
-                <span>LIVE</span>
-                <span>∞</span>
+              <div className="flex justify-between text-[8px] font-bold tracking-widest text-[#515044]/30 mt-3">
+                <div className="flex items-center gap-1.5">
+                  <span className={`w-1.5 h-1.5 rounded-full ${isPlaying ? 'bg-red-500 animate-pulse' : 'bg-gray-300'}`}></span>
+                  LIVE
+                </div>
+                <span>ON AIR</span>
               </div>
             </div>
 
@@ -264,27 +283,27 @@ const Stations = () => {
             <div className="flex items-center justify-center gap-8">
               <button
                 onClick={prevStation}
-                className="w-12 h-12 rounded-full bg-[#1e1e2d] text-gray-400 hover:text-white hover:bg-white/10 flex items-center justify-center transition-all shadow-md active:scale-95"
+                className="w-12 h-12 rounded-2xl bg-[#515044]/5 text-[#515044]/40 hover:text-[#515044] hover:bg-[#515044]/10 flex items-center justify-center transition-all active:scale-95"
               >
-                <SkipBack size={20} fill="currentColor" />
+                <SkipBack size={20} fill="currentColor" stroke="none" />
               </button>
 
               <button
                 onClick={togglePlay}
-                className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 text-white flex items-center justify-center shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105 transition-all active:scale-95"
+                className="w-16 h-16 rounded-3xl bg-[#515044] text-white flex items-center justify-center shadow-xl shadow-[#515044]/20 hover:bg-black hover:scale-105 transition-all active:scale-95"
               >
                 {isPlaying ? (
-                  <Pause size={28} fill="currentColor" />
+                  <Pause size={24} fill="currentColor" stroke="none" />
                 ) : (
-                  <Play size={28} fill="currentColor" className="ml-1" />
+                  <Play size={24} fill="currentColor" stroke="none" className="ml-1" />
                 )}
               </button>
 
               <button
                 onClick={nextStation}
-                className="w-12 h-12 rounded-full bg-[#1e1e2d] text-gray-400 hover:text-white hover:bg-white/10 flex items-center justify-center transition-all shadow-md active:scale-95"
+                className="w-12 h-12 rounded-2xl bg-[#515044]/5 text-[#515044]/40 hover:text-[#515044] hover:bg-[#515044]/10 flex items-center justify-center transition-all active:scale-95"
               >
-                <SkipForward size={20} fill="currentColor" />
+                <SkipForward size={20} fill="currentColor" stroke="none" />
               </button>
             </div>
 

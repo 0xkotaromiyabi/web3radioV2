@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -8,9 +9,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { X, Coins } from "lucide-react";
+import { X, Coins, Wallet, CreditCard } from "lucide-react";
 import { useSendTransaction, useWriteContract, useWaitForTransactionReceipt, useAccount } from 'wagmi';
 import { parseEther, parseUnits } from 'viem';
+import placeholderData from '@/assets/placeholder.svg';
 
 interface NFTData {
   id: string;
@@ -33,33 +35,27 @@ const BuyNFTDialog = ({ nft, isOpen, onClose }: BuyNFTDialogProps) => {
   const [paymentMethod, setPaymentMethod] = useState<'usdc' | 'eth'>('eth');
   const { address } = useAccount();
 
-  // Seller address from previous file
   const sellerAddress = "0x242DfB7849544eE242b2265cA7E585bdec60456B";
   const usdcAddress = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"; // Base USDC
 
-  // ETH Payment
   const { sendTransaction, data: ethHash, isPending: isEthPending } = useSendTransaction();
-
-  // USDC Payment
   const { writeContract, data: usdcHash, isPending: isUsdcPending } = useWriteContract();
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash: ethHash || usdcHash,
   });
 
-  // Calculate USDC equivalent (approximate conversion: 1 ETH = ~3700 USDC)
   const usdcPrice = nft.price ? (parseFloat(nft.price) * 3700).toFixed(6) : "18.5";
 
-  // Function to get IPFS image URL
   const getImageUrl = (imageUri: string) => {
-    if (!imageUri) return '/placeholder.svg';
+    if (!imageUri) return placeholderData;
     if (imageUri.startsWith('ipfs://')) {
       return `https://ipfs.io/ipfs/${imageUri.replace('ipfs://', '')}`;
     }
     if (imageUri.startsWith('http')) {
       return imageUri;
     }
-    return '/placeholder.svg';
+    return placeholderData;
   };
 
   const handleCreateTransaction = async () => {
@@ -72,7 +68,6 @@ const BuyNFTDialog = ({ nft, isOpen, onClose }: BuyNFTDialogProps) => {
           value: parseEther(nft.price),
         });
       } else {
-        // USDC Transfer
         const erc20Abi = [
           {
             name: 'transfer',
@@ -90,11 +85,8 @@ const BuyNFTDialog = ({ nft, isOpen, onClose }: BuyNFTDialogProps) => {
           address: usdcAddress,
           abi: erc20Abi,
           functionName: 'transfer',
-          args: [sellerAddress, parseUnits(usdcPrice, 6)], // USDC has 6 decimals
+          args: [sellerAddress, parseUnits(usdcPrice, 6)],
           account: address,
-          chain: undefined // AppKit adapter handles chain, but wagmi types might demand it or we can omit if types allow.
-          // actually the error said 'chain' is missing. 
-          // Let's try to infer or pass 'null' if compatible, or import 'base' and pass it.
         });
       }
     } catch (error) {
@@ -106,76 +98,96 @@ const BuyNFTDialog = ({ nft, isOpen, onClose }: BuyNFTDialogProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-gray-800 border-gray-600 text-white max-w-md max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-center flex items-center justify-between">
-            <span className="flex items-center">
-              <Coins className="w-5 h-5 mr-2" />
-              Purchase NFT
-            </span>
-            <Button variant="ghost" size="sm" onClick={onClose} className="text-gray-400 hover:text-white">
-              <X className="w-4 h-4" />
-            </Button>
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent className="p-0 border-none bg-transparent shadow-none max-w-lg">
+        <div className="bg-white/95 backdrop-blur-2xl rounded-[48px] overflow-hidden border border-[#515044]/5 shadow-2xl animate-in fade-in zoom-in duration-500">
+          {/* Close Button Overlay */}
+          <button
+            onClick={onClose}
+            className="absolute top-6 right-6 z-30 p-2 rounded-full bg-white/50 hover:bg-white text-[#515044]/40 hover:text-[#515044] transition-all shadow-sm"
+          >
+            <X className="w-4 h-4" />
+          </button>
 
-        <div className="space-y-4">
-          {/* NFT Preview */}
-          <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-700">
-            <img
-              src={getImageUrl(nft.image)}
-              alt={nft.name}
-              className="w-full h-full object-cover"
-              onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }}
-            />
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2">
+            {/* Left Column: Media */}
+            <div className="relative aspect-square md:aspect-auto bg-[#515044]/5">
+              <img
+                src={getImageUrl(nft.image)}
+                alt={nft.name}
+                className="w-full h-full object-cover"
+                onError={(e) => { e.currentTarget.src = placeholderData; }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+            </div>
 
-          {/* NFT Details */}
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold">{nft.name}</h3>
-            <p className="text-sm text-gray-400 line-clamp-3">{nft.description}</p>
-            <div className="flex items-center justify-between">
-              <Badge className="bg-blue-600">Token ID: {nft.tokenId}</Badge>
-              <Badge className="bg-green-600">Available</Badge>
+            {/* Right Column: Info & Action */}
+            <div className="p-8 space-y-8 flex flex-col justify-between">
+              <div>
+                <Badge className="bg-[#515044]/5 text-[#515044]/40 hover:bg-[#515044]/10 border-none px-3 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest mb-4">
+                  #{nft.tokenId}
+                </Badge>
+                <h2 className="text-2xl font-bold text-[#515044] tracking-tight">{nft.name}</h2>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/30 mt-2 leading-relaxed">
+                  {nft.description}
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                <div className="flex items-center justify-between p-1 bg-[#515044]/5 rounded-2xl">
+                  <button
+                    onClick={() => setPaymentMethod('eth')}
+                    className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all font-bold text-[10px] uppercase tracking-widest ${paymentMethod === 'eth' ? 'bg-white text-[#515044] shadow-sm' : 'text-[#515044]/30 hover:text-[#515044]/50'}`}
+                  >
+                    <Coins className="w-3 h-3" />
+                    ETH
+                  </button>
+                  <button
+                    onClick={() => setPaymentMethod('usdc')}
+                    className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all font-bold text-[10px] uppercase tracking-widest ${paymentMethod === 'usdc' ? 'bg-white text-[#515044] shadow-sm' : 'text-[#515044]/30 hover:text-[#515044]/50'}`}
+                  >
+                    <CreditCard className="w-3 h-3" />
+                    USDC
+                  </button>
+                </div>
+
+                <div className="text-center bg-[#515044]/2 rounded-[24px] p-6">
+                  <p className="text-[8px] font-bold uppercase tracking-widest text-[#515044]/30 mb-1">Estimated Price</p>
+                  {paymentMethod === 'eth' ? (
+                    <div className="space-y-1">
+                      <p className="text-3xl font-bold text-[#515044]">{nft.price || "0.005"} ETH</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/20">≈ {usdcPrice} USDC</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      <p className="text-3xl font-bold text-[#515044]">{usdcPrice} USDC</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/20">≈ {nft.price || "0.005"} ETH</p>
+                    </div>
+                  )}
+                </div>
+
+                {isSuccess ? (
+                  <div className="p-4 bg-green-500/10 border border-green-500/20 text-green-600 rounded-2xl text-center text-[10px] font-bold uppercase tracking-[0.2em] animate-bounce">
+                    Purchase Successful
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleCreateTransaction}
+                    disabled={isPending || !address}
+                    className="w-full bg-[#515044] hover:bg-black text-white font-bold py-5 rounded-2xl transition-all shadow-xl shadow-[#515044]/10 uppercase text-[10px] tracking-[0.3em] disabled:opacity-20 disabled:grayscale"
+                  >
+                    {isPending ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        Processing
+                      </span>
+                    ) : (
+                      `Confirm Purchase`
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-
-          {/* Payment Options */}
-          <Tabs value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as 'usdc' | 'eth')} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-gray-700">
-              <TabsTrigger value="eth" className="data-[state=active]:bg-purple-600">ETH Payment</TabsTrigger>
-              <TabsTrigger value="usdc" className="data-[state=active]:bg-blue-600">USDC Payment</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="eth" className="mt-4 text-center">
-              <div className="mb-4">
-                <span className="text-2xl font-bold text-purple-400">{nft.price || "0.005"} ETH</span>
-                <p className="text-xs text-gray-400 mt-1">≈ {usdcPrice} USDC</p>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="usdc" className="mt-4 text-center">
-              <div className="mb-4">
-                <span className="text-2xl font-bold text-green-400">{usdcPrice} USDC</span>
-                <p className="text-xs text-gray-400 mt-1">≈ {nft.price || "0.005"} ETH</p>
-              </div>
-            </TabsContent>
-          </Tabs>
-
-          {/* Transaction Status */}
-          {isSuccess ? (
-            <div className="p-3 bg-green-900/20 text-green-400 rounded-lg text-center text-sm">
-              ✅ Purchase Successful!
-            </div>
-          ) : (
-            <Button
-              onClick={handleCreateTransaction}
-              disabled={isPending || !address}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-            >
-              {isPending ? 'Processing...' : `Pay using ${paymentMethod.toUpperCase()}`}
-            </Button>
-          )}
         </div>
       </DialogContent>
     </Dialog>

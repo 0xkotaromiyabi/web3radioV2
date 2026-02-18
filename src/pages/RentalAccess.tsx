@@ -1,11 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import NavBar from '@/components/navigation/NavBar';
 import RentalListingCard from '@/components/rental/RentalListingCard';
 import CreateListingModal from '@/components/rental/CreateListingModal';
 import RentModal from '@/components/rental/RentModal';
 import { Button } from "@/components/ui/button";
-import { Filter, Clock } from "lucide-react";
+import { Filter, Clock, Search, Calendar, Shield, Info } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { DAYS_OF_WEEK, getCurrentUTCTime } from '@/utils/timeSlots';
 
 const RentalAccess = () => {
@@ -18,7 +20,6 @@ const RentalAccess = () => {
     const [filterNetwork, setFilterNetwork] = useState<string>("sepolia");
     const [currentTime, setCurrentTime] = useState(getCurrentUTCTime());
 
-    // Fetch listings from API
     useEffect(() => {
         const fetchListings = async () => {
             try {
@@ -44,12 +45,10 @@ const RentalAccess = () => {
         fetchListings();
     }, []);
 
-    // Update current time every minute
     useEffect(() => {
         const interval = setInterval(() => {
             setCurrentTime(getCurrentUTCTime());
-        }, 60000); // Update every minute
-
+        }, 60000);
         return () => clearInterval(interval);
     }, []);
 
@@ -61,29 +60,24 @@ const RentalAccess = () => {
         }
     };
 
-    // Filter listings
     const filteredListings = listings.filter(listing => {
         if (filterType !== "all") {
             const isSuper = listing.isSuperAccess;
             if (filterType === "super" && !isSuper) return false;
             if (filterType === "regular" && isSuper) return false;
         }
-
         if (filterDay !== "all") {
             const tokenId = parseInt(listing.tokenId);
             if (listing.isSuperAccess) {
-                // Super Access tokens 169-175 map to Monday-Sunday
                 const superDayIndex = tokenId - 169 + 1;
                 const dayName = DAYS_OF_WEEK[superDayIndex - 1].toLowerCase();
                 if (dayName !== filterDay) return false;
             } else {
-                // Regular tokens
                 const dayIndex = Math.floor(tokenId / 24) + 1;
                 const dayName = DAYS_OF_WEEK[dayIndex - 1].toLowerCase();
                 if (dayName !== filterDay) return false;
             }
         }
-
         return true;
     });
 
@@ -91,134 +85,138 @@ const RentalAccess = () => {
     const currentHourFormatted = currentTime.hour.toString().padStart(2, '0');
 
     return (
-        <div className="min-h-screen bg-background text-foreground">
+        <div className="min-h-screen w-full bg-[#fef29c] relative overflow-y-auto font-['Raleway',_sans-serif] text-[#515044] flex flex-col items-center">
+            <style>{`
+                @import url('https://fonts.googleapis.com/css?family=Raleway:400,300,700');
+                body { font-family: 'Raleway', sans-serif; }
+            `}</style>
             <NavBar />
 
-            <main className="container mx-auto px-4 py-8">
+            <main className="container mx-auto px-6 py-12 md:py-20 max-w-7xl">
                 {/* Header Section */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-                    <div>
-                        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent mb-2">
-                            Rental Access Marketplace
+                <div className="flex flex-col lg:flex-row justify-between items-start gap-12 mb-16">
+                    <div className="max-w-2xl space-y-6">
+                        <Badge className="bg-[#515044]/5 text-[#515044] hover:bg-[#515044]/10 border-[#515044]/10 px-4 py-1.5 rounded-full text-[10px] uppercase tracking-widest font-bold">
+                            Temporal Access pass
+                        </Badge>
+                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-[#515044]">
+                            Rental Access
                         </h1>
-                        <p className="text-muted-foreground text-lg">
-                            Rent time-specific access to Web3Radio's exclusive broadcast slots
+                        <p className="text-xl text-[#515044]/60 font-light leading-relaxed">
+                            Rent time-specific broadcast slots and manage your on-air presence through our decentralized scheduling system.
                         </p>
 
-                        {/* Time Legend */}
-                        <div className="mt-3 flex flex-wrap gap-4 text-sm">
-                            <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                                <span className="text-muted-foreground">Regular: 168h max (7 days)</span>
+                        <div className="flex flex-wrap gap-6 pt-4">
+                            <div className="flex items-center gap-3">
+                                <div className="w-2.5 h-2.5 rounded-full bg-blue-400"></div>
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/40">Regular: 7 Days max</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-                                <span className="text-muted-foreground">Super: 24h max (1 day)</span>
+                            <div className="flex items-center gap-3">
+                                <div className="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/40">Super: 24h Slots</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
-                                <span className="text-muted-foreground">Active Now</span>
+                            <div className="flex items-center gap-3">
+                                <div className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse"></div>
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/40">Active Slots</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-3">
-                        {/* Current UTC Time Display */}
-                        <div className="glass border-border/50 px-4 py-2 rounded-lg">
-                            <div className="flex items-center gap-2">
-                                <Clock className="w-4 h-4 text-primary" />
-                                <span className="text-sm font-mono">
-                                    Current: {currentDayName} {currentHourFormatted}:00 UTC
-                                </span>
+                    <div className="flex flex-col gap-4 w-full lg:w-auto">
+                        <div className="bg-white/80 backdrop-blur-xl rounded-[32px] p-8 border border-[#515044]/5 shadow-xl">
+                            <div className="flex items-center gap-4 mb-2">
+                                <Clock className="w-5 h-5 text-[#515044]/40" />
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/30">Current Network Time</p>
                             </div>
+                            <p className="text-2xl font-bold text-[#515044] mono">{currentDayName} {currentHourFormatted}:00 UTC</p>
                         </div>
                         <CreateListingModal />
                     </div>
                 </div>
 
-                {/* Filters */}
-                <div className="mb-6 p-4 rounded-lg glass border border-border/50 flex flex-wrap gap-4 items-center">
-                    <div className="flex items-center gap-2">
-                        <Filter className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm font-semibold">Filters:</span>
+                {/* Controls & Contract Info */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+                    <div className="lg:col-span-9 bg-white/40 backdrop-blur-xl rounded-[32px] p-4 border border-[#515044]/5 flex flex-wrap gap-4 items-center">
+                        <div className="flex items-center gap-2 px-4 border-r border-[#515044]/10 h-10">
+                            <Filter className="w-4 h-4 text-[#515044]/30" />
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/40">Filters</span>
+                        </div>
+
+                        <Select value={filterDay} onValueChange={setFilterDay}>
+                            <SelectTrigger className="w-[160px] bg-transparent border-none text-[#515044] font-bold text-[10px] uppercase tracking-widest focus:ring-0">
+                                <SelectValue placeholder="All Days" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white/95 backdrop-blur-xl border-[#515044]/5">
+                                <SelectItem value="all">All Days</SelectItem>
+                                {DAYS_OF_WEEK.map(day => (
+                                    <SelectItem key={day} value={day.toLowerCase()} className="text-[10px] font-bold uppercase tracking-widest">{day}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+
+                        <Select value={filterType} onValueChange={setFilterType}>
+                            <SelectTrigger className="w-[160px] bg-transparent border-none text-[#515044] font-bold text-[10px] uppercase tracking-widest focus:ring-0">
+                                <SelectValue placeholder="All Types" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white/95 backdrop-blur-xl border-[#515044]/5">
+                                <SelectItem value="all">All Types</SelectItem>
+                                <SelectItem value="regular">Regular Access</SelectItem>
+                                <SelectItem value="super">Super Access</SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <Select value={filterNetwork} onValueChange={setFilterNetwork}>
+                            <SelectTrigger className="w-[160px] bg-transparent border-none text-[#515044] font-bold text-[10px] uppercase tracking-widest focus:ring-0">
+                                <SelectValue placeholder="Network" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white/95 backdrop-blur-xl border-[#515044]/5">
+                                <SelectItem value="sepolia">Sepolia Testnet</SelectItem>
+                                <SelectItem value="base">Base Mainnet</SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <div className="flex-1"></div>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/20 pr-4">
+                            {filteredListings.length} Listings
+                        </p>
                     </div>
 
-                    <Select value={filterDay} onValueChange={setFilterDay}>
-                        <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Filter by Day" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Days</SelectItem>
-                            {DAYS_OF_WEEK.map(day => (
-                                <SelectItem key={day} value={day.toLowerCase()}>
-                                    {day}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-
-                    <Select value={filterType} onValueChange={setFilterType}>
-                        <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Filter by Type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Types</SelectItem>
-                            <SelectItem value="regular">Regular Access</SelectItem>
-                            <SelectItem value="super">Super Access</SelectItem>
-                        </SelectContent>
-                    </Select>
-
-                    <Select value={filterNetwork} onValueChange={setFilterNetwork}>
-                        <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Network" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="sepolia">Sepolia Testnet</SelectItem>
-                            <SelectItem value="base">Base Mainnet</SelectItem>
-                        </SelectContent>
-                    </Select>
-
-                    <div className="flex-1"></div>
-
-                    <div className="text-sm text-muted-foreground">
-                        Showing {filteredListings.length} of {listings.length} listings
-                    </div>
-                </div>
-
-                {/* Contract Info */}
-                <div className="mb-6 p-4 rounded-lg glass border border-border/50">
-                    <p className="text-xs text-muted-foreground">
-                        <span className="font-semibold">Contract:</span>{' '}
+                    <div className="lg:col-span-3 bg-[#515044]/5 rounded-[32px] p-6 flex flex-col justify-center gap-3">
+                        <div className="flex items-center gap-2">
+                            <Shield className="w-3.5 h-3.5 text-[#515044]/30" />
+                            <p className="text-[8px] font-bold uppercase tracking-widest text-[#515044]/30">Verified Contract</p>
+                        </div>
                         <a
                             href={filterNetwork === 'sepolia'
                                 ? "https://sepolia.etherscan.io/address/0xf6cE0304C02bBAcC817f2a90599cE700f538906F"
-                                : "https://basescan.org/address/0xf6cE0304C02bBAcC817f2a90599cE700f538906F" // Assuming same addr for demo or user will update
+                                : "https://basescan.org/address/0xf6cE0304C02bBAcC817f2a90599cE700f538906F"
                             }
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-primary hover:underline font-mono"
+                            className="text-[10px] font-bold text-[#515044] hover:text-black transition-colors flex items-center justify-between group"
                         >
                             0xf6cE...906F
+                            <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-all" />
                         </a>
-                        {' '}on {filterNetwork === 'sepolia' ? 'Sepolia' : 'Base'}
-                    </p>
+                    </div>
                 </div>
 
                 {/* Listings Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredListings.map(listing => (
-                        <RentalListingCard
-                            key={listing.id}
-                            listing={listing}
-                            onRent={handleRent}
-                        />
-                    ))}
-                </div>
-
-                {filteredListings.length === 0 && (
-                    <div className="text-center py-20 text-muted-foreground glass rounded-2xl border-dashed border-2 border-border/50">
-                        <p>No listings found matching your filters.</p>
-                        <p className="text-sm mt-2">Try adjusting your filter settings.</p>
+                {filteredListings.length === 0 ? (
+                    <div className="bg-white/40 backdrop-blur-xl rounded-[48px] p-24 text-center border-2 border-dashed border-[#515044]/5">
+                        <Calendar className="w-16 h-16 text-[#515044]/10 mx-auto mb-6" />
+                        <h3 className="text-2xl font-bold text-[#515044]">No Listings Found</h3>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/20 mt-2">Adjust your filters to see more results</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {filteredListings.map(listing => (
+                            <RentalListingCard
+                                key={listing.id}
+                                listing={listing}
+                                onRent={handleRent}
+                            />
+                        ))}
                     </div>
                 )}
             </main>

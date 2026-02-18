@@ -24,36 +24,54 @@ const PersistentPlayer = () => {
 
     // Do not show on Home page ('/') or if explicitly hidden
     if (location.pathname === '/' || location.pathname === '/dashboard') {
-        return null; // The main big player controls audio here, or dashboard doesn't need it obstructing
+        return null;
     }
 
     const stationName = currentStation.charAt(0).toUpperCase() + currentStation.slice(1);
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 h-20 bg-white/90 backdrop-blur-md border-t border-gray-200 z-50 flex items-center px-4 md:px-8 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] transition-transform duration-300">
-            {/* Song Info */}
-            <div className="flex items-center gap-3 w-1/3 min-w-0">
-                {currentSong?.artwork ? (
-                    <img src={currentSong.artwork} alt="Album Art" className="w-12 h-12 rounded-lg object-cover shadow-sm bg-gray-100" />
-                ) : (
-                    <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400">
-                        <Music className="w-6 h-6" />
-                    </div>
+        <div className="fixed bottom-0 left-0 right-0 h-24 bg-white/80 backdrop-blur-xl border-t border-[#515044]/5 z-50 flex items-center px-6 md:px-10 shadow-[0_-10px_40px_rgba(81,80,68,0.05)] transition-all duration-500 font-['Raleway',_sans-serif]">
+            <style>{`
+                @import url('https://fonts.googleapis.com/css?family=Raleway:400,300,700');
+            `}</style>
+
+            {/* Progress Bar */}
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-[#515044]/5">
+                {isPlaying && !isLoading && (
+                    <div className="h-full bg-[#515044]/20 w-full animate-pulse" />
                 )}
+                {isLoading && (
+                    <div className="h-full w-1/3 bg-[#515044]/40 animate-loading-bar" />
+                )}
+            </div>
+
+            {/* Song Info */}
+            <div className="flex items-center gap-4 w-1/3 min-w-0">
+                <div className="relative group">
+                    {currentSong?.artwork ? (
+                        <img src={currentSong.artwork} alt="Album Art" className="w-14 h-14 rounded-2xl object-cover shadow-md bg-[#515044]/5 transition-transform group-hover:scale-105" />
+                    ) : (
+                        <div className="w-14 h-14 rounded-2xl bg-[#515044]/5 flex items-center justify-center text-[#515044]/20">
+                            <Music className="w-6 h-6" />
+                        </div>
+                    )}
+                    {isPlaying && !isLoading && (
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-pulse" />
+                    )}
+                </div>
                 <div className="min-w-0">
-                    <p className="font-semibold text-sm text-gray-900 truncate">{currentSong?.title || 'Live Stream'}</p>
-                    <p className="text-xs text-gray-500 truncate">{currentSong?.artist || stationName}</p>
+                    <p className="font-bold text-sm text-[#515044] truncate tracking-tight">{currentSong?.title || 'Live Stream'}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/40 truncate mt-1">{currentSong?.artist || stationName}</p>
                 </div>
             </div>
 
             {/* Controls */}
-            <div className="flex items-center justify-center gap-4 w-1/3">
-                <Button
+            <div className="flex items-center justify-center gap-6 w-1/3">
+                <button
                     onClick={togglePlay}
-                    size="icon"
                     className={cn(
-                        "rounded-full h-10 w-10 shadow-lg transition-transform active:scale-95",
-                        isPlaying ? "bg-gray-100 text-gray-900 hover:bg-gray-200" : "bg-black text-white hover:bg-gray-800"
+                        "rounded-[20px] h-12 w-12 flex items-center justify-center shadow-xl transition-all active:scale-90",
+                        isPlaying ? "bg-[#515044]/5 text-[#515044] hover:bg-[#515044]/10" : "bg-[#515044] text-white hover:bg-black shadow-[#515044]/20"
                     )}
                 >
                     {isLoading ? (
@@ -61,15 +79,15 @@ const PersistentPlayer = () => {
                     ) : isPlaying ? (
                         <Pause className="w-5 h-5 fill-current" />
                     ) : (
-                        <Play className="w-5 h-5 fill-current ml-0.5" />
+                        <Play className="w-5 h-5 fill-current ml-1" />
                     )}
-                </Button>
+                </button>
             </div>
 
             {/* Volume & Extras */}
-            <div className="flex items-center justify-end gap-3 w-1/3">
-                <div className="hidden md:flex items-center gap-2 w-32 group">
-                    <button onClick={toggleMute} className="text-gray-500 hover:text-gray-900 transition-colors">
+            <div className="flex items-center justify-end gap-6 w-1/3">
+                <div className="hidden md:flex items-center gap-3 w-32 group">
+                    <button onClick={toggleMute} className="text-[#515044]/40 hover:text-[#515044] transition-colors">
                         {isMuted || volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
                     </button>
                     <Slider
@@ -78,24 +96,14 @@ const PersistentPlayer = () => {
                         max={100}
                         step={1}
                         onValueChange={(val) => setVolume(val[0])}
-                        className="cursor-pointer"
+                        className="cursor-pointer opacity-40 hover:opacity-100 transition-opacity"
                     />
                 </div>
                 <Link to="/">
-                    <Button variant="ghost" size="icon" className="text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-full">
+                    <button className="p-3 rounded-2xl bg-[#515044]/5 text-[#515044]/40 hover:text-[#515044] hover:bg-[#515044]/10 transition-all">
                         <Maximize2 className="w-4 h-4" />
-                    </Button>
+                    </button>
                 </Link>
-            </div>
-
-            {/* Progress Bar (Indeterminate mostly for radio) */}
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gray-100">
-                {isPlaying && !isLoading && (
-                    <div className="h-full bg-blue-500 w-full animate-pulse opacity-50" />
-                )}
-                {isLoading && (
-                    <div className="h-full w-1/3 bg-blue-500 animate-loading-bar" />
-                )}
             </div>
         </div>
     );

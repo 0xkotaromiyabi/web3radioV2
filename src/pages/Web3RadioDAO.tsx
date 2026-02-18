@@ -25,33 +25,37 @@ export default function Web3RadioDAO() {
     const { open } = useAppKit();
 
     return (
-        <div className="min-h-screen bg-gray-50/50">
+        <div className="min-h-screen w-full bg-[#fef29c] relative overflow-y-auto font-['Raleway',_sans-serif] text-[#515044] flex flex-col items-center">
+            <style>{`
+                @import url('https://fonts.googleapis.com/css?family=Raleway:400,300,700');
+                body { font-family: 'Raleway', sans-serif; }
+            `}</style>
             <NavBar />
 
             {/* Hero Section */}
-            <div className="bg-white border-b border-gray-200 px-4 py-16 md:py-24 text-center">
-                <div className="container mx-auto max-w-4xl space-y-4">
-                    <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200 mb-2">
+            <div className="w-full px-4 pt-24 md:pt-32 pb-12 text-center">
+                <div className="container mx-auto max-w-4xl space-y-6">
+                    <div className="bg-[#515044]/5 text-[#515044]/60 text-[10px] font-bold uppercase tracking-[0.4em] px-4 py-2 rounded-full inline-flex items-center gap-2 mb-2">
                         Governance Live
-                    </Badge>
-                    <h1 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight">
+                    </div>
+                    <h1 className="text-4xl md:text-6xl font-bold text-[#515044] tracking-tight leading-tight">
                         Web3Radio DAO
                     </h1>
-                    <p className="text-xl text-gray-500 max-w-2xl mx-auto">
+                    <p className="text-lg md:text-xl text-[#515044]/60 max-w-2xl mx-auto font-light leading-relaxed">
                         A decentralized community where every listener, creator, and developer has an equal voice in shaping the future of Web3 broadcasting.
                     </p>
 
-                    <div className="flex justify-center gap-4 pt-4">
+                    <div className="flex flex-wrap justify-center gap-4 pt-6">
                         {!isConnected ? (
-                            <Button onClick={() => open()} size="lg" className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-600/20">
+                            <Button onClick={() => open()} size="lg" className="bg-[#515044] hover:bg-black text-white rounded-2xl px-10 py-7 font-bold text-xs uppercase tracking-widest shadow-xl shadow-[#515044]/10 transition-all hover:scale-105 active:scale-95">
                                 <Wallet className="w-4 h-4 mr-2" /> Connect to Join
                             </Button>
                         ) : (
-                            <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white rounded-xl shadow-lg shadow-green-600/20">
-                                <ShieldCheck className="w-4 h-4 mr-2" /> Member Verifed
+                            <Button size="lg" className="bg-green-500 hover:bg-green-600 text-white rounded-2xl px-10 py-7 font-bold text-xs uppercase tracking-widest shadow-xl shadow-green-500/10 transition-all hover:scale-105 active:scale-95">
+                                <ShieldCheck className="w-4 h-4 mr-2" /> Member Verified
                             </Button>
                         )}
-                        <Button variant="outline" size="lg" className="rounded-xl">
+                        <Button variant="outline" size="lg" className="rounded-2xl border-[#515044]/10 bg-white/50 backdrop-blur text-[#515044] px-8 py-7 font-bold text-xs uppercase tracking-widest hover:bg-white transition-all shadow-lg hover:shadow-xl">
                             Read Manifesto
                         </Button>
                     </div>
@@ -59,206 +63,229 @@ export default function Web3RadioDAO() {
             </div>
 
             <div className="container mx-auto px-4 py-12 max-w-6xl">
-                <Tabs defaultValue="governance" className="space-y-8">
+                <Tabs defaultValue="governance" className="space-y-12">
                     <div className="flex justify-center">
-                        <TabsList className="bg-white p-1 rounded-xl border border-gray-200 shadow-sm">
-                            <TabsTrigger value="governance" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
-                                <Vote className="w-4 h-4 mr-2" /> Governance
+                        <TabsList className="bg-white/50 backdrop-blur p-1.5 rounded-2xl border border-[#515044]/10 shadow-sm">
+                            <TabsTrigger value="governance" className="rounded-xl px-8 py-3 data-[state=active]:bg-[#515044] data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest transition-all">
+                                <Vote className="w-3 h-3 mr-2" /> Governance
                             </TabsTrigger>
-                            <TabsTrigger value="treasury" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
-                                <Coins className="w-4 h-4 mr-2" /> Contributor Pool
+                            <TabsTrigger value="treasury" className="rounded-xl px-8 py-3 data-[state=active]:bg-[#515044] data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest transition-all">
+                                <Coins className="w-3 h-3 mr-2" /> Contributor Pool
                             </TabsTrigger>
-                            <TabsTrigger value="community" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
-                                <Users className="w-4 h-4 mr-2" /> Members
+                            <TabsTrigger value="community" className="rounded-xl px-8 py-3 data-[state=active]:bg-[#515044] data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest transition-all">
+                                <Users className="w-3 h-3 mr-2" /> Members
                             </TabsTrigger>
                         </TabsList>
                     </div>
 
-                    {/* Governance Tab */}
-                    <TabsContent value="governance" className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <Card className="shadow-sm border-gray-200">
-                                <CardHeader>
-                                    <div className="flex justify-between items-start">
-                                        <Badge className="bg-green-100 text-green-700">Active Proposal</Badge>
-                                        <span className="text-xs text-gray-500">Ends in 2 days</span>
-                                    </div>
-                                    <CardTitle className="text-xl mt-2">W3RP-12: Add 'Synthwave' Station</CardTitle>
-                                    <CardDescription>
-                                        Proposal to allocate server resources for a new 24/7 Synthwave music station curated by community DJs.
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between text-sm">
-                                            <span className="font-medium text-gray-700">Yes (Implement)</span>
-                                            <span className="font-bold text-gray-900">84%</span>
-                                        </div>
-                                        <Progress value={84} className="h-2 bg-gray-100" indicatorClassName="bg-green-500" />
+                    <TabsContent value="governance" className="space-y-8 mt-0 focus-visible:outline-none">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <Card className="bg-white/95 backdrop-blur-xl rounded-[40px] border border-[#515044]/5 shadow-2xl overflow-hidden p-8 md:p-10">
+                                <div className="space-y-6">
+                                    <div className="flex justify-between items-center">
+                                        <div className="bg-green-500/10 text-green-600 text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-lg">Active Proposal</div>
+                                        <span className="text-[10px] text-[#515044]/40 font-bold uppercase tracking-widest">Ends in 2 days</span>
                                     </div>
                                     <div className="space-y-2">
-                                        <div className="flex justify-between text-sm">
-                                            <span className="font-medium text-gray-700">No (Status Quo)</span>
-                                            <span className="font-bold text-gray-900">16%</span>
-                                        </div>
-                                        <Progress value={16} className="h-2 bg-gray-100" indicatorClassName="bg-red-500" />
+                                        <h3 className="text-2xl font-bold text-[#515044] leading-tight">W3RP-12: Add 'Synthwave' Station</h3>
+                                        <p className="text-sm text-[#515044]/60 font-light leading-relaxed">
+                                            Proposal to allocate server resources for a new 24/7 Synthwave music station curated by community DJs.
+                                        </p>
                                     </div>
-                                </CardContent>
-                                <CardFooter>
-                                    <Button className="w-full bg-gray-900 text-white hover:bg-gray-800">Vote Now</Button>
-                                </CardFooter>
+                                    <div className="space-y-6">
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-[#515044]/40">
+                                                <span>Yes (Implement)</span>
+                                                <span>84%</span>
+                                            </div>
+                                            <div className="h-1.5 w-full bg-[#515044]/5 rounded-full overflow-hidden">
+                                                <div className="h-full bg-green-500 opacity-80" style={{ width: '84%' }} />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-[#515044]/40">
+                                                <span>No (Status Quo)</span>
+                                                <span>16%</span>
+                                            </div>
+                                            <div className="h-1.5 w-full bg-[#515044]/5 rounded-full overflow-hidden">
+                                                <div className="h-full bg-red-400 opacity-80" style={{ width: '16%' }} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <Button className="w-full bg-[#515044] hover:bg-black text-white rounded-2xl py-7 font-bold text-xs uppercase tracking-widest shadow-xl shadow-[#515044]/10 transition-all hover:scale-[1.02]">Vote Now</Button>
+                                </div>
                             </Card>
 
-                            <Card className="shadow-sm border-gray-200">
-                                <CardHeader>
-                                    <div className="flex justify-between items-start">
-                                        <Badge className="bg-gray-100 text-gray-600">Passed</Badge>
-                                        <span className="text-xs text-gray-500">Ended 5 days ago</span>
+                            <Card className="bg-white/95 backdrop-blur-xl rounded-[40px] border border-[#515044]/5 shadow-2xl overflow-hidden p-8 md:p-10">
+                                <div className="space-y-6">
+                                    <div className="flex justify-between items-center">
+                                        <div className="bg-[#515044]/5 text-[#515044]/40 text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-lg">Passed</div>
+                                        <span className="text-[10px] text-[#515044]/40 font-bold uppercase tracking-widest">Ended 5 days ago</span>
                                     </div>
-                                    <CardTitle className="text-xl mt-2">W3RP-11: IDRX Integration</CardTitle>
-                                    <CardDescription>
-                                        Implement IDRX token for tips and micropayments to support local creators.
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                        <div className="flex items-center gap-3">
-                                            <div className="p-2 bg-green-100 rounded-full">
-                                                <CheckCircleIcon className="w-5 h-5 text-green-600" />
+                                    <div className="space-y-2">
+                                        <h3 className="text-2xl font-bold text-[#515044] leading-tight opacity-60">W3RP-11: IDRX Integration</h3>
+                                        <p className="text-sm text-[#515044]/40 font-light leading-relaxed">
+                                            Implement IDRX token for tips and micropayments to support local creators.
+                                        </p>
+                                    </div>
+                                    <div className="p-5 bg-[#515044]/5 rounded-[24px] border border-[#515044]/5">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-10 h-10 rounded-xl bg-white border border-[#515044]/5 flex items-center justify-center text-green-500 shadow-sm">
+                                                <CheckCircleIcon className="w-5 h-5" />
                                             </div>
                                             <div>
-                                                <p className="font-medium text-gray-900">Proposal Passed</p>
-                                                <p className="text-sm text-gray-500">Feature has been implemented.</p>
+                                                <p className="font-bold text-[#515044] text-sm">Proposal Passed</p>
+                                                <p className="text-[10px] text-[#515044]/40 font-bold uppercase tracking-widest">Feature fully implemented.</p>
                                             </div>
                                         </div>
                                     </div>
                                     <div className="flex gap-2">
-                                        <Badge variant="outline">DeFi</Badge>
-                                        <Badge variant="outline">Integration</Badge>
+                                        <div className="bg-[#515044]/5 text-[#515044]/60 text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-md">DeFi</div>
+                                        <div className="bg-[#515044]/5 text-[#515044]/60 text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-md">Integration</div>
                                     </div>
-                                </CardContent>
-                                <CardFooter>
-                                    <Button variant="outline" className="w-full">View Details</Button>
-                                </CardFooter>
+                                    <Button variant="outline" className="w-full border-[#515044]/10 rounded-2xl py-7 font-bold text-xs uppercase tracking-widest hover:bg-white">View Details</Button>
+                                </div>
                             </Card>
                         </div>
                     </TabsContent>
 
-                    {/* Contributor Pool Tab */}
-                    <TabsContent value="treasury" className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <TabsContent value="treasury" className="space-y-8 mt-0 focus-visible:outline-none">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {/* Sponsor Pool Card */}
-                            <Card className="shadow-lg border-blue-100 bg-gradient-to-br from-blue-50 to-white md:col-span-2">
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2 text-blue-900">
-                                        <Trophy className="w-6 h-6 text-blue-600" />
-                                        Monthly Sponsor Pool
-                                    </CardTitle>
-                                    <CardDescription className="text-blue-700/80">
-                                        Rewards allocated for active contributors this month
-                                    </CardDescription>
+                            <Card className="bg-white/95 backdrop-blur-xl rounded-[40px] border border-[#515044]/5 shadow-2xl md:col-span-2 overflow-hidden">
+                                <CardHeader className="p-8 md:p-10 pb-0">
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <div className="w-10 h-10 rounded-2xl bg-[#515044]/5 flex items-center justify-center">
+                                            <Trophy className="w-5 h-5 text-[#515044]/40" />
+                                        </div>
+                                        <div>
+                                            <CardTitle className="text-2xl font-bold text-[#515044]">
+                                                Monthly Sponsor Pool
+                                            </CardTitle>
+                                            <CardDescription className="text-[#515044]/40 text-[10px] font-bold uppercase tracking-widest">
+                                                Rewards allocated for contributors
+                                            </CardDescription>
+                                        </div>
+                                    </div>
                                 </CardHeader>
-                                <CardContent className="space-y-6">
-                                    <div className="flex items-baseline gap-2">
-                                        <span className="text-5xl font-bold text-blue-900">$5,000</span>
-                                        <span className="text-lg text-blue-600 font-medium">USD</span>
+                                <CardContent className="p-8 md:p-10 pt-6 space-y-10">
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#515044]/30 mb-2">Current Rewards</span>
+                                        <div className="flex items-baseline gap-3">
+                                            <span className="text-6xl md:text-7xl font-bold text-[#515044] tracking-tight">5,000</span>
+                                            <span className="text-xs font-bold text-[#515044]/40 uppercase tracking-[0.2em] mb-2">USD</span>
+                                        </div>
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between text-sm font-medium text-blue-800">
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-[#515044]/40">
                                             <span>Pool Utilization</span>
                                             <span>65% Allocated</span>
                                         </div>
-                                        <Progress value={65} className="h-3 bg-blue-100" indicatorClassName="bg-blue-600" />
+                                        <div className="h-2 w-full bg-[#515044]/5 rounded-full overflow-hidden">
+                                            <div className="h-full bg-[#515044] opacity-80" style={{ width: '65%' }} />
+                                        </div>
                                     </div>
 
-                                    <div className="flex gap-4 pt-2">
-                                        <div className="text-center p-3 bg-white rounded-xl shadow-sm border border-blue-100 flex-1">
-                                            <p className="text-xs text-blue-500 uppercase font-bold">Base</p>
-                                            <p className="font-bold text-gray-900">$2,500</p>
+                                    <div className="grid grid-cols-3 gap-6 pt-4 border-t border-[#515044]/5">
+                                        <div>
+                                            <p className="text-[8px] font-bold text-[#515044]/30 uppercase tracking-[0.2em] mb-1">Broadcasters</p>
+                                            <p className="font-bold text-[#515044] text-lg">$2,500</p>
                                         </div>
-                                        <div className="text-center p-3 bg-white rounded-xl shadow-sm border border-blue-100 flex-1">
-                                            <p className="text-xs text-red-500 uppercase font-bold">Cultural-Nodes AI</p>
-                                            <p className="font-bold text-gray-900">$1,500</p>
+                                        <div>
+                                            <p className="text-[8px] font-bold text-[#515044]/30 uppercase tracking-[0.2em] mb-1">Cultural AI</p>
+                                            <p className="font-bold text-[#515044] text-lg">$1,500</p>
                                         </div>
-                                        <div className="text-center p-3 bg-white rounded-xl shadow-sm border border-blue-100 flex-1">
-                                            <p className="text-xs text-indigo-500 uppercase font-bold">Decentranews</p>
-                                            <p className="font-bold text-gray-900">$1,000</p>
+                                        <div>
+                                            <p className="text-[8px] font-bold text-[#515044]/30 uppercase tracking-[0.2em] mb-1">News Team</p>
+                                            <p className="font-bold text-[#515044] text-lg">$1,000</p>
                                         </div>
                                     </div>
                                 </CardContent>
                             </Card>
 
                             {/* User Rewards Card */}
-                            <Card className="shadow-md border-gray-200 bg-white flex flex-col justify-between">
-                                <CardHeader>
-                                    <CardTitle className="text-gray-900">Your Rewards</CardTitle>
-                                    <CardDescription>Based on your recent activity</CardDescription>
-                                </CardHeader>
-                                <CardContent className="text-center py-8">
-                                    <div className="mb-4 inline-flex p-4 rounded-full bg-yellow-50 text-yellow-600">
-                                        <Coins className="w-8 h-8" />
+                            <Card className="bg-white/95 backdrop-blur-xl rounded-[40px] border border-[#515044]/5 shadow-2xl p-8 md:p-10 flex flex-col justify-between">
+                                <div className="space-y-2 mb-8 text-center md:text-left">
+                                    <CardTitle className="text-lg font-bold text-[#515044]">Your Rewards</CardTitle>
+                                    <div className="bg-[#515044]/5 text-[#515044]/40 text-[8px] font-bold uppercase tracking-[0.2em] px-2 py-1 rounded-lg inline-block">
+                                        Jan 2026 Earnings
                                     </div>
-                                    <h3 className="text-3xl font-bold text-gray-900 mb-1">250</h3>
-                                    <p className="text-sm text-gray-500 font-medium uppercase tracking-wider">USDC</p>
-                                    <p className="text-xs text-green-600 mt-2 font-medium">+150 this week</p>
-                                </CardContent>
-                                <CardFooter>
-                                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={!isConnected}>
-                                        Claim Rewards
-                                    </Button>
-                                </CardFooter>
+                                </div>
+                                <div className="text-center py-6">
+                                    <div className="mb-6 inline-flex p-5 rounded-[24px] bg-[#515044]/5 text-yellow-500">
+                                        <Coins className="w-10 h-10" />
+                                    </div>
+                                    <h3 className="text-4xl font-bold text-[#515044] mb-2">{isConnected ? '250' : '0'}</h3>
+                                    <p className="text-[10px] font-bold text-[#515044]/30 uppercase tracking-[0.3em]">USDC REWARD</p>
+                                    {isConnected && (
+                                        <div className="mt-4 bg-green-500/10 text-green-600 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest inline-block">
+                                            +150 this week
+                                        </div>
+                                    )}
+                                </div>
+                                <Button className="w-full bg-[#515044] hover:bg-black text-white rounded-2xl py-7 font-bold text-xs uppercase tracking-widest shadow-xl shadow-[#515044]/10 transition-all hover:scale-[1.02]" disabled={!isConnected}>
+                                    Claim Rewards
+                                </Button>
                             </Card>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-6">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Top Contributors</CardTitle>
-                                    <CardDescription>Leaderboard for Jan 2026</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-4">
-                                        {[
-                                            { name: "indy-barends.eth", score: 850, role: "Broadcaster" },
-                                            { name: "sarah-sechan.eth", score: 720, role: "Broadcaster" },
-                                            { name: "kotarominami", score: 690, role: "Producer" },
-                                            { name: "0x44...b18", score: 550, role: "Music Director" },
-                                        ].map((user, i) => (
-                                            <div key={i} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors border border-transparent hover:border-gray-100">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-gray-200 to-gray-300 flex items-center justify-center font-bold text-xs text-gray-600">
-                                                        {i + 1}
-                                                    </div>
-                                                    <div>
-                                                        <p className="font-medium text-gray-900">{user.name}</p>
-                                                        <p className="text-xs text-gray-500">{user.role}</p>
-                                                    </div>
+                        <Card className="bg-white/80 backdrop-blur rounded-[32px] border border-[#515044]/5 shadow-xl p-8 md:p-10">
+                            <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                                <div>
+                                    <CardTitle className="text-xl font-bold text-[#515044]">Top Contributors</CardTitle>
+                                    <CardDescription className="text-[#515044]/40 font-light">Community leaderboard for Jan 2026</CardDescription>
+                                </div>
+                                <Button variant="ghost" className="text-[#515044]/50 hover:text-[#515044] uppercase text-[10px] font-bold tracking-widest">View All</Button>
+                            </div>
+                            <CardContent className="p-0">
+                                <div className="space-y-3">
+                                    {[
+                                        { name: "indy-barends.eth", score: 850, role: "Broadcaster" },
+                                        { name: "sarah-sechan.eth", score: 720, role: "Broadcaster" },
+                                        { name: "kotarominami", score: 690, role: "Producer" },
+                                        { name: "0x44...b18", score: 550, role: "Music Director" },
+                                    ].map((user, i) => (
+                                        <div key={i} className="flex items-center justify-between p-4 rounded-[20px] bg-white border border-[#515044]/5 transition-all hover:shadow-lg group">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 rounded-xl bg-[#515044]/5 flex items-center justify-center font-bold text-xs text-[#515044]/40 group-hover:bg-[#515044] group-hover:text-white transition-all">
+                                                    {i + 1}
                                                 </div>
-                                                <Badge variant="secondary" className="font-mono">{user.score} pts</Badge>
+                                                <div>
+                                                    <p className="font-bold text-[#515044]">{user.name}</p>
+                                                    <p className="text-[10px] text-[#515044]/40 font-bold uppercase tracking-widest">{user.role}</p>
+                                                </div>
                                             </div>
-                                        ))}
-                                    </div>
-                                </CardContent>
-                                <CardFooter>
-                                    <Button variant="ghost" className="w-full text-blue-600">View Full Leaderboard</Button>
-                                </CardFooter>
-                            </Card>
-                        </div>
+                                            <div className="bg-[#515044]/5 text-[#515044] px-4 py-2 rounded-xl text-xs font-bold font-mono">
+                                                {user.score} pts
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
                     </TabsContent>
 
                     {/* Community/Members Tab */}
-                    <TabsContent value="community">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Community Hub</CardTitle>
-                                <CardDescription>Connect with 12,405 DAO members</CardDescription>
-                            </CardHeader>
-                            <CardContent className="text-center py-12 text-gray-500">
-                                <MessageSquare className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                                <p>Community forum and chat integration coming soon.</p>
-                                <p className="text-sm mt-2">Join our Discord for active discussions.</p>
-                            </CardContent>
+                    <TabsContent value="community" className="mt-0 focus-visible:outline-none">
+                        <Card className="bg-white/80 backdrop-blur rounded-[40px] border border-[#515044]/5 shadow-xl p-12 text-center">
+                            <div className="max-w-md mx-auto space-y-8">
+                                <div className="w-24 h-24 mx-auto rounded-[32px] bg-[#515044]/5 flex items-center justify-center text-[#515044]/20 shadow-inner">
+                                    <MessageSquare className="w-12 h-12" />
+                                </div>
+                                <div className="space-y-4">
+                                    <h3 className="text-3xl font-bold text-[#515044]">Community Hub</h3>
+                                    <p className="text-[#515044]/40 font-light leading-relaxed">
+                                        Connect with 12,405 DAO members. Community forums and chat integration are coming soon.
+                                    </p>
+                                </div>
+                                <div className="pt-6 border-t border-[#515044]/5">
+                                    <p className="text-[10px] font-bold text-[#515044]/30 uppercase tracking-[0.4em] mb-4">Join active discussions</p>
+                                    <Button className="bg-[#515044] hover:bg-black text-white rounded-2xl px-10 py-7 font-bold text-xs uppercase tracking-widest transition-all">
+                                        Join Discord
+                                    </Button>
+                                </div>
+                            </div>
                         </Card>
                     </TabsContent>
                 </Tabs>
