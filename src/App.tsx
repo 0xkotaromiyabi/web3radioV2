@@ -25,6 +25,8 @@ import { AudioProvider } from "./contexts/AudioProvider";
 import PersistentPlayer from "./components/radio/PersistentPlayer";
 import ExtensionHome from "./pages/ExtensionHome";
 
+import IndexV2 from "./pages/IndexV2";
+
 import "./App.css";
 
 function App() {
@@ -45,6 +47,7 @@ function App() {
                 <BrowserRouter>
                   <Routes>
                     <Route path="/" element={<Index />} />
+                    <Route path="/v2" element={<IndexV2 />} />
                     <Route path="/marketplace" element={<Marketplace />} />
                     <Route path="/news" element={<News />} />
                     <Route path="/news/:slug" element={<NewsDetail />} />

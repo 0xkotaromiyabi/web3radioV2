@@ -1,27 +1,56 @@
 import { createAppKit } from '@reown/appkit/react';
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
-import { base, mainnet, sepolia } from '@reown/appkit/networks';
+import { SolanaAdapter } from '@reown/appkit-adapter-solana';
+import {
+    base,
+    mainnet,
+    sepolia,
+    arbitrum,
+    optimism,
+    polygon,
+    bsc,
+    lisk,
+    solana,
+    solanaDevnet,
+} from '@reown/appkit/networks';
 import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
-// 1. Get projectId from environment
+// 1. Project ID
 const projectId = '436eaacb5d6ac40e778902daf08eb741';
 
-// 2. Set up Wagmi adapter
+// 2. Define all supported networks
+const networks = [
+    mainnet,
+    base,
+    arbitrum,
+    optimism,
+    polygon,
+    bsc,
+    lisk,
+    sepolia,
+    solana,
+    solanaDevnet,
+] as const;
+
+// 3. Set up Wagmi adapter (handles EVM chains)
 const wagmiAdapter = new WagmiAdapter({
-    networks: [base, mainnet, sepolia],
+    networks: [mainnet, base, arbitrum, optimism, polygon, bsc, lisk, sepolia],
     projectId,
 });
 
-// 3. Create the AppKit modal
+// 4. Set up Solana adapter
+const solanaAdapter = new SolanaAdapter();
+
+// 5. Create the AppKit modal (unified for all chains)
 createAppKit({
-    adapters: [wagmiAdapter],
-    networks: [base, mainnet, sepolia],
+    adapters: [wagmiAdapter, solanaAdapter],
+    networks,
     projectId,
     metadata: {
         name: 'Web3Radio',
-        description: 'Web3Radio - IDRX Buy & Tip Platform',
+        description: 'Web3Radio - Decentralized Radio Station',
         url: 'https://webthreeradio.xyz',
         icons: ['https://webthreeradio.xyz/web3radio-logo.png'],
     },
@@ -30,15 +59,15 @@ createAppKit({
         email: true,
         socials: ['google', 'x', 'discord', 'farcaster'],
         emailShowWallets: true,
-        swaps: true, // Enable Swaps
-        onramp: true, // Enable OnRamp
+        swaps: true,
+        onramp: true,
     },
 });
 
-// 4. Create query client
+// 6. Create query client
 const queryClient = new QueryClient();
 
-// 5. Export AppKit Provider wrapper
+// 7. Export AppKit Provider wrapper
 export function AppKitProvider({ children }: { children: React.ReactNode }) {
     return (
         <WagmiProvider config={wagmiAdapter.wagmiConfig}>
