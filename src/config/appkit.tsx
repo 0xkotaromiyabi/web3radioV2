@@ -52,13 +52,24 @@ const wagmiAdapter = new WagmiAdapter({
     }
 });
 
-// 4. Set up Solana adapter
-const solanaAdapter = new SolanaAdapter();
+// Custom Solana configuration with explicit RPC
+const solanaWithRpc = {
+    ...solana,
+    rpcUrls: {
+        default: { http: ['https://api.mainnet-beta.solana.com'] },
+        public: { http: ['https://api.mainnet-beta.solana.com'] }
+    }
+};
 
-// 5. Create the AppKit modal (unified for all chains)
+// 4. Set up Solana adapter
+const solanaAdapter = new SolanaAdapter({
+    wallets: []
+});
+
+// 5. Create the AppKit modal
 createAppKit({
     adapters: [wagmiAdapter, solanaAdapter],
-    networks,
+    networks: [mainnet, base, arbitrum, optimism, polygon, bsc, lisk, sepolia, solanaWithRpc, solanaDevnet],
     projectId,
     metadata: {
         name: 'Web3Radio',

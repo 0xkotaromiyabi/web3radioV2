@@ -65,6 +65,7 @@ export default function UnifiedTipComponent() {
                 { signal: controller.signal }
             );
             clearTimeout(timeoutId);
+            if (!res.ok) throw new Error('API or CORS error');
             const data = await res.json();
             const price = data[coinGeckoId]?.idr;
             if (price) setPriceIdr(price);

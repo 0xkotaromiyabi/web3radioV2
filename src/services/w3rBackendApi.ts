@@ -32,7 +32,7 @@ export class W3RBackendApi {
   async submitListeningSession(session: ListeningSession): Promise<{ success: boolean; verifiedTime: number; sessionId?: string }> {
     try {
       console.log('Submitting listening session:', session);
-      
+
       const { data, error } = await supabase.functions.invoke('w3r-api', {
         body: {
           ...session,
@@ -120,7 +120,12 @@ export class W3RBackendApi {
       });
 
       if (error) {
-        console.error('Error checking reward eligibility:', error);
+        // Handle CORS or network errors gracefully
+        if (error.message?.includes('Failed to fetch') || error.name === 'FunctionsFetchError') {
+          console.warn('W3R API: CORS or Network error. Features requiring backend may be limited.');
+        } else {
+          console.error('Error checking reward eligibility:', error);
+        }
         return { eligible: false, nextRewardIn: 0, availableRewards: 0 };
       }
 
