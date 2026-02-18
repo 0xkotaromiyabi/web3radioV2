@@ -34,10 +34,22 @@ const networks = [
     solanaDevnet,
 ] as const;
 
+import { http } from 'viem';
+
 // 3. Set up Wagmi adapter (handles EVM chains)
 const wagmiAdapter = new WagmiAdapter({
     networks: [mainnet, base, arbitrum, optimism, polygon, bsc, lisk, sepolia],
     projectId,
+    transports: {
+        [mainnet.id]: http(),
+        [base.id]: http(),
+        [arbitrum.id]: http(),
+        [optimism.id]: http(),
+        [polygon.id]: http(),
+        [bsc.id]: http(),
+        [lisk.id]: http(),
+        [sepolia.id]: http(),
+    }
 });
 
 // 4. Set up Solana adapter

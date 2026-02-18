@@ -56,17 +56,29 @@ export default function UnifiedTipComponent() {
 
     const fetchPrice = useCallback(async () => {
         setIsLoadingPrice(true);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout
+
         try {
-            const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coinGeckoId}&vs_currencies=idr`);
+            const res = await fetch(
+                `https://api.coingecko.com/api/v3/simple/price?ids=${coinGeckoId}&vs_currencies=idr`,
+                { signal: controller.signal }
+            );
+            clearTimeout(timeoutId);
             const data = await res.json();
             const price = data[coinGeckoId]?.idr;
             if (price) setPriceIdr(price);
-        } catch (err) {
+        } catch (err: any) {
             console.error('Failed to fetch price:', err);
+            // Fallback price if API fails (approximate)
+            if (!priceIdr) {
+                if (coinGeckoId === 'ethereum') setPriceIdr(45000000);
+                if (coinGeckoId === 'solana') setPriceIdr(1500000);
+            }
         } finally {
             setIsLoadingPrice(false);
         }
-    }, [coinGeckoId]);
+    }, [coinGeckoId, priceIdr]);
 
     useEffect(() => { if (isConnected) fetchPrice(); }, [isConnected, coinGeckoId, fetchPrice]);
 
@@ -101,22 +113,43 @@ export default function UnifiedTipComponent() {
     const handleConfirmSend = async () => {
         setShowConfirm(false);
         if (!isConnected || parseFloat(cryptoAmount) <= 0) return;
-        toast({ title: "⏳ Waiting for Wallet Approval", description: "Please approve the transaction in your wallet..." });
+
         try {
             setIsProcessing(true);
+            toast({ title: "⏳ Waiting for Wallet Approval", description: "Please approve the transaction in your wallet..." });
+
             if (isEvm) {
                 sendEvmTx({ to: EVM_DESTINATION as `0x${string}`, value: parseEther(cryptoAmount) });
             } else if (isSolana && solanaPubKey) {
+                // Optimize Solana: Fetch fresh blockhash immediately
+                const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('finalized');
+
                 const recipientPubKey = new PublicKey(SOLANA_DESTINATION);
-                const transaction = new Transaction().add(
-                    SystemProgram.transfer({ fromPubkey: solanaPubKey, toPubkey: recipientPubKey, lamports: parseFloat(cryptoAmount) * LAMPORTS_PER_SOL })
+                const transaction = new Transaction({
+                    recentBlockhash: blockhash,
+                    feePayer: solanaPubKey
+                }).add(
+                    SystemProgram.transfer({
+                        fromPubkey: solanaPubKey,
+                        toPubkey: recipientPubKey,
+                        lamports: Math.floor(parseFloat(cryptoAmount) * LAMPORTS_PER_SOL)
+                    })
                 );
+
                 const signature = await sendSolanaTx(transaction, connection);
-                await connection.confirmTransaction(signature, 'processed');
+
+                // Modern confirmation strategy
+                await connection.confirmTransaction({
+                    signature,
+                    blockhash,
+                    lastValidBlockHeight
+                }, 'processed');
+
                 toast({ title: "Tip Sent! 💖", description: `Thank you for tipping ${cryptoAmount} SOL!` });
                 setIsProcessing(false);
             }
         } catch (error: any) {
+            console.error("Tip failed:", error);
             const isRejected = error.message?.includes('rejected') || error.message?.includes('denied') || error.code === 4001;
             toast({
                 title: isRejected ? "Transaction Rejected" : "Transaction Failed",

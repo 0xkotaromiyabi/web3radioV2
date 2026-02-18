@@ -15,11 +15,8 @@ interface SolanaProviderProps {
 }
 
 export const SolanaProvider: FC<SolanaProviderProps> = ({ children }) => {
-  // The network can be set to 'devnet', 'testnet', or 'mainnet-beta'
-  const network = WalletAdapterNetwork.Devnet;
-
-  // You can also provide a custom RPC endpoint
-  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+  // Use Mainnet-beta for better reliability if not specified, or fallback to clusterApiUrl
+  const endpoint = useMemo(() => clusterApiUrl("mainnet-beta"), []);
 
   return (
     <ConnectionProvider endpoint={endpoint}>
