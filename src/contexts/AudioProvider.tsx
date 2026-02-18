@@ -96,7 +96,6 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const onPlay = () => {
             setIsPlaying(true);
             setIsLoading(false);
-            fetchMetadata(currentStation);
         };
         const onPause = () => {
             setIsPlaying(false);
@@ -146,27 +145,29 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return () => clearInterval(interval);
     }, [isPlaying, currentStation]);
 
-    // Station Change Effect
+    // Station Change Effect — load stream but do NOT auto-play
     useEffect(() => {
         if (audioRef.current) {
-            const wasPlaying = isPlaying;
+            // Stop current playback
+            audioRef.current.pause();
+            setIsPlaying(false);
 
-            // Update Metadata immediately for new station
-            fetchMetadata(currentStation);
+            // Show station default info (not real metadata yet)
+            const station = getStationById(currentStation);
+            if (station) {
+                setCurrentSong({
+                    title: station.description,
+                    artist: station.name,
+                    album: station.genre.toUpperCase(),
+                    artwork: station.image_url
+                });
+            }
 
+            // Load new stream URL without playing
             const newUrl = getStreamUrl(currentStation);
             if (newUrl) {
                 audioRef.current.src = newUrl;
                 audioRef.current.load();
-                if (wasPlaying) {
-                    const playPromise = audioRef.current.play();
-                    if (playPromise !== undefined) {
-                        playPromise.catch(error => {
-                            console.error("Auto-play prevented", error);
-                            setIsPlaying(false);
-                        });
-                    }
-                }
             }
         }
     }, [currentStation]);
@@ -182,10 +183,17 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             if (isPlaying) {
                 audioRef.current.pause();
             } else {
-                audioRef.current.play().catch(e => {
-                    console.error("Play failed", e);
-                    toast({ title: "Error", description: "Stream might be offline", variant: "destructive" });
-                });
+                setIsLoading(true);
+                audioRef.current.play()
+                    .then(() => {
+                        // Fetch real metadata after play starts
+                        fetchMetadata(currentStation);
+                    })
+                    .catch(e => {
+                        console.error("Play failed", e);
+                        setIsLoading(false);
+                        toast({ title: "Error", description: "Stream might be offline", variant: "destructive" });
+                    });
             }
         }
     };
