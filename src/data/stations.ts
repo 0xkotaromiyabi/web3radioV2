@@ -26,14 +26,6 @@ export const STATIONS: Station[] = [
         image_url: "https://pbs.twimg.com/profile_images/1615234149959602177/X9q9p7G0_400x400.jpg"
     },
     {
-        id: 'iradio',
-        name: 'i-Radio',
-        streamUrl: 'https://n04.radiojar.com/4ywdgup3bnzuv?1744076195=&rj-tok=AAABlhMxTIcARnjabAV4uyOIpA&rj-ttl=5',
-        genre: 'pop',
-        description: "Today's Best Music",
-        image_url: "https://www.herworld.co.id/gallery/teaser/ECR-IRADIO-MOVE_IRadio-3_7320220711140553xo8bA0.jpg"
-    },
-    {
         id: 'female',
         name: 'Female Radio',
         streamUrl: 'https://s1.cloudmu.id/listen/female_radio/radio.mp3',
