@@ -47,7 +47,7 @@ export const STATIONS: Station[] = [
         streamUrl: 'https://s2.cloudmu.id/listen/prambors/stream',
         genre: 'pop',
         description: "Jakarta's #1 Hit Music Station",
-        image_url: "https://i.scdn.co/image/ab67616d0000b273e787cffec20aa2a396a61647"
+        image_url: "https://www.pramborsfm.com/img/coverArt.jpg"
     }
 ];
 
