@@ -20,7 +20,23 @@ import React from 'react';
 // 1. Project ID
 const projectId = '436eaacb5d6ac40e778902daf08eb741';
 
-// 2. Define all supported networks
+// 2. Define all supported networks with explicit RPCs where needed
+const solanaWithRpc = {
+    ...solana,
+    rpcUrls: {
+        default: { http: ['https://api.mainnet-beta.solana.com'] },
+        public: { http: ['https://api.mainnet-beta.solana.com'] },
+    }
+};
+
+const solanaDevnetWithRpc = {
+    ...solanaDevnet,
+    rpcUrls: {
+        default: { http: ['https://api.devnet.solana.com'] },
+        public: { http: ['https://api.devnet.solana.com'] },
+    }
+};
+
 const networks = [
     mainnet,
     base,
@@ -30,8 +46,8 @@ const networks = [
     bsc,
     lisk,
     sepolia,
-    solana,
-    solanaDevnet,
+    solanaWithRpc,
+    solanaDevnetWithRpc,
 ] as const;
 
 import { http } from 'viem';
@@ -60,7 +76,7 @@ const solanaAdapter = new SolanaAdapter({
 // 5. Create the AppKit modal
 createAppKit({
     adapters: [wagmiAdapter, solanaAdapter],
-    networks: [mainnet, base, arbitrum, optimism, polygon, bsc, lisk, sepolia, solana, solanaDevnet],
+    networks: [mainnet, base, arbitrum, optimism, polygon, bsc, lisk, sepolia, solanaWithRpc, solanaDevnetWithRpc],
     projectId,
     metadata: {
         name: 'Web3Radio',
