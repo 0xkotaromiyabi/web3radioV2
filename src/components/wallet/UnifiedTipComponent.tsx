@@ -107,7 +107,7 @@ export default function UnifiedTipComponent() {
 
     useEffect(() => {
         if (isSuccess) {
-            toast({ title: "Tip Sent! 💖", description: "Thank you for supporting Web3Radio!" });
+            toast({ title: "Tip Sent! 💖", description: "Thank you for supporting Web3Radio Contributor!" });
             setIsProcessing(false);
         }
     }, [isSuccess, toast]);

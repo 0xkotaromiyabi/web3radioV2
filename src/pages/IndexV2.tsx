@@ -8,6 +8,7 @@ import UnifiedTipComponent from '@/components/wallet/UnifiedTipComponent';
 import CryptoTicker from '@/components/ui/CryptoTicker';
 import { MessageSquare } from 'lucide-react';
 import XmtpChatRoom from '@/components/radio/XmtpChatRoom';
+import ListeningTimeTracker from '@/components/radio/ListeningTimeTracker';
 const IndexV2 = () => {
   const { isPlaying, togglePlay, currentStation, currentSong, changeStation } = useAudio();
   const [showChat, setShowChat] = React.useState(false);
@@ -354,6 +355,9 @@ const IndexV2 = () => {
         </div>
       </div>
 
+      {/* Listening Time Information (Minimalist text-based) */}
+      <ListeningTimeTracker isPlaying={isPlaying} />
+
       {/* Unified Button Container (70% Width) */}
       <div className="w-[90%] md:w-[70%] z-20 space-y-12 pb-32 mt-12">
         {/* Station Selection */}
@@ -378,7 +382,7 @@ const IndexV2 = () => {
 
         {/* Wallet & Tip Section */}
         <div className="pt-10 border-t border-[#515044]/10 flex flex-col items-center">
-          <p className="text-[10px] uppercase tracking-[0.2em] font-bold opacity-40 mb-6 text-center">Web3 Universal Access</p>
+          <p className="text-[10px] uppercase tracking-[0.2em] font-bold opacity-40 mb-6 text-center">Connect Wallet to Support Contributor</p>
 
           <div className="flex flex-col items-center gap-6 w-full">
             {/* Single Unified Connect Button */}
