@@ -129,29 +129,55 @@ export default function UnifiedTipComponent() {
                 const RPCS = [
                     import.meta.env.VITE_SOLANA_RPC,
                     'https://rpc.ankr.com/solana',
+                    'https://solana-mainnet.rpc.extrnode.com',
                     'https://api.mainnet-beta.solana.com'
                 ].filter(Boolean);
 
-                // @ts-ignore
-                const solanaConnection = new Connection(RPCS[0], {
-                    commitment: "confirmed",
-                });
-                const transaction = new Transaction().add(
-                    SystemProgram.transfer({
-                        fromPubkey: new PublicKey(address),
-                        toPubkey: new PublicKey(SOLANA_DESTINATION),
-                        lamports: Math.floor(parseFloat(cryptoAmount) * LAMPORTS_PER_SOL),
-                    })
-                );
+                let lastError = null;
+                let success = false;
 
-                const { blockhash } = await solanaConnection.getLatestBlockhash();
-                transaction.recentBlockhash = blockhash;
-                transaction.feePayer = new PublicKey(address);
+                for (const rpcUrl of RPCS) {
+                    try {
+                        console.log(`Trying Solana RPC: ${rpcUrl}`);
+                        // @ts-ignore
+                        const solanaConnection = new Connection(rpcUrl, {
+                            commitment: "confirmed",
+                            confirmTransactionInitialTimeout: 30000,
+                        });
 
-                // @ts-ignore
-                const signedTransaction = await walletProvider.signTransaction(transaction);
-                const signature = await solanaConnection.sendRawTransaction(signedTransaction.serialize());
-                await solanaConnection.confirmTransaction(signature);
+                        const transaction = new Transaction().add(
+                            SystemProgram.transfer({
+                                fromPubkey: new PublicKey(address),
+                                toPubkey: new PublicKey(SOLANA_DESTINATION),
+                                lamports: Math.floor(parseFloat(cryptoAmount) * LAMPORTS_PER_SOL),
+                            })
+                        );
+
+                        const { blockhash } = await solanaConnection.getLatestBlockhash('confirmed');
+                        transaction.recentBlockhash = blockhash;
+                        transaction.feePayer = new PublicKey(address);
+
+                        // @ts-ignore
+                        const signedTransaction = await walletProvider.signTransaction(transaction);
+                        const signature = await solanaConnection.sendRawTransaction(signedTransaction.serialize(), {
+                            skipPreflight: false,
+                            preflightCommitment: 'confirmed'
+                        });
+
+                        await solanaConnection.confirmTransaction(signature, 'confirmed');
+                        success = true;
+                        console.log(`Solana transaction successful via ${rpcUrl}`);
+                        break; // Exit loop on success
+                    } catch (err: any) {
+                        console.warn(`RPC ${rpcUrl} failed:`, err.message);
+                        lastError = err;
+                        // Continue to next RPC
+                    }
+                }
+
+                if (!success) {
+                    throw lastError || new Error("All Solana RPC endpoints failed");
+                }
 
                 toast({ title: "Tip Sent! 💖", description: "Thank you for supporting Web3Radio!" });
                 setIsProcessing(false);
