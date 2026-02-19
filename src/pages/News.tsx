@@ -54,7 +54,7 @@ const News = () => {
         <div className="mb-12 text-center md:text-left">
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-[#515044]/80">MARKET INTELLIGENCE</h1>
           <p className="text-[10px] md:text-xs uppercase tracking-[0.4em] font-bold opacity-30 mt-2">
-            Latest updates, analysis, and insights
+            News updates, analysis, and insights
           </p>
         </div>
 

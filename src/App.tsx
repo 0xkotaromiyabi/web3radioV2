@@ -2,7 +2,6 @@
 import React from 'react';
 import { BrowserRouter, HashRouter, Routes, Route } from "react-router-dom";
 import { AppKitProvider } from './config/appkit';
-import { SolanaProvider } from "./providers/SolanaProvider";
 import { W3RTokenProvider } from "./contexts/W3RTokenContext";
 import { MiniKitContextProvider } from "./providers/MiniKitProvider";
 import { Toaster } from "@/components/ui/toaster";
@@ -33,41 +32,39 @@ function App() {
   return (
     <MiniKitContextProvider>
       <AppKitProvider>
-        <SolanaProvider>
-          <W3RTokenProvider>
-            <AudioProvider>
-              {import.meta.env.MODE === 'extension' ? (
-                <HashRouter>
-                  <Routes>
-                    <Route path="/" element={<ExtensionHome />} />
-                  </Routes>
-                  <Toaster />
-                </HashRouter>
-              ) : (
-                <BrowserRouter>
-                  <Routes>
-                    <Route path="/" element={<IndexV2 />} />
-                    <Route path="/marketplace" element={<Marketplace />} />
-                    <Route path="/news" element={<News />} />
-                    <Route path="/news/:slug" element={<NewsDetail />} />
-                    <Route path="/events" element={<Events />} />
-                    <Route path="/events/:slug" element={<EventDetail />} />
-                    <Route path="/stations" element={<Stations />} />
-                    <Route path="/stations/:slug" element={<StationDetail />} />
-                    <Route path="/rental" element={<RentalAccess />} />
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/dao" element={<Web3RadioDAO />} />
-                    <Route path="/ply" element={<PLY />} />
-                    <Route path="/premium" element={<PremiumContent />} />
-                    <Route path="/p/:slug" element={<DynamicPage />} />
-                  </Routes>
-                  <PersistentPlayer />
-                  <Toaster />
-                </BrowserRouter>
-              )}
-            </AudioProvider>
-          </W3RTokenProvider>
-        </SolanaProvider>
+        <W3RTokenProvider>
+          <AudioProvider>
+            {import.meta.env.MODE === 'extension' ? (
+              <HashRouter>
+                <Routes>
+                  <Route path="/" element={<ExtensionHome />} />
+                </Routes>
+                <Toaster />
+              </HashRouter>
+            ) : (
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<IndexV2 />} />
+                  <Route path="/marketplace" element={<Marketplace />} />
+                  <Route path="/news" element={<News />} />
+                  <Route path="/news/:slug" element={<NewsDetail />} />
+                  <Route path="/events" element={<Events />} />
+                  <Route path="/events/:slug" element={<EventDetail />} />
+                  <Route path="/stations" element={<Stations />} />
+                  <Route path="/stations/:slug" element={<StationDetail />} />
+                  <Route path="/rental" element={<RentalAccess />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/dao" element={<Web3RadioDAO />} />
+                  <Route path="/ply" element={<PLY />} />
+                  <Route path="/premium" element={<PremiumContent />} />
+                  <Route path="/p/:slug" element={<DynamicPage />} />
+                </Routes>
+                <PersistentPlayer />
+                <Toaster />
+              </BrowserRouter>
+            )}
+          </AudioProvider>
+        </W3RTokenProvider>
       </AppKitProvider>
     </MiniKitContextProvider>
   );
