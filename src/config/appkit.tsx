@@ -1,111 +1,91 @@
-import { createAppKit } from '@reown/appkit/react';
-import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
-import { SolanaAdapter } from '@reown/appkit-adapter-solana';
+import { createAppKit } from '@reown/appkit/react'
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
+import { SolanaAdapter } from '@reown/appkit-adapter-solana'
 import {
-    base,
-    mainnet,
-    sepolia,
-    arbitrum,
-    optimism,
-    polygon,
-    bsc,
-    lisk,
-    solana,
-    solanaDevnet,
-} from '@reown/appkit/networks';
-import { WagmiProvider } from 'wagmi';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React from 'react';
+  mainnet,
+  base,
+  arbitrum,
+  optimism,
+  polygon,
+  bsc,
+  sepolia,
+  solana,
+} from '@reown/appkit/networks'
+import { http } from 'viem'
+import { WagmiProvider } from 'wagmi'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import React from 'react'
 
-// 1. Project ID
-const projectId = '436eaacb5d6ac40e778902daf08eb741';
+const projectId = import.meta.env.VITE_WC_PROJECT_ID
+const alchemyKey = import.meta.env.VITE_ALCHEMY_KEY
+const solanaRpc =
+  import.meta.env.VITE_SOLANA_RPC || 'https://rpc.ankr.com/solana'
 
-// 2. Define all supported networks with explicit RPCs where needed
-const solanaWithRpc = {
-    ...solana,
-    rpcUrls: {
-        default: { http: ['https://api.mainnet-beta.solana.com'] },
-        public: { http: ['https://api.mainnet-beta.solana.com'] },
-    }
-};
-
-const solanaDevnetWithRpc = {
-    ...solanaDevnet,
-    rpcUrls: {
-        default: { http: ['https://api.devnet.solana.com'] },
-        public: { http: ['https://api.devnet.solana.com'] },
-    }
-};
-
-const networks = [
-    mainnet,
-    base,
-    arbitrum,
-    optimism,
-    polygon,
-    bsc,
-    lisk,
-    sepolia,
-    solanaWithRpc,
-    solanaDevnetWithRpc,
-] as const;
-
-import { http } from 'viem';
-
-// 3. Set up Wagmi adapter (handles EVM chains)
+// ---- EVM ----
 const wagmiAdapter = new WagmiAdapter({
-    networks: [mainnet, base, arbitrum, optimism, polygon, bsc, lisk, sepolia],
-    projectId,
-    transports: {
-        [mainnet.id]: http('https://eth-mainnet.g.alchemy.com/v2/' + projectId),
-        [base.id]: http('https://mainnet.base.org'),
-        [arbitrum.id]: http(),
-        [optimism.id]: http(),
-        [polygon.id]: http(),
-        [bsc.id]: http(),
-        [lisk.id]: http(),
-        [sepolia.id]: http(),
-    }
-});
+  projectId,
+  networks: [mainnet, base, arbitrum, optimism, polygon, bsc, sepolia],
+  transports: {
+    [mainnet.id]: http(`https://eth-mainnet.g.alchemy.com/v2/${alchemyKey}`),
+    [base.id]: http(),
+    [arbitrum.id]: http(),
+    [optimism.id]: http(),
+    [polygon.id]: http(),
+    [bsc.id]: http(),
+    [sepolia.id]: http(),
+  },
+})
 
-// 4. Set up Solana adapter
-const solanaAdapter = new SolanaAdapter({
-    wallets: []
-});
-
-// 5. Create the AppKit modal
-createAppKit({
-    adapters: [wagmiAdapter, solanaAdapter],
-    networks: [mainnet, base, arbitrum, optimism, polygon, bsc, lisk, sepolia, solanaWithRpc, solanaDevnetWithRpc],
-    projectId,
-    metadata: {
-        name: 'Web3Radio',
-        description: 'Web3Radio - Decentralized Radio Station',
-        url: 'https://www.webthreeradio.xyz',
-        icons: ['https://www.webthreeradio.xyz/web3radio-logo.png'],
-    },
-    features: {
-        analytics: true,
-        email: true,
-        socials: ['google', 'x', 'discord', 'farcaster'],
-        emailShowWallets: true,
-        swaps: true,
-        onramp: true,
-    },
-});
-
-// 6. Create query client
-const queryClient = new QueryClient();
-
-// 7. Export AppKit Provider wrapper
-export function AppKitProvider({ children }: { children: React.ReactNode }) {
-    return (
-        <WagmiProvider config={wagmiAdapter.wagmiConfig}>
-            <QueryClientProvider client={queryClient}>
-                {children}
-            </QueryClientProvider>
-        </WagmiProvider>
-    );
+// ---- SOLANA ----
+const solanaWithRpc = {
+  ...solana,
+  rpcUrls: {
+    default: { http: [solanaRpc] },
+    public: { http: [solanaRpc] },
+  },
 }
 
-export { wagmiAdapter };
+const solanaAdapter = new SolanaAdapter({
+  wallets: [], // Add Phantom etc later if needed
+})
+
+// ---- CREATE APPKIT ----
+createAppKit({
+  adapters: [wagmiAdapter, solanaAdapter],
+  networks: [
+    mainnet,
+    base,
+    arbitrum,
+    optimism,
+    polygon,
+    bsc,
+    sepolia,
+    solanaWithRpc,
+  ],
+  projectId,
+  metadata: {
+    name: 'Web3Radio',
+    description: 'Web3Radio - Decentralized Radio Station',
+    url: 'https://www.webthreeradio.xyz',
+    icons: ['https://www.webthreeradio.xyz/web3radio-logo.png'],
+  },
+  features: {
+    analytics: false,
+    swaps: false,
+    onramp: false,
+    email: false,
+  },
+})
+
+// ---- PROVIDER WRAPPER ----
+const queryClient = new QueryClient()
+
+export function AppKitProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <WagmiProvider config={wagmiAdapter.wagmiConfig}>
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
+    </WagmiProvider>
+  )
+}
