@@ -29,7 +29,7 @@ function getCoinGeckoId(caipNetwork: any): string {
     const chainId = caipNetwork?.id;
     const name = (caipNetwork?.name || '').toLowerCase();
 
-    if (chainId?.startsWith('solana')) return 'solana';
+    if (chainId && String(chainId).startsWith('solana')) return 'solana';
     if (name.includes('bnb') || name.includes('bsc')) return 'binancecoin';
     if (name.includes('polygon') || name.includes('matic')) return 'matic-network';
     return 'ethereum';
@@ -50,7 +50,7 @@ export default function UnifiedTipComponent() {
     const { caipNetwork } = useAppKitNetwork();
     const { walletProvider } = useAppKitProvider('solana');
 
-    const isSolana = caipAddress?.startsWith('solana:');
+    const isSolana = caipAddress && String(caipAddress).startsWith('solana:');
     const networkLabel = caipNetwork?.name || (isSolana ? 'Solana' : 'EVM');
     const nativeSymbol = caipNetwork?.nativeCurrency?.symbol || (isSolana ? 'SOL' : 'ETH');
     const coinGeckoId = getCoinGeckoId(caipNetwork);

@@ -163,7 +163,7 @@ function SolanaVerification() {
   const [isLoading, setIsLoading] = useState(false);
 
   // Check if current connection is Solana
-  const isSolana = caipAddress?.startsWith('solana:');
+  const isSolana = caipAddress && String(caipAddress).startsWith('solana:');
 
   useEffect(() => {
     async function checkSolanaWallet() {

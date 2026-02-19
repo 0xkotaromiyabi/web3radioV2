@@ -6,9 +6,11 @@ import { useAppKit, useAppKitAccount, useAppKitNetwork } from '@reown/appkit/rea
 import { useDisconnect } from 'wagmi';
 import UnifiedTipComponent from '@/components/wallet/UnifiedTipComponent';
 import CryptoTicker from '@/components/ui/CryptoTicker';
-
+import { MessageSquare } from 'lucide-react';
+import XmtpChatRoom from '@/components/radio/XmtpChatRoom';
 const IndexV2 = () => {
   const { isPlaying, togglePlay, currentStation, currentSong, changeStation } = useAudio();
+  const [showChat, setShowChat] = React.useState(false);
 
   // Unified AppKit State
   const { open: openAppKit } = useAppKit();
@@ -24,7 +26,7 @@ const IndexV2 = () => {
   const albumArt = currentSong?.artwork || stationData.image_url || 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/83141/incubus-make-yourself.jpg';
 
   // Detect if connected to Solana or EVM
-  const isSolana = caipAddress?.startsWith('solana:');
+  const isSolana = caipAddress && String(caipAddress).startsWith('solana:');
   const networkName = caipNetwork?.name || 'Unknown';
 
   return (
@@ -359,16 +361,26 @@ const IndexV2 = () => {
           <p className="text-center text-[10px] uppercase tracking-[0.2em] font-bold opacity-40">Frequency</p>
           <div className="flex flex-wrap justify-center gap-3">
             {STATIONS.map((station) => (
-              <button
-                key={station.id}
-                onClick={() => changeStation(station.id)}
-                className={`px-5 py-2.5 rounded-2xl text-xs font-bold transition-all border whitespace-nowrap ${currentStation === station.id
-                  ? 'bg-[#515044] text-white border-[#515044] scale-105 shadow-lg'
-                  : 'bg-white/90 text-[#515044] border-[#515044]/10 hover:bg-white hover:border-[#515044]/30 shadow-md hover:shadow-lg'
-                  }`}
-              >
-                {station.name}
-              </button>
+              <div key={station.id} className="flex flex-col items-center gap-2">
+                <button
+                  onClick={() => changeStation(station.id)}
+                  className={`px-5 py-2.5 rounded-2xl text-xs font-bold transition-all border whitespace-nowrap ${currentStation === station.id
+                    ? 'bg-[#515044] text-white border-[#515044] scale-105 shadow-lg'
+                    : 'bg-white/90 text-[#515044] border-[#515044]/10 hover:bg-white hover:border-[#515044]/30 shadow-md hover:shadow-lg'
+                    }`}
+                >
+                  {station.name}
+                </button>
+                {currentStation === station.id && (
+                  <button
+                    onClick={() => setShowChat(true)}
+                    className="flex items-center gap-1.5 px-3 py-1 bg-white/50 hover:bg-white text-[#515044]/40 hover:text-[#515044] rounded-full text-[8px] font-bold uppercase tracking-widest transition-all border border-transparent hover:border-[#515044]/5"
+                  >
+                    <MessageSquare className="w-2.5 h-2.5" />
+                    Chatroom
+                  </button>
+                )}
+              </div>
             ))}
           </div>
         </div>
@@ -423,6 +435,15 @@ const IndexV2 = () => {
           </div>
         </div>
       </div>
+
+      {/* XMTP Chatroom Popup */}
+      {showChat && (
+        <XmtpChatRoom
+          stationId={currentStation}
+          stationName={stationData.name}
+          onClose={() => setShowChat(false)}
+        />
+      )}
     </div>
   );
 };
