@@ -37,8 +37,16 @@ export default defineConfig(({ mode }) => ({
         manualChunks: {
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
           'vendor-ui': ['@radix-ui/react-slot', '@radix-ui/react-label', 'lucide-react', 'class-variance-authority', 'clsx', 'tailwind-merge'],
-          'vendor-reown': ['@reown/appkit', '@reown/appkit-adapter-wagmi', '@reown/appkit-adapter-solana', '@walletconnect/ethereum-provider'],
-          'vendor-web3': ['wagmi', 'viem', '@tanstack/react-query', 'ethers'],
+          'vendor-web3': [
+            '@reown/appkit',
+            '@reown/appkit-adapter-wagmi',
+            '@reown/appkit-adapter-solana',
+            '@walletconnect/ethereum-provider',
+            'wagmi',
+            'viem',
+            '@tanstack/react-query',
+            'ethers'
+          ],
         },
       },
     },
