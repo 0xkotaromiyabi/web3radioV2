@@ -4,10 +4,9 @@ import NavBar from '@/components/navigation/NavBar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, MapPin, Radio, Users } from 'lucide-react';
+import { Calendar, MapPin, Radio, Users, Briefcase, Newspaper, Sparkles, Map } from 'lucide-react';
 import { fetchEvents, subscribeToTable } from '@/lib/supabase';
 import { Loader2 } from 'lucide-react';
-
 import { Link } from 'react-router-dom';
 import { Event } from '@/types/content';
 
@@ -48,54 +47,63 @@ const Events = () => {
     );
   }
 
-  // Filter events by type
-  const communityEvents = events.filter(event =>
-    !event.title.toLowerCase().includes('web3 radio schedule') &&
-    !event.location.toLowerCase().includes('web3 radio studio')
-  );
+  // Filter content by category
+  const newsAndJobs = events.filter(e => e.category === 'news' || e.category === 'job');
+  const web3Events = events.filter(e => e.category === 'event' || !e.category);
 
-  const radioSchedule = events.filter(event =>
-    event.title.toLowerCase().includes('web3 radio schedule') ||
-    event.location.toLowerCase().includes('web3 radio studio')
-  );
+  const getCategoryIcon = (category?: string) => {
+    switch (category) {
+      case 'news': return <Newspaper className="h-3 w-3" />;
+      case 'job': return <Briefcase className="h-3 w-3" />;
+      default: return <Sparkles className="h-3 w-3" />;
+    }
+  };
 
-  const renderEventCard = (event: Event, isRadioSchedule = false) => (
-    <div key={event.id} className="bg-white/90 backdrop-blur border border-[#515044]/10 rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-all group flex flex-col">
+  const renderEventCard = (event: Event) => (
+    <div key={event.id} className="bg-white/80 backdrop-blur-xl border border-[#515044]/5 rounded-[32px] overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 group flex flex-col h-full hover:-translate-y-1">
       {event.image_url && (
         <div className="w-full h-48 overflow-hidden relative">
-          <Link to={`/events/${event.slug || event.id}`}>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <Link to={`/events/${event.slug || event.id}`} className="block h-full">
             <img
               src={event.image_url}
               alt={event.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
             />
           </Link>
+          <div className="absolute top-4 left-4 z-20">
+            <Badge className="bg-white/90 backdrop-blur-md text-[#515044] border-none px-3 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest shadow-sm">
+              <span className="flex items-center gap-1.5">
+                {getCategoryIcon(event.category)}
+                {event.category || 'Event'}
+              </span>
+            </Badge>
+          </div>
         </div>
       )}
-      <div className="p-6 flex flex-col flex-grow">
-        <div className="flex items-start justify-between mb-3 gap-2">
-          <h3 className="text-xl font-bold text-[#515044]/90 leading-tight group-hover:text-black transition-colors flex-1">
-            <Link to={`/events/${event.slug || event.id}`}>
-              {event.title}
-            </Link>
-          </h3>
-          {isRadioSchedule && (
-            <div className="bg-[#515044] text-white text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-lg flex items-center gap-1 shrink-0">
-              <Radio className="h-2 w-2" /> Live
-            </div>
-          )}
-        </div>
-        <p className="text-[#515044]/70 text-sm line-clamp-2 mb-6 leading-relaxed">
+      <div className="p-8 flex flex-col flex-grow">
+        <h3 className="text-xl font-bold text-[#515044] leading-tight mb-3 group-hover:text-black transition-colors">
+          <Link to={`/events/${event.slug || event.id}`}>
+            {event.title}
+          </Link>
+        </h3>
+        <p className="text-[#515044]/60 text-sm line-clamp-2 mb-8 leading-relaxed font-light">
           {event.description}
         </p>
-        <div className="mt-auto space-y-2 pt-4 border-t border-[#515044]/5">
-          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[#515044]/40">
-            <Calendar className="h-3 w-3" />
-            <span>{new Date(event.date).toLocaleDateString()}</span>
+        <div className="mt-auto grid grid-cols-2 gap-4 pt-6 border-t border-[#515044]/5">
+          <div className="flex flex-col gap-1">
+            <span className="text-[8px] font-bold uppercase tracking-widest text-[#515044]/30">Date</span>
+            <div className="flex items-center gap-2 text-[10px] font-bold text-[#515044]/60 uppercase">
+              <Calendar className="h-3 w-3 text-[#515044]/20" />
+              <span>{new Date(event.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[#515044]/40">
-            {isRadioSchedule ? <Radio className="h-3 w-3" /> : <MapPin className="h-3 w-3" />}
-            <span>{event.location}</span>
+          <div className="flex flex-col gap-1">
+            <span className="text-[8px] font-bold uppercase tracking-widest text-[#515044]/30">Location</span>
+            <div className="flex items-center gap-2 text-[10px] font-bold text-[#515044]/60 uppercase truncate">
+              <MapPin className="h-3 w-3 text-[#515044]/20" />
+              <span className="truncate">{event.location}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -109,53 +117,82 @@ const Events = () => {
         body { font-family: 'Raleway', sans-serif; }
       `}</style>
       <NavBar />
-      <div className="w-[90%] md:w-[70%] mt-24 md:mt-28 mb-12">
-        <div className="mb-12 text-center md:text-left">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-[#515044]/80">EVENTS & SCHEDULES</h1>
-          <p className="text-[10px] md:text-xs uppercase tracking-[0.4em] font-bold opacity-30 mt-2">
-            Discover the latest crypto events and broadcasts
-          </p>
+
+      <main className="container mx-auto px-6 py-12 md:py-24 max-w-7xl">
+        <div className="flex flex-col md:flex-row justify-between items-end gap-8 mb-16">
+          <div className="space-y-4 max-w-2xl">
+            <Badge className="bg-[#515044]/5 text-[#515044] hover:bg-[#515044]/10 border-[#515044]/10 px-4 py-1.5 rounded-full text-[10px] uppercase tracking-widest font-bold">
+              Hub & Broadcast
+            </Badge>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-[#515044]">
+              Web3 Events & Hub
+            </h1>
+            <p className="text-xl text-[#515044]/60 font-light leading-relaxed">
+              Explore the latest in Web3, from industry news and career opportunities to live broadcasts and community events.
+            </p>
+          </div>
+
+          <div className="bg-white/40 backdrop-blur-xl rounded-[32px] p-4 border border-[#515044]/5 flex items-center gap-6">
+            <div className="flex flex-col items-center px-4 border-r border-[#515044]/10">
+              <span className="text-[8px] font-bold uppercase tracking-widest text-[#515044]/30">Broadcasts</span>
+              <span className="text-xl font-bold">Live</span>
+            </div>
+            <div className="flex flex-col items-center px-4">
+              <span className="text-[8px] font-bold uppercase tracking-widest text-[#515044]/30">Active Now</span>
+              <span className="text-xl font-bold">{events.length}</span>
+            </div>
+          </div>
         </div>
 
-        <Tabs defaultValue="community" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-white/50 backdrop-blur p-1.5 rounded-2xl border border-[#515044]/10 shadow-sm mb-10">
-            <TabsTrigger value="community" className="rounded-xl px-6 py-3 data-[state=active]:bg-[#515044] data-[state=active]:text-white font-bold text-xs transition-all tracking-wider">
-              <Users className="h-4 w-4 mr-2" />
-              COMMUNITY
-            </TabsTrigger>
-            <TabsTrigger value="radio" className="rounded-xl px-6 py-3 data-[state=active]:bg-[#515044] data-[state=active]:text-white font-bold text-xs transition-all tracking-wider">
-              <Radio className="h-4 w-4 mr-2" />
-              CALENDAR
-            </TabsTrigger>
-          </TabsList>
+        <Tabs defaultValue="events" className="w-full">
+          <div className="flex justify-center mb-16">
+            <TabsList className="bg-white/60 backdrop-blur-xl p-1.5 rounded-3xl border border-[#515044]/5 shadow-sm inline-flex">
+              <TabsTrigger
+                value="events"
+                className="rounded-2xl px-8 py-4 data-[state=active]:bg-[#515044] data-[state=active]:text-white font-bold text-[10px] uppercase tracking-[0.2em] transition-all"
+              >
+                <Sparkles className="h-4 w-4 mr-3" />
+                Web3 Events
+              </TabsTrigger>
+              <TabsTrigger
+                value="news"
+                className="rounded-2xl px-8 py-4 data-[state=active]:bg-[#515044] data-[state=active]:text-white font-bold text-[10px] uppercase tracking-[0.2em] transition-all"
+              >
+                <Newspaper className="h-4 w-4 mr-3" />
+                News & Jobs
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-          <TabsContent value="community" className="mt-0">
-            {communityEvents.length > 0 ? (
+          <TabsContent value="events" className="mt-0 ring-0 focus:outline-none">
+            {web3Events.length > 0 ? (
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                {communityEvents.map((event) => renderEventCard(event, false))}
+                {web3Events.map((event) => renderEventCard(event))}
               </div>
             ) : (
-              <div className="text-center py-20 bg-white/50 backdrop-blur rounded-3xl border border-dashed border-[#515044]/20">
-                <Users className="h-12 w-12 text-[#515044]/20 mx-auto mb-4" />
-                <h3 className="text-lg font-bold text-[#515044]/60 mb-2 uppercase tracking-widest">No Events</h3>
+              <div className="text-center py-32 bg-white/40 backdrop-blur-xl rounded-[48px] border-2 border-dashed border-[#515044]/5">
+                <Users className="h-16 w-16 text-[#515044]/10 mx-auto mb-6" />
+                <h3 className="text-2xl font-bold text-[#515044] uppercase tracking-widest">No Events Found</h3>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/20 mt-2">Check back later for upcoming Web3 events</p>
               </div>
             )}
           </TabsContent>
 
-          <TabsContent value="radio" className="mt-0">
-            {radioSchedule.length > 0 ? (
+          <TabsContent value="news" className="mt-0 ring-0 focus:outline-none">
+            {newsAndJobs.length > 0 ? (
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                {radioSchedule.map((event) => renderEventCard(event, true))}
+                {newsAndJobs.map((event) => renderEventCard(event))}
               </div>
             ) : (
-              <div className="text-center py-20 bg-white/50 backdrop-blur rounded-3xl border border-dashed border-[#515044]/20">
-                <Radio className="h-12 w-12 text-[#515044]/20 mx-auto mb-4" />
-                <h3 className="text-lg font-bold text-[#515044]/60 mb-2 uppercase tracking-widest">No Shows</h3>
+              <div className="text-center py-32 bg-white/40 backdrop-blur-xl rounded-[48px] border-2 border-dashed border-[#515044]/5">
+                <Briefcase className="h-16 w-16 text-[#515044]/10 mx-auto mb-6" />
+                <h3 className="text-2xl font-bold text-[#515044] uppercase tracking-widest">No News or Jobs</h3>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/20 mt-2">Join our community to stay updated</p>
               </div>
             )}
           </TabsContent>
         </Tabs>
-      </div>
+      </main>
     </div>
   );
 };

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAppKit, useAppKitAccount, useAppKitNetwork } from '@reown/appkit/react';
 import { useDisconnect } from 'wagmi';
-import { Home, Newspaper, Calendar, Radio, Menu, X, Users, Gift, Smartphone } from 'lucide-react';
+import { Home, Calendar, Radio, Menu, X, Users, Gift, Smartphone, Lock as LockIcon } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import logo from '@/assets/web3radio-logo.png';
@@ -23,11 +23,11 @@ const NavBar = () => {
 
   const navLinks = [
     { to: '/', label: 'Home', icon: Home },
-    { to: '/news', label: 'News', icon: Newspaper },
     { to: '/events', label: 'Events', icon: Calendar },
     { to: '/rental', label: 'Rental', icon: Smartphone },
     { to: '/ply', label: 'PLY', icon: Gift },
     { to: '/dao', label: 'DAO', icon: Users },
+    { to: '/pintu_masuk', label: 'CMS', icon: LockIcon },
   ];
 
   const animate = useCallback((from: number, to: number) => {

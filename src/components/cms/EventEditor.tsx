@@ -19,9 +19,10 @@ const EventEditor: React.FC<EventEditorProps> = ({ onSave }) => {
     date: new Date().toISOString().split('T')[0],
     location: '',
     description: '',
-    image_url: ''
+    image_url: '',
+    category: 'event' as 'news' | 'job' | 'event'
   });
-  
+
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
@@ -42,7 +43,8 @@ const EventEditor: React.FC<EventEditorProps> = ({ onSave }) => {
         date: eventData.date,
         location: eventData.location,
         description: eventData.description,
-        image_url: eventData.image_url
+        image_url: eventData.image_url,
+        category: eventData.category
       });
 
       if (error) throw error;
@@ -58,9 +60,10 @@ const EventEditor: React.FC<EventEditorProps> = ({ onSave }) => {
         date: new Date().toISOString().split('T')[0],
         location: '',
         description: '',
-        image_url: ''
+        image_url: '',
+        category: 'event'
       });
-      
+
       onSave();
     } catch (error: any) {
       toast({
@@ -85,7 +88,7 @@ const EventEditor: React.FC<EventEditorProps> = ({ onSave }) => {
             <Input
               id="event-title"
               value={eventData.title}
-              onChange={(e) => setEventData({...eventData, title: e.target.value})}
+              onChange={(e) => setEventData({ ...eventData, title: e.target.value })}
               placeholder="Enter event title..."
               className="bg-gray-700 text-white border-gray-600 focus:border-green-500"
             />
@@ -96,9 +99,22 @@ const EventEditor: React.FC<EventEditorProps> = ({ onSave }) => {
               id="event-date"
               type="date"
               value={eventData.date}
-              onChange={(e) => setEventData({...eventData, date: e.target.value})}
+              onChange={(e) => setEventData({ ...eventData, date: e.target.value })}
               className="bg-gray-700 text-white border-gray-600 focus:border-green-500"
             />
+          </div>
+          <div>
+            <Label htmlFor="event-category" className="text-white">Category</Label>
+            <select
+              id="event-category"
+              value={eventData.category}
+              onChange={(e) => setEventData({ ...eventData, category: e.target.value as any })}
+              className="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:border-green-500 focus:outline-none transition-colors"
+            >
+              <option value="event">Web3 Event</option>
+              <option value="news">News</option>
+              <option value="job">Job</option>
+            </select>
           </div>
         </div>
 
@@ -107,21 +123,21 @@ const EventEditor: React.FC<EventEditorProps> = ({ onSave }) => {
           <Input
             id="event-location"
             value={eventData.location}
-            onChange={(e) => setEventData({...eventData, location: e.target.value})}
+            onChange={(e) => setEventData({ ...eventData, location: e.target.value })}
             placeholder="Enter event location..."
             className="bg-gray-700 text-white border-gray-600 focus:border-green-500"
           />
         </div>
 
         <FileUpload
-          onFileUploaded={(url) => setEventData({...eventData, image_url: url})}
+          onFileUploaded={(url) => setEventData({ ...eventData, image_url: url })}
           currentImageUrl={eventData.image_url}
         />
 
         <RichTextEditor
           label="Event Description"
           value={eventData.description}
-          onChange={(description) => setEventData({...eventData, description})}
+          onChange={(description) => setEventData({ ...eventData, description })}
           placeholder="Describe your event details..."
           rows={6}
         />

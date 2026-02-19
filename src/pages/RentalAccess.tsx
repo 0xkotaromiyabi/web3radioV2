@@ -5,7 +5,7 @@ import RentalListingCard from '@/components/rental/RentalListingCard';
 import CreateListingModal from '@/components/rental/CreateListingModal';
 import RentModal from '@/components/rental/RentModal';
 import { Button } from "@/components/ui/button";
-import { Filter, Clock, Search, Calendar, Shield, Info } from "lucide-react";
+import { Filter, Clock, Search, Calendar, Shield, Info, ExternalLink, AlertTriangle, RefreshCcw, Loader2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { DAYS_OF_WEEK, getCurrentUTCTime } from '@/utils/timeSlots';
@@ -13,6 +13,8 @@ import { DAYS_OF_WEEK, getCurrentUTCTime } from '@/utils/timeSlots';
 const RentalAccess = () => {
     const [listings, setListings] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const [selectedListing, setSelectedListing] = useState<any | null>(null);
     const [rentModalOpen, setRentModalOpen] = useState(false);
     const [filterDay, setFilterDay] = useState<string>("all");
@@ -20,28 +22,38 @@ const RentalAccess = () => {
     const [filterNetwork, setFilterNetwork] = useState<string>("sepolia");
     const [currentTime, setCurrentTime] = useState(getCurrentUTCTime());
 
-    useEffect(() => {
-        const fetchListings = async () => {
-            try {
-                const baseUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3001');
-                const response = await fetch(`${baseUrl}/api/rentals`);
-                const result = await response.json();
-                if (result.data && result.data.length > 0) {
-                    setListings(result.data.map((l: any) => ({
-                        ...l,
-                        tokenId: l.token_id.toString(),
-                        isSuperAccess: l.is_super_access,
-                        pricePerHour: l.price_per_hour.toString(),
-                        maxDuration: l.max_duration_hours
-                    })));
-                }
-            } catch (err) {
-                console.error("API fetch failed:", err);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+    const fetchListings = async (silent = false) => {
+        if (!silent) setIsLoading(true);
+        else setIsRefreshing(true);
+        setError(null);
+        try {
+            const baseUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3001');
+            const response = await fetch(`${baseUrl}/api/rentals`, {
+                signal: AbortSignal.timeout(5000) // 5s timeout
+            });
 
+            if (!response.ok) throw new Error(`Server responded with ${response.status}`);
+
+            const result = await response.json();
+            if (result.data) {
+                setListings(result.data.map((l: any) => ({
+                    ...l,
+                    tokenId: l.token_id.toString(),
+                    isSuperAccess: l.is_super_access,
+                    pricePerHour: l.price_per_hour.toString(),
+                    maxDuration: l.max_duration_hours
+                })));
+            }
+        } catch (err: any) {
+            console.error("API fetch failed:", err);
+            setError(err.message || "Failed to connect to the rental backend. Please ensure the server is running.");
+        } finally {
+            setIsLoading(false);
+            setIsRefreshing(false);
+        }
+    };
+
+    useEffect(() => {
         fetchListings();
     }, []);
 
@@ -123,16 +135,48 @@ const RentalAccess = () => {
                     </div>
 
                     <div className="flex flex-col gap-4 w-full lg:w-auto">
-                        <div className="bg-white/80 backdrop-blur-xl rounded-[32px] p-8 border border-[#515044]/5 shadow-xl">
-                            <div className="flex items-center gap-4 mb-2">
-                                <Clock className="w-5 h-5 text-[#515044]/40" />
-                                <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/30">Current Network Time</p>
+                        <div className="bg-white/80 backdrop-blur-xl rounded-[32px] p-8 border border-[#515044]/5 shadow-xl relative overflow-hidden group">
+                            <div className="absolute inset-0 bg-gradient-to-br from-transparent to-[#515044]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            <div className="relative z-10">
+                                <div className="flex items-center gap-4 mb-2">
+                                    <Clock className="w-5 h-5 text-[#515044]/40" />
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/30">Current Network Time</p>
+                                </div>
+                                <p className="text-2xl font-bold text-[#515044] mono">{currentDayName} {currentHourFormatted}:00 UTC</p>
                             </div>
-                            <p className="text-2xl font-bold text-[#515044] mono">{currentDayName} {currentHourFormatted}:00 UTC</p>
                         </div>
-                        <CreateListingModal />
+                        <div className="flex gap-3">
+                            <CreateListingModal />
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => fetchListings(true)}
+                                className={`rounded-xl border-[#515044]/10 bg-white/50 backdrop-blur w-12 h-12 transition-all ${isRefreshing ? 'animate-spin' : 'hover:bg-white active:scale-95'}`}
+                                disabled={isRefreshing}
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" /><path d="M16 21v-5h5" /></svg>
+                            </Button>
+                        </div>
                     </div>
                 </div>
+
+                {error && (
+                    <div className="mb-12 p-8 bg-red-500/5 backdrop-blur-xl rounded-[40px] border border-red-500/10 flex flex-col md:flex-row items-center gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
+                        <div className="w-16 h-16 rounded-[24px] bg-red-500/10 flex items-center justify-center flex-shrink-0">
+                            <AlertTriangle className="w-8 h-8 text-red-500/40" />
+                        </div>
+                        <div className="flex-1 text-center md:text-left">
+                            <h3 className="text-lg font-bold text-red-500">Connection Issue</h3>
+                            <p className="text-sm text-red-500/60 font-light max-w-xl">{error}</p>
+                        </div>
+                        <Button
+                            onClick={() => fetchListings()}
+                            className="bg-red-500 hover:bg-red-600 text-white rounded-2xl px-8 py-6 font-bold text-[10px] uppercase tracking-widest"
+                        >
+                            Retry Connection
+                        </Button>
+                    </div>
+                )}
 
                 {/* Controls & Contract Info */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
@@ -202,14 +246,51 @@ const RentalAccess = () => {
                 </div>
 
                 {/* Listings Grid */}
-                {filteredListings.length === 0 ? (
-                    <div className="bg-white/40 backdrop-blur-xl rounded-[48px] p-24 text-center border-2 border-dashed border-[#515044]/5">
-                        <Calendar className="w-16 h-16 text-[#515044]/10 mx-auto mb-6" />
+                {isLoading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {[1, 2, 3, 4, 5, 6].map((i) => (
+                            <div key={i} className="bg-white/40 backdrop-blur-xl rounded-[32px] p-8 border border-[#515044]/5 space-y-6">
+                                <div className="flex justify-between items-start">
+                                    <div className="w-24 h-6 bg-[#515044]/5 rounded-lg animate-pulse"></div>
+                                    <div className="w-20 h-5 bg-[#515044]/5 rounded-lg animate-pulse"></div>
+                                </div>
+                                <div className="space-y-4">
+                                    <div className="h-20 bg-[#515044]/5 rounded-2xl animate-pulse"></div>
+                                    <div className="flex justify-between pt-2">
+                                        <div className="w-12 h-4 bg-[#515044]/5 rounded animate-pulse"></div>
+                                        <div className="w-20 h-4 bg-[#515044]/5 rounded animate-pulse"></div>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <div className="w-12 h-4 bg-[#515044]/5 rounded animate-pulse"></div>
+                                        <div className="w-24 h-6 bg-[#515044]/5 rounded animate-pulse"></div>
+                                    </div>
+                                </div>
+                                <div className="w-full h-14 bg-[#515044]/10 rounded-2xl animate-pulse mt-4"></div>
+                            </div>
+                        ))}
+                    </div>
+                ) : filteredListings.length === 0 ? (
+                    <div className="bg-white/40 backdrop-blur-xl rounded-[48px] p-24 text-center border-2 border-dashed border-[#515044]/5 animate-in fade-in zoom-in duration-700">
+                        <div className="w-24 h-24 rounded-[40px] bg-[#515044]/5 flex items-center justify-center mx-auto mb-8">
+                            <Calendar className="w-10 h-10 text-[#515044]/10" />
+                        </div>
                         <h3 className="text-2xl font-bold text-[#515044]">No Listings Found</h3>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/20 mt-2">Adjust your filters to see more results</p>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/20 mt-4 max-w-xs mx-auto leading-relaxed">
+                            Try adjusting your filters or check back later for new broadcast slots.
+                        </p>
+                        <Button
+                            variant="link"
+                            onClick={() => {
+                                setFilterDay("all");
+                                setFilterType("all");
+                            }}
+                            className="mt-6 text-[#515044] font-bold text-[10px] uppercase tracking-[0.2em] underline-offset-8"
+                        >
+                            Reset all filters
+                        </Button>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
                         {filteredListings.map(listing => (
                             <RentalListingCard
                                 key={listing.id}

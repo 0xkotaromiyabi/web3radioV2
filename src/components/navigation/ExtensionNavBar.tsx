@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Home, Newspaper, Calendar, Radio, Users, LogIn, Gift, ExternalLink } from 'lucide-react';
+import { Home, Calendar, Radio, Users, LogIn, Gift, ExternalLink } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import logo from '@/assets/web3radio-logo.png';
@@ -11,7 +11,6 @@ const ExtensionNavBar = () => {
     };
 
     const navLinks = [
-        { to: '/news', label: 'News', icon: Newspaper },
         { to: '/stations', label: 'Stations', icon: Radio },
     ];
 

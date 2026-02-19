@@ -7,15 +7,14 @@ import { MiniKitContextProvider } from "./providers/MiniKitProvider";
 import { Toaster } from "@/components/ui/toaster";
 import Index from "./pages/Index";
 import Marketplace from "./pages/Marketplace";
-import News from "./pages/News";
 import Events from "./pages/Events";
 import Stations from "./pages/Stations";
 import Dashboard from "./pages/Dashboard";
 import Web3RadioDAO from "./pages/Web3RadioDAO";
 import PremiumContent from "./pages/PremiumContent";
 import DynamicPage from "./pages/DynamicPage";
+import PintuMasuk from "./pages/PintuMasuk";
 
-import NewsDetail from "./pages/NewsDetail";
 import EventDetail from "./pages/EventDetail";
 import StationDetail from "./pages/StationDetail";
 import RentalAccess from "./pages/RentalAccess";
@@ -46,14 +45,13 @@ function App() {
                 <Routes>
                   <Route path="/" element={<IndexV2 />} />
                   <Route path="/marketplace" element={<Marketplace />} />
-                  <Route path="/news" element={<News />} />
-                  <Route path="/news/:slug" element={<NewsDetail />} />
                   <Route path="/events" element={<Events />} />
                   <Route path="/events/:slug" element={<EventDetail />} />
                   <Route path="/stations" element={<Stations />} />
                   <Route path="/stations/:slug" element={<StationDetail />} />
                   <Route path="/rental" element={<RentalAccess />} />
                   <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/pintu_masuk" element={<PintuMasuk />} />
                   <Route path="/dao" element={<Web3RadioDAO />} />
                   <Route path="/ply" element={<PLY />} />
                   <Route path="/premium" element={<PremiumContent />} />

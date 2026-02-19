@@ -14,28 +14,6 @@ export const supabase = (supabaseUrl && supabaseAnonKey && !isDummyUrl)
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null as any;
 
-// Database helper functions for common operations
-export const fetchNews = async () => {
-  return await supabase
-    .from('news')
-    .select('*')
-    .order('created_at', { ascending: false });
-};
-
-export const addNewsItem = async (newsItem: any) => {
-  return await supabase
-    .from('news')
-    .insert([newsItem])
-    .select();
-};
-
-export const deleteNewsItem = async (id: number) => {
-  return await supabase
-    .from('news')
-    .delete()
-    .eq('id', id);
-};
-
 export const fetchEvents = async () => {
   return await supabase
     .from('events')
@@ -76,14 +54,6 @@ export const deleteStation = async (id: number) => {
     .from('stations')
     .delete()
     .eq('id', id);
-};
-
-export const getNewsBySlug = async (slug: string) => {
-  return await supabase
-    .from('news')
-    .select('*')
-    .eq('slug', slug)
-    .single();
 };
 
 export const getEventBySlug = async (slug: string) => {

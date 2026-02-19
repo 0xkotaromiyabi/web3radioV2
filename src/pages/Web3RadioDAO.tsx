@@ -187,18 +187,14 @@ export default function Web3RadioDAO() {
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-3 gap-6 pt-4 border-t border-[#515044]/5">
+                                    <div className="grid grid-cols-2 gap-6 pt-4 border-t border-[#515044]/5">
                                         <div>
                                             <p className="text-[8px] font-bold text-[#515044]/30 uppercase tracking-[0.2em] mb-1">Broadcasters</p>
-                                            <p className="font-bold text-[#515044] text-lg">$2,500</p>
+                                            <p className="font-bold text-[#515044] text-lg">$3,000</p>
                                         </div>
                                         <div>
                                             <p className="text-[8px] font-bold text-[#515044]/30 uppercase tracking-[0.2em] mb-1">Cultural AI</p>
-                                            <p className="font-bold text-[#515044] text-lg">$1,500</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-[8px] font-bold text-[#515044]/30 uppercase tracking-[0.2em] mb-1">News Team</p>
-                                            <p className="font-bold text-[#515044] text-lg">$1,000</p>
+                                            <p className="font-bold text-[#515044] text-lg">$2,000</p>
                                         </div>
                                     </div>
                                 </CardContent>

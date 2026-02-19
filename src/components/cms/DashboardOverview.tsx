@@ -1,26 +1,17 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Newspaper, Calendar, Radio, Image, TrendingUp, Clock, Sparkles } from "lucide-react";
+import { Calendar, Radio, Image, TrendingUp, Clock, Sparkles } from "lucide-react";
 
 interface DashboardOverviewProps {
-    newsCount: number;
     eventsCount: number;
     stationsCount: number;
 }
 
 const DashboardOverview: React.FC<DashboardOverviewProps> = ({
-    newsCount,
     eventsCount,
     stationsCount
 }) => {
     const stats = [
-        {
-            title: "Total Articles",
-            value: newsCount,
-            icon: Newspaper,
-            gradient: "from-blue-500 to-blue-600",
-            bgGradient: "from-blue-500/10 to-blue-600/10"
-        },
         {
             title: "Upcoming Events",
             value: eventsCount,
@@ -115,9 +106,6 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                         </div>
                     </div>
                     <div className="p-6 space-y-3">
-                        <p className="text-sm text-muted-foreground">
-                            • Use <span className="text-blue-500 font-medium">News</span> to publish articles
-                        </p>
                         <p className="text-sm text-muted-foreground">
                             • <span className="text-blue-500 font-medium">Media Library</span> stores uploaded images
                         </p>

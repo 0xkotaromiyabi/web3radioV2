@@ -1,13 +1,3 @@
-export interface NewsItem {
-    id: number;
-    title: string;
-    content: string;
-    date: string;
-    image_url?: string;
-    slug?: string;
-    created_at?: string;
-}
-
 export interface Event {
     id: number;
     title: string;
@@ -16,6 +6,7 @@ export interface Event {
     description: string;
     image_url?: string;
     slug?: string;
+    category?: 'news' | 'job' | 'event';
     created_at?: string;
 }
 

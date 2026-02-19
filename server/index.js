@@ -4,7 +4,6 @@ const cors = require('cors');
 const path = require('path');
 
 const authRoutes = require('./routes/auth');
-const newsRoutes = require('./routes/news');
 const eventsRoutes = require('./routes/events');
 const stationsRoutes = require('./routes/stations');
 const rentalRoutes = require('./routes/rentals'); // Added rentalRoutes import
@@ -31,7 +30,6 @@ app.get('/health', (req, res) => {
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/news', newsRoutes);
 app.use('/api/events', eventsRoutes);
 app.use('/api/stations', stationsRoutes);
 app.use('/api/rentals', rentalRoutes);

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
     LayoutDashboard,
-    Newspaper,
     Calendar,
     Radio,
     Image,
@@ -26,7 +25,6 @@ const CMSSidebar: React.FC<CMSSidebarProps> = ({ onLogout, activeTab, onTabChang
 
     const menuItems = [
         { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
-        { id: 'news', label: 'News', icon: Newspaper },
         { id: 'events', label: 'Events', icon: Calendar },
         { id: 'stations', label: 'Stations', icon: Radio },
         { id: 'media', label: 'Media', icon: Image },
@@ -93,7 +91,10 @@ const CMSSidebar: React.FC<CMSSidebarProps> = ({ onLogout, activeTab, onTabChang
                     <span className="text-[10px] font-bold uppercase tracking-widest">Settings</span>
                 </Link>
                 <button
-                    onClick={onLogout}
+                    onClick={() => {
+                        localStorage.removeItem('cms_auth');
+                        onLogout();
+                    }}
                     className="w-full flex items-center gap-3 px-4 py-3.5 rounded-[20px] text-red-400 hover:bg-red-500/5 hover:text-red-500 transition-all duration-300"
                 >
                     <LogOut className="w-4 h-4 flex-shrink-0" />
