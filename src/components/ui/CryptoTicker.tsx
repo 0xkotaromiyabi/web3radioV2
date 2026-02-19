@@ -23,7 +23,20 @@ export default function CryptoTicker() {
         const fetchPrices = async () => {
             try {
                 const res = await fetch(
-                    'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false&price_change_percentage=24h'
+                    'https://oiciwwjpfypcivbbwjwa.supabase.co/functions/v1/w3r-api',
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'get_markets',
+                            vs_currency: 'usd',
+                            order: 'market_cap_desc',
+                            per_page: 10,
+                            page: 1,
+                            sparkline: false,
+                            price_change_percentage: '24h'
+                        })
+                    }
                 );
 
                 if (!res.ok) {

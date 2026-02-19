@@ -5,6 +5,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
 }
 
 // Initialize Supabase client
@@ -398,6 +399,52 @@ serve(async (req) => {
         }
         const eligibilityResult = await handleCheckEligibility(requestData.userAddress)
         return Response.json(eligibilityResult, { headers: corsHeaders })
+
+      case 'get_price':
+        const { ids, vs_currencies } = requestData
+        if (!ids || !vs_currencies) {
+          return Response.json(
+            { error: 'Parameters ids and vs_currencies are required' },
+            { status: 400, headers: corsHeaders }
+          )
+        }
+        try {
+          const priceRes = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=${vs_currencies}`)
+          const priceData = await priceRes.json()
+          return Response.json(priceData, { headers: corsHeaders })
+        } catch (err) {
+          return Response.json(
+            { error: 'Failed to fetch price from provider' },
+            { status: 500, headers: corsHeaders }
+          )
+        }
+
+      case 'get_markets':
+        const { vs_currency, order, per_page, page, sparkline, price_change_percentage } = requestData
+        if (!vs_currency) {
+          return Response.json(
+            { error: 'Parameter vs_currency is required' },
+            { status: 400, headers: corsHeaders }
+          )
+        }
+        try {
+          const params = new URLSearchParams({
+            vs_currency,
+            order: order || 'market_cap_desc',
+            per_page: per_page?.toString() || '10',
+            page: page?.toString() || '1',
+            sparkline: sparkline?.toString() || 'false',
+            price_change_percentage: price_change_percentage || '24h'
+          })
+          const marketRes = await fetch(`https://api.coingecko.com/api/v3/coins/markets?${params.toString()}`)
+          const marketData = await marketRes.json()
+          return Response.json(marketData, { headers: corsHeaders })
+        } catch (err) {
+          return Response.json(
+            { error: 'Failed to fetch markets from provider' },
+            { status: 500, headers: corsHeaders }
+          )
+        }
 
       default:
         return Response.json(

@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { BrowserRouter, HashRouter, Routes, Route } from "react-router-dom";
+import { XMTPProvider } from '@xmtp/react-sdk';
 import { AppKitProvider } from './config/appkit';
 import { W3RTokenProvider } from "./contexts/W3RTokenContext";
 import { MiniKitContextProvider } from "./providers/MiniKitProvider";
@@ -32,36 +33,38 @@ function App() {
     <MiniKitContextProvider>
       <AppKitProvider>
         <W3RTokenProvider>
-          <AudioProvider>
-            {import.meta.env.MODE === 'extension' ? (
-              <HashRouter>
-                <Routes>
-                  <Route path="/" element={<ExtensionHome />} />
-                </Routes>
-                <Toaster />
-              </HashRouter>
-            ) : (
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/" element={<IndexV2 />} />
-                  <Route path="/marketplace" element={<Marketplace />} />
-                  <Route path="/events" element={<Events />} />
-                  <Route path="/events/:slug" element={<EventDetail />} />
-                  <Route path="/stations" element={<Stations />} />
-                  <Route path="/stations/:slug" element={<StationDetail />} />
-                  <Route path="/rental" element={<RentalAccess />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/pintu_masuk" element={<PintuMasuk />} />
-                  <Route path="/dao" element={<Web3RadioDAO />} />
-                  <Route path="/ply" element={<PLY />} />
-                  <Route path="/premium" element={<PremiumContent />} />
-                  <Route path="/p/:slug" element={<DynamicPage />} />
-                </Routes>
-                <PersistentPlayer />
-                <Toaster />
-              </BrowserRouter>
-            )}
-          </AudioProvider>
+          <XMTPProvider>
+            <AudioProvider>
+              {import.meta.env.MODE === 'extension' ? (
+                <HashRouter>
+                  <Routes>
+                    <Route path="/" element={<ExtensionHome />} />
+                  </Routes>
+                  <Toaster />
+                </HashRouter>
+              ) : (
+                <BrowserRouter>
+                  <Routes>
+                    <Route path="/" element={<IndexV2 />} />
+                    <Route path="/marketplace" element={<Marketplace />} />
+                    <Route path="/events" element={<Events />} />
+                    <Route path="/events/:slug" element={<EventDetail />} />
+                    <Route path="/stations" element={<Stations />} />
+                    <Route path="/stations/:slug" element={<StationDetail />} />
+                    <Route path="/rental" element={<RentalAccess />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/pintu_masuk" element={<PintuMasuk />} />
+                    <Route path="/dao" element={<Web3RadioDAO />} />
+                    <Route path="/ply" element={<PLY />} />
+                    <Route path="/premium" element={<PremiumContent />} />
+                    <Route path="/p/:slug" element={<DynamicPage />} />
+                  </Routes>
+                  <PersistentPlayer />
+                  <Toaster />
+                </BrowserRouter>
+              )}
+            </AudioProvider>
+          </XMTPProvider>
         </W3RTokenProvider>
       </AppKitProvider>
     </MiniKitContextProvider>

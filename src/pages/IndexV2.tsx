@@ -371,15 +371,6 @@ const IndexV2 = () => {
                 >
                   {station.name}
                 </button>
-                {currentStation === station.id && (
-                  <button
-                    onClick={() => setShowChat(true)}
-                    className="flex items-center gap-1.5 px-3 py-1 bg-white/50 hover:bg-white text-[#515044]/40 hover:text-[#515044] rounded-full text-[8px] font-bold uppercase tracking-widest transition-all border border-transparent hover:border-[#515044]/5"
-                  >
-                    <MessageSquare className="w-2.5 h-2.5" />
-                    Chatroom
-                  </button>
-                )}
               </div>
             ))}
           </div>
@@ -428,12 +419,38 @@ const IndexV2 = () => {
               </div>
             )}
 
-
-
             {/* Unified Tipping Hub */}
             {isConnected && <UnifiedTipComponent />}
           </div>
         </div>
+
+        {/* Centered Chat Button */}
+        {currentStation && (
+          <div className="flex flex-col items-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <button
+              onClick={() => setShowChat(true)}
+              className="group relative flex flex-col items-center gap-6 p-12 rounded-[60px] bg-white/40 hover:bg-white/60 backdrop-blur-xl border border-white/20 transition-all hover:scale-105 hover:shadow-2xl active:scale-95 shadow-xl shadow-[#515044]/5"
+            >
+              <div className="absolute inset-0 bg-gradient-to-tr from-[#515044]/5 to-transparent rounded-[60px] opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="w-32 h-32 rounded-[32px] bg-white shadow-inner flex items-center justify-center relative overflow-hidden">
+                <img
+                  src="https://i.imgur.com/g3FTYNs.png"
+                  alt="Chat Logo"
+                  className="w-20 h-20 object-contain group-hover:scale-110 transition-transform duration-500"
+                />
+              </div>
+              <div className="text-center relative">
+                <p className="text-[12px] font-bold text-[#515044]/40 uppercase tracking-[0.4em] mb-2">Web3 Relay Chat</p>
+                <h4 className="text-3xl font-black text-[#515044] tracking-tight">{stationData.name} Chatroom</h4>
+              </div>
+
+              <div className="flex items-center gap-3 mt-4 px-8 py-3 rounded-full bg-[#515044] text-white text-[12px] font-bold uppercase tracking-[0.3em] shadow-lg shadow-[#515044]/20 group-hover:bg-black transition-colors">
+                <div className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse" />
+                Live Chat
+              </div>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* XMTP Chatroom Popup */}
