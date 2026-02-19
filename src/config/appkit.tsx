@@ -40,8 +40,8 @@ const wagmiAdapter = new WagmiAdapter({
 const solanaWithRpc = {
   ...solana,
   rpcUrls: {
-    default: { http: [solanaRpc] },
-    public: { http: [solanaRpc] },
+    default: { http: [solanaRpc, 'https://rpc.ankr.com/solana'] },
+    public: { http: [solanaRpc, 'https://rpc.ankr.com/solana'] },
   },
 }
 

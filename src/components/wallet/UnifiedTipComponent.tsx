@@ -126,8 +126,16 @@ export default function UnifiedTipComponent() {
                     throw new Error("Solana wallet provider not found");
                 }
 
+                const RPCS = [
+                    import.meta.env.VITE_SOLANA_RPC,
+                    'https://rpc.ankr.com/solana',
+                    'https://api.mainnet-beta.solana.com'
+                ].filter(Boolean);
+
                 // @ts-ignore
-                const solanaConnection = new Connection(SOLANA_RPC);
+                const solanaConnection = new Connection(RPCS[0], {
+                    commitment: "confirmed",
+                });
                 const transaction = new Transaction().add(
                     SystemProgram.transfer({
                         fromPubkey: new PublicKey(address),
