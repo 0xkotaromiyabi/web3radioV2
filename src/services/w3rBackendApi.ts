@@ -33,6 +33,11 @@ export class W3RBackendApi {
     try {
       console.log('Submitting listening session:', session);
 
+      if (!supabase) {
+        console.warn('W3R API: Supabase not initialized, skipping session submission.');
+        return { success: false, verifiedTime: 0 };
+      }
+
       const { data, error } = await supabase.functions.invoke('w3r-api', {
         body: {
           ...session,
@@ -65,6 +70,8 @@ export class W3RBackendApi {
   // Get verified listening time for user
   async getVerifiedListeningTime(userAddress: string): Promise<number> {
     try {
+      if (!supabase) return 0;
+
       const { data, error } = await supabase.functions.invoke('w3r-api', {
         body: {
           action: 'get_listening_time',
@@ -92,6 +99,8 @@ export class W3RBackendApi {
   // Request reward claim signature
   async requestRewardSignature(userAddress: string): Promise<RewardClaim | null> {
     try {
+      if (!supabase) return null;
+
       const { data, error } = await supabase.functions.invoke('w3r-api', {
         body: {
           action: 'claim_reward',
@@ -123,6 +132,8 @@ export class W3RBackendApi {
     availableRewards: number;
   }> {
     try {
+      if (!supabase) return { eligible: false, nextRewardIn: 0, availableRewards: 0 };
+
       const { data, error } = await supabase.functions.invoke('w3r-api', {
         body: {
           action: 'check_eligibility',

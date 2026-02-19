@@ -8,7 +8,9 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 // Create the Supabase client safely
-export const supabase = (supabaseUrl && supabaseAnonKey)
+const isDummyUrl = supabaseUrl.includes('dummy-project');
+
+export const supabase = (supabaseUrl && supabaseAnonKey && !isDummyUrl)
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null as any;
 

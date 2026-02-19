@@ -1,24 +1,14 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { useAccount, useDisconnect } from 'wagmi';
-import { useAppKit } from '@reown/appkit/react';
-import {
-  ConnectionProvider,
-  WalletProvider,
-  useWallet,
-} from "@solana/wallet-adapter-react";
-import {
-  WalletModalProvider,
-  WalletMultiButton,
-} from "@solana/wallet-adapter-react-ui";
-import { clusterApiUrl } from "@solana/web3.js";
+import { useAppKit, useAppKitAccount } from '@reown/appkit/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Shield, CheckCircle, AlertTriangle, Wallet } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NavBar from "@/components/navigation/NavBar";
 
-import "@solana/wallet-adapter-react-ui/styles.css";
+// Removed legacy Solana wallet adapter styles
 
 const REGISTERED_WALLETS: Record<string, string> = {
   "kotarominami.eth": "ngapain ikut lomba?",
@@ -167,16 +157,20 @@ function EthereumVerification() {
 }
 
 function SolanaVerification() {
-  const { publicKey, connected } = useWallet();
+  const { address, isConnected, caipAddress } = useAppKitAccount();
+  const { open } = useAppKit();
   const [notif, setNotif] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // Check if current connection is Solana
+  const isSolana = caipAddress?.startsWith('solana:');
+
   useEffect(() => {
     async function checkSolanaWallet() {
-      if (publicKey && connected) {
+      if (address && isConnected && isSolana) {
         setIsLoading(true);
         try {
-          const walletAddress = publicKey.toString().toLowerCase();
+          const walletAddress = address.toLowerCase();
 
           // Check if Solana wallet address is registered
           if (REGISTERED_WALLETS[walletAddress]) {
@@ -195,20 +189,36 @@ function SolanaVerification() {
       }
     }
     checkSolanaWallet();
-  }, [publicKey, connected]);
+  }, [address, isConnected, isSolana]);
 
   return (
     <div className="space-y-6">
       <div className="flex justify-center">
-        <WalletMultiButton />
+        {!isConnected || !isSolana ? (
+          <button
+            onClick={() => open()}
+            className="flex items-center gap-2 px-6 py-2 bg-[#14F195] hover:bg-[#10c47a] text-black rounded-lg transition-colors font-medium"
+          >
+            <Wallet className="w-4 h-4" />
+            Connect Solana Wallet
+          </button>
+        ) : (
+          <button
+            onClick={() => open({ view: 'Account' })}
+            className="flex items-center gap-2 px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg transition-colors font-medium border"
+          >
+            <div className="w-2 h-2 rounded-full bg-green-500" />
+            {address?.slice(0, 6)}...{address?.slice(-4)}
+          </button>
+        )}
       </div>
 
-      {connected && publicKey && (
+      {isConnected && isSolana && address && (
         <div className="space-y-4">
           <div className="p-4 bg-secondary/20 rounded-lg">
             <h3 className="font-semibold text-foreground mb-2">Solana Wallet Connected</h3>
             <p className="text-sm text-muted-foreground font-mono break-all">
-              {publicKey.toString()}
+              {address}
             </p>
           </div>
 
@@ -228,7 +238,7 @@ function SolanaVerification() {
             </Alert>
           )}
 
-          {connected && !notif && !isLoading && (
+          {isConnected && isSolana && !notif && !isLoading && (
             <Alert>
               <CheckCircle className="h-4 w-4" />
               <AlertDescription>
@@ -239,7 +249,7 @@ function SolanaVerification() {
         </div>
       )}
 
-      {!connected && (
+      {(!isConnected || !isSolana) && (
         <div className="text-center text-muted-foreground">
           <Shield className="h-12 w-12 mx-auto mb-3 opacity-50" />
           <p>Connect your Solana wallet to start verification process</p>
@@ -250,8 +260,6 @@ function SolanaVerification() {
 }
 
 function VerificationPlayground() {
-  const endpoint = useMemo(() => clusterApiUrl("devnet"), []);
-  const wallets = useMemo(() => [], []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -289,13 +297,7 @@ function VerificationPlayground() {
               </TabsContent>
 
               <TabsContent value="solana" className="mt-6">
-                <ConnectionProvider endpoint={endpoint}>
-                  <WalletProvider wallets={wallets}>
-                    <WalletModalProvider>
-                      <SolanaVerification />
-                    </WalletModalProvider>
-                  </WalletProvider>
-                </ConnectionProvider>
+                <SolanaVerification />
               </TabsContent>
             </Tabs>
           </CardContent>

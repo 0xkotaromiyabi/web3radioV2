@@ -16,7 +16,7 @@ import { WagmiProvider } from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
 
-const projectId = import.meta.env.VITE_WC_PROJECT_ID
+const projectId = import.meta.env.VITE_WC_PROJECT_ID || '436eaacb5d6ac40e778902daf08eb741'
 const alchemyKey = import.meta.env.VITE_ALCHEMY_KEY
 const solanaRpc =
   import.meta.env.VITE_SOLANA_RPC || 'https://rpc.ankr.com/solana'
@@ -26,7 +26,7 @@ const wagmiAdapter = new WagmiAdapter({
   projectId,
   networks: [mainnet, base, arbitrum, optimism, polygon, bsc, sepolia],
   transports: {
-    [mainnet.id]: http(`https://eth-mainnet.g.alchemy.com/v2/${alchemyKey}`),
+    [mainnet.id]: alchemyKey ? http(`https://eth-mainnet.g.alchemy.com/v2/${alchemyKey}`) : http(),
     [base.id]: http(),
     [arbitrum.id]: http(),
     [optimism.id]: http(),
@@ -66,7 +66,7 @@ createAppKit({
   metadata: {
     name: 'Web3Radio',
     description: 'Web3Radio - Decentralized Radio Station',
-    url: 'https://www.webthreeradio.xyz',
+    url: typeof window !== 'undefined' ? window.location.origin : 'https://www.webthreeradio.xyz',
     icons: ['https://www.webthreeradio.xyz/web3radio-logo.png'],
   },
   features: {

@@ -73,9 +73,9 @@ wss.on('connection', (ws) => {
                 if (data.type === 'connect') {
                     const config = data.config || {};
                     const protocol = config.protocol || 'shoutcast1';
-                    const host = config.host || '100.67.23.46';
+                    const host = config.host || 'localhost';
                     const port = config.port || 8000;
-                    const password = config.password || 'changeme123';
+                    const password = config.password || 'Web3RadioXYZ';
                     const mountpoint = config.mountpoint || '/stream';
                     const user = config.user || 'admin';
 

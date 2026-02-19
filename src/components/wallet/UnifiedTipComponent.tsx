@@ -1,15 +1,21 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAppKitAccount, useAppKitNetwork } from '@reown/appkit/react';
+import { useAppKitAccount, useAppKitNetwork, useAppKitProvider } from '@reown/appkit/react';
 import { useSendTransaction, useWaitForTransactionReceipt } from 'wagmi';
 import { parseEther } from 'viem';
-import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { Transaction, SystemProgram, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import {
+    Connection,
+    Transaction,
+    SystemProgram,
+    PublicKey,
+    LAMPORTS_PER_SOL
+} from '@solana/web3.js';
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Heart, ExternalLink, ShieldCheck, AlertTriangle, RefreshCw, Coins, Wallet } from "lucide-react";
+import { Loader2, Heart, RefreshCw, Coins, Wallet, ShieldCheck, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 const EVM_DESTINATION = "0x242dfb7849544ee242b2265ca7e585bdec60456b";
 const SOLANA_DESTINATION = "9xhz4Cb4C2Z4z9xdD2geCafovNYVngC4E4XpWtQmeEuv";
+const SOLANA_RPC = import.meta.env.VITE_SOLANA_RPC || 'https://rpc.ankr.com/solana';
 
 const IDR_PRESETS = [
     { label: '1K', value: 1000 },
@@ -19,9 +25,11 @@ const IDR_PRESETS = [
     { label: '100K', value: 100000 },
 ];
 
-function getCoinGeckoId(chainName: string | undefined, isSolana: boolean): string {
-    if (isSolana) return 'solana';
-    const name = (chainName || '').toLowerCase();
+function getCoinGeckoId(caipNetwork: any): string {
+    const chainId = caipNetwork?.id;
+    const name = (caipNetwork?.name || '').toLowerCase();
+
+    if (chainId?.startsWith('solana')) return 'solana';
     if (name.includes('bnb') || name.includes('bsc')) return 'binancecoin';
     if (name.includes('polygon') || name.includes('matic')) return 'matic-network';
     return 'ethereum';
@@ -40,20 +48,16 @@ export default function UnifiedTipComponent() {
 
     const { address, isConnected, caipAddress } = useAppKitAccount();
     const { caipNetwork } = useAppKitNetwork();
+    const { walletProvider } = useAppKitProvider('solana');
 
-    const isSolana = caipAddress?.startsWith('solana:') ?? false;
-    const isEvm = isConnected && !isSolana;
-
-    const { sendTransaction: sendEvmTx, data: evmHash } = useSendTransaction();
-    const { isLoading: isEvmConfirming, isSuccess: isEvmSuccess } = useWaitForTransactionReceipt({ hash: evmHash });
-
-    const { connection } = useConnection();
-    const { publicKey: solanaPubKey, sendTransaction: sendSolanaTx } = useWallet();
-
-    const nativeSymbol = isSolana ? 'SOL' : (caipNetwork?.nativeCurrency?.symbol || 'ETH');
-    const destination = isSolana ? SOLANA_DESTINATION : EVM_DESTINATION;
+    const isSolana = caipAddress?.startsWith('solana:');
     const networkLabel = caipNetwork?.name || (isSolana ? 'Solana' : 'EVM');
-    const coinGeckoId = getCoinGeckoId(caipNetwork?.name, isSolana);
+    const nativeSymbol = caipNetwork?.nativeCurrency?.symbol || (isSolana ? 'SOL' : 'ETH');
+    const coinGeckoId = getCoinGeckoId(caipNetwork);
+
+    // EVM Hooks
+    const { sendTransaction, data: hash } = useSendTransaction();
+    const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
 
     const fetchPrice = useCallback(async () => {
         setIsLoadingPrice(true);
@@ -72,9 +76,12 @@ export default function UnifiedTipComponent() {
             if (price) setPriceIdr(price);
         } catch (err: any) {
             console.error('Failed to fetch price:', err);
+            // Dynamic fallbacks to avoid zero division
             if (!priceIdr) {
                 if (coinGeckoId === 'ethereum') setPriceIdr(45000000);
-                if (coinGeckoId === 'solana') setPriceIdr(1500000);
+                else if (coinGeckoId === 'binancecoin') setPriceIdr(9000000);
+                else if (coinGeckoId === 'solana') setPriceIdr(1500000);
+                else setPriceIdr(1000000);
             }
         } finally {
             setIsLoadingPrice(false);
@@ -92,11 +99,11 @@ export default function UnifiedTipComponent() {
     }, [idrAmount, customIdr, isCustom, priceIdr]);
 
     useEffect(() => {
-        if (isEvmSuccess) {
+        if (isSuccess) {
             toast({ title: "Tip Sent! 💖", description: "Thank you for supporting Web3Radio!" });
             setIsProcessing(false);
         }
-    }, [isEvmSuccess, toast]);
+    }, [isSuccess, toast]);
 
     const handleTipClick = () => {
         const activeIdr = isCustom ? (parseFloat(customIdr) || 0) : idrAmount;
@@ -114,31 +121,44 @@ export default function UnifiedTipComponent() {
         try {
             setIsProcessing(true);
 
-            if (isEvm) {
-                sendEvmTx({ to: EVM_DESTINATION as `0x${string}`, value: parseEther(cryptoAmount) });
-            } else if (isSolana && solanaPubKey) {
-                const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('finalized');
-                const recipientPubKey = new PublicKey(SOLANA_DESTINATION);
-                const transaction = new Transaction({
-                    recentBlockhash: blockhash,
-                    feePayer: solanaPubKey
-                }).add(
+            if (isSolana) {
+                if (!walletProvider || !address) {
+                    throw new Error("Solana wallet provider not found");
+                }
+
+                // @ts-ignore
+                const solanaConnection = new Connection(SOLANA_RPC);
+                const transaction = new Transaction().add(
                     SystemProgram.transfer({
-                        fromPubkey: solanaPubKey,
-                        toPubkey: recipientPubKey,
-                        lamports: Math.floor(parseFloat(cryptoAmount) * LAMPORTS_PER_SOL)
+                        fromPubkey: new PublicKey(address),
+                        toPubkey: new PublicKey(SOLANA_DESTINATION),
+                        lamports: Math.floor(parseFloat(cryptoAmount) * LAMPORTS_PER_SOL),
                     })
                 );
 
-                const signature = await sendSolanaTx(transaction, connection);
-                await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, 'processed');
+                const { blockhash } = await solanaConnection.getLatestBlockhash();
+                transaction.recentBlockhash = blockhash;
+                transaction.feePayer = new PublicKey(address);
 
-                toast({ title: "Tip Sent! 💖", description: `Thank you for tipping ${cryptoAmount} SOL!` });
+                // @ts-ignore
+                const signedTransaction = await walletProvider.signTransaction(transaction);
+                const signature = await solanaConnection.sendRawTransaction(signedTransaction.serialize());
+                await solanaConnection.confirmTransaction(signature);
+
+                toast({ title: "Tip Sent! 💖", description: "Thank you for supporting Web3Radio!" });
                 setIsProcessing(false);
+            } else {
+                // EVM
+                sendTransaction({
+                    to: EVM_DESTINATION as `0x${string}`,
+                    value: parseEther(cryptoAmount)
+                });
             }
         } catch (error: any) {
             console.error("Tip failed:", error);
-            const isRejected = error.message?.includes('rejected') || error.message?.includes('denied') || error.code === 4001;
+            const isRejected = error.message?.toLowerCase().includes('rejected') ||
+                error.message?.toLowerCase().includes('denied') ||
+                error.code === 4001;
             toast({
                 title: isRejected ? "Transaction Rejected" : "Transaction Failed",
                 description: isRejected ? "You declined the transaction in your wallet." : (error.message || "Failed to send tip."),
@@ -186,7 +206,12 @@ export default function UnifiedTipComponent() {
                                 </div>
                                 <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
                                     <span className="text-[#515044]/40">To</span>
-                                    <span className="font-mono text-[#515044]">{destination.slice(0, 6)}...{destination.slice(-4)}</span>
+                                    <span className="font-mono text-[#515044]">
+                                        {isSolana
+                                            ? `${SOLANA_DESTINATION.slice(0, 6)}...${SOLANA_DESTINATION.slice(-4)}`
+                                            : `${EVM_DESTINATION.slice(0, 6)}...${EVM_DESTINATION.slice(-4)}`
+                                        }
+                                    </span>
                                 </div>
                             </div>
 
@@ -218,7 +243,6 @@ export default function UnifiedTipComponent() {
 
             {/* Main Tip Card */}
             <div className="bg-white/90 backdrop-blur-2xl rounded-[40px] p-8 border border-[#515044]/5 shadow-2xl relative overflow-hidden">
-                {/* Decorative background element */}
                 <div className="absolute top-0 right-0 p-8 opacity-[0.03]">
                     <Coins className="w-32 h-32 text-[#515044]" />
                 </div>
@@ -233,7 +257,7 @@ export default function UnifiedTipComponent() {
                         </div>
                         <div className="text-right">
                             <div className="flex items-center justify-end gap-2 text-[10px] font-bold uppercase tracking-widest text-[#515044]/40">
-                                <div className={`w-1.5 h-1.5 rounded-full ${isEvmConfirming ? 'bg-amber-500 animate-pulse' : 'bg-green-500'}`} />
+                                <div className={`w-1.5 h-1.5 rounded-full ${isProcessing || isConfirming ? 'bg-amber-500 animate-pulse' : 'bg-green-500'}`} />
                                 {networkLabel}
                                 {!isLoadingPrice && (
                                     <button onClick={fetchPrice} className="hover:text-[#515044] transition-colors"><RefreshCw className="w-3 h-3" /></button>
@@ -245,7 +269,6 @@ export default function UnifiedTipComponent() {
                         </div>
                     </div>
 
-                    {/* Presets Grid */}
                     <div className="grid grid-cols-2 gap-3">
                         {IDR_PRESETS.map((preset) => (
                             <button
@@ -270,7 +293,6 @@ export default function UnifiedTipComponent() {
                         </button>
                     </div>
 
-                    {/* Input/Estimation Box */}
                     <div className="bg-[#515044]/2 rounded-3xl p-6 border border-[#515044]/5 space-y-4">
                         {isCustom ? (
                             <div className="relative">
@@ -309,10 +331,10 @@ export default function UnifiedTipComponent() {
 
                     <button
                         onClick={handleTipClick}
-                        disabled={isProcessing || isEvmConfirming || isLoadingPrice || parseFloat(cryptoAmount) <= 0}
+                        disabled={isProcessing || isConfirming || isLoadingPrice || parseFloat(cryptoAmount) <= 0}
                         className="w-full bg-[#515044] hover:bg-black text-white font-bold py-5 rounded-[24px] transition-all shadow-xl shadow-[#515044]/10 uppercase text-[10px] tracking-[0.3em] disabled:opacity-20 disabled:grayscale flex items-center justify-center gap-3 group"
                     >
-                        {isProcessing || isEvmConfirming ? (
+                        {isProcessing || isConfirming ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
                         ) : (
                             <>

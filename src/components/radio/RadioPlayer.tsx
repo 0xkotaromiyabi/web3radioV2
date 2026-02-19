@@ -1,6 +1,5 @@
 
 import React from 'react';
-import WalletConnection from '../wallet/WalletConnection';
 import RadioControls from './RadioControls';
 import StationSelector from './StationSelector';
 import EventsTicker from './EventsTicker';
@@ -118,10 +117,6 @@ const RadioPlayer = () => {
           />
         </div>
 
-        {/* Wallet Connection */}
-        <div className="border-t border-gray-200/30 bg-white/40">
-          <WalletConnection isPlaying={isPlaying} />
-        </div>
       </div>
     </div>
   );
