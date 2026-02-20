@@ -8,10 +8,15 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
 }
 
-// Initialize Supabase client
-const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
+// Initialize Supabase client lazily to avoid cold start crashes
+let supabase: ReturnType<typeof createClient>;
+try {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+  const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+  supabase = createClient(supabaseUrl, supabaseKey);
+} catch (e) {
+  console.error("Failed to initialize Supabase client", e);
+}
 
 // Rate limiting configuration
 const RATE_LIMITS = {

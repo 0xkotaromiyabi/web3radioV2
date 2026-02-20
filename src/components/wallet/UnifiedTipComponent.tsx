@@ -135,8 +135,7 @@ export default function UnifiedTipComponent() {
 
                 const RPCS = [
                     import.meta.env.VITE_SOLANA_RPC,
-                    'https://rpc.ankr.com/solana',
-                    'https://solana-mainnet.rpc.extrnode.com',
+                    'https://solana-rpc.publicnode.com',
                     'https://api.mainnet-beta.solana.com'
                 ].filter(Boolean);
 

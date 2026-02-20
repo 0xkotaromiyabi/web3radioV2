@@ -36,12 +36,11 @@ const wagmiAdapter = new WagmiAdapter({
   },
 })
 
-// ---- SOLANA ----
 const solanaWithRpc = {
   ...solana,
   rpcUrls: {
-    default: { http: [solanaRpc, 'https://rpc.ankr.com/solana', 'https://solana-mainnet.rpc.extrnode.com'] },
-    public: { http: [solanaRpc, 'https://rpc.ankr.com/solana', 'https://solana-mainnet.rpc.extrnode.com'] },
+    default: { http: [solanaRpc, 'https://solana-rpc.publicnode.com', 'https://api.mainnet-beta.solana.com'] },
+    public: { http: [solanaRpc, 'https://solana-rpc.publicnode.com', 'https://api.mainnet-beta.solana.com'] },
   },
 }
 
