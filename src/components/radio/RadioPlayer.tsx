@@ -1,16 +1,18 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import RadioControls from './RadioControls';
 import StationSelector from './StationSelector';
 import EventsTicker from './EventsTicker';
 import CryptoPriceTicker from './CryptoPriceTicker';
 import AudioVisualizer from './AudioVisualizer';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Music } from 'lucide-react';
+import { Music, Share2 } from 'lucide-react';
 import logo from '@/assets/web3radio-logo.png';
 import { useAudio } from '@/contexts/AudioProvider';
+import { ShareModal } from './ShareModal';
 
 const RadioPlayer = () => {
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const {
     isPlaying,
     volume,
@@ -60,11 +62,24 @@ const RadioPlayer = () => {
               </p>
             </div>
           </div>
-          {/* Window Controls - Apple Style */}
-          <div className="flex gap-2">
-            <div className="w-3 h-3 rounded-full bg-red-400 hover:bg-red-500 transition-colors cursor-pointer" />
-            <div className="w-3 h-3 rounded-full bg-yellow-400 hover:bg-yellow-500 transition-colors cursor-pointer" />
-            <div className="w-3 h-3 rounded-full bg-green-400 hover:bg-green-500 transition-colors cursor-pointer" />
+
+          <div className="flex items-center gap-4">
+            {/* Share Button */}
+            <button
+              onClick={() => setIsShareModalOpen(true)}
+              className="p-2 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors flex items-center gap-2 group shadow-sm"
+              title="Share Station"
+            >
+              <Share2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
+              <span className="text-xs font-semibold pr-1 hidden sm:inline-block">Share</span>
+            </button>
+
+            {/* Window Controls - Apple Style */}
+            <div className="flex gap-2">
+              <div className="w-3 h-3 rounded-full bg-red-400 hover:bg-red-500 transition-colors cursor-pointer" />
+              <div className="w-3 h-3 rounded-full bg-yellow-400 hover:bg-yellow-500 transition-colors cursor-pointer" />
+              <div className="w-3 h-3 rounded-full bg-green-400 hover:bg-green-500 transition-colors cursor-pointer" />
+            </div>
           </div>
         </div>
 
@@ -118,6 +133,14 @@ const RadioPlayer = () => {
         </div>
 
       </div>
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        currentSong={currentSong || null}
+        stationName={stationNames[currentStation] || currentStation}
+      />
     </div>
   );
 };

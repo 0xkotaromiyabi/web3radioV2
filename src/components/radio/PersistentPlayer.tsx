@@ -1,14 +1,16 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAudio } from '@/contexts/AudioProvider';
 import { Button } from '@/components/ui/button';
-import { Play, Pause, Loader2, Volume2, VolumeX, Music, Maximize2 } from 'lucide-react';
+import { Play, Pause, Loader2, Volume2, VolumeX, Music, Maximize2, Share2 } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
+import { ShareModal } from './ShareModal';
 
 const PersistentPlayer = () => {
+    const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const location = useLocation();
     const {
         isPlaying,
@@ -99,12 +101,30 @@ const PersistentPlayer = () => {
                         className="cursor-pointer opacity-40 hover:opacity-100 transition-opacity"
                     />
                 </div>
-                <Link to="/">
-                    <button className="p-3 rounded-2xl bg-[#515044]/5 text-[#515044]/40 hover:text-[#515044] hover:bg-[#515044]/10 transition-all">
-                        <Maximize2 className="w-4 h-4" />
+
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => setIsShareModalOpen(true)}
+                        className="p-3 rounded-2xl bg-[#515044]/5 text-[#515044]/40 hover:text-[#515044] hover:bg-[#515044]/10 transition-all"
+                        title="Share Station"
+                    >
+                        <Share2 className="w-4 h-4" />
                     </button>
-                </Link>
+                    <Link to="/">
+                        <button className="p-3 rounded-2xl bg-[#515044]/5 text-[#515044]/40 hover:text-[#515044] hover:bg-[#515044]/10 transition-all">
+                            <Maximize2 className="w-4 h-4" />
+                        </button>
+                    </Link>
+                </div>
             </div>
+
+            {/* Share Modal */}
+            <ShareModal
+                isOpen={isShareModalOpen}
+                onClose={() => setIsShareModalOpen(false)}
+                currentSong={currentSong || null}
+                stationName={stationName}
+            />
         </div>
     );
 };
