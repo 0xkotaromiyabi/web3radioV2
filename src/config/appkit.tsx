@@ -45,8 +45,10 @@ const solanaWithRpc = {
   },
 }
 
+import { PhantomWalletAdapter, SolflareWalletAdapter } from '@solana/wallet-adapter-wallets'
+
 const solanaAdapter = new SolanaAdapter({
-  wallets: [], // Add Phantom etc later if needed
+  wallets: [new PhantomWalletAdapter(), new SolflareWalletAdapter()],
 })
 
 // ---- CREATE APPKIT ----

@@ -165,13 +165,9 @@ export default function UnifiedTipComponent() {
                         transaction.feePayer = new PublicKey(address);
 
                         // @ts-ignore
-                        const signedTransaction = await walletProvider.signTransaction(transaction);
-                        const signature = await solanaConnection.sendRawTransaction(signedTransaction.serialize(), {
-                            skipPreflight: false,
-                            preflightCommitment: 'confirmed'
-                        });
-
+                        const signature = await walletProvider.sendTransaction(transaction, solanaConnection);
                         await solanaConnection.confirmTransaction(signature, 'confirmed');
+
                         success = true;
                         console.log(`Solana transaction successful via ${rpcUrl}`);
                         break; // Exit loop on success
