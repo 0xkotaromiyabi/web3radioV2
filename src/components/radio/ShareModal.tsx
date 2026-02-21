@@ -142,21 +142,21 @@ export function ShareModal({ isOpen, onClose, currentSong, stationName }: ShareM
 
                     <div className="relative z-10 flex flex-col items-center w-full">
                         {/* Artwork */}
-                        <div className="w-24 h-24 rounded-2xl overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.5)] mb-4 border border-white/10 bg-black/40 flex items-center justify-center pointer-events-none">
+                        <div className="w-20 h-20 rounded-[14px] overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.5)] mb-3 border border-white/10 bg-black/40 flex items-center justify-center pointer-events-none">
                             {currentSong?.artwork ? (
                                 <img src={currentSong.artwork} alt="Artwork" className="w-full h-full object-cover" crossOrigin="anonymous" />
                             ) : (
-                                <Music className="w-10 h-10 text-white/50" />
+                                <Music className="w-8 h-8 text-white/50" />
                             )}
                         </div>
 
                         {/* Song Info */}
-                        <div className="text-center w-full space-y-1 pointer-events-none flex flex-col justify-center">
-                            <h2 className="text-white text-[10px] font-bold font-['Space_Grotesk'] tracking-tight line-clamp-3 w-full px-2 leading-tight">
-                                {currentSong?.title || "Live Stream"}
+                        <div className="text-center w-full pointer-events-none flex flex-col justify-center gap-1">
+                            <h2 className="text-white text-[11px] font-bold font-['Space_Grotesk'] tracking-tight w-full px-2 leading-snug break-words">
+                                {currentSong?.title ? (currentSong.title.length > 70 ? currentSong.title.slice(0, 70) + '...' : currentSong.title) : "Live Stream"}
                             </h2>
-                            <p className="text-white/70 text-[8px] font-medium line-clamp-2 w-full px-2 leading-tight">
-                                {currentSong?.artist || stationName}
+                            <p className="text-white/70 text-[9px] font-medium w-full px-2 leading-snug break-words">
+                                {currentSong?.artist ? (currentSong.artist.length > 50 ? currentSong.artist.slice(0, 50) + '...' : currentSong.artist) : stationName}
                             </p>
 
                             <RealAudioVisualizer />
