@@ -151,11 +151,11 @@ export function ShareModal({ isOpen, onClose, currentSong, stationName }: ShareM
                         </div>
 
                         {/* Song Info */}
-                        <div className="text-center w-full space-y-1 pointer-events-none">
-                            <h2 className="text-white text-base font-bold font-['Space_Grotesk'] tracking-tight truncate w-full px-2">
+                        <div className="text-center w-full space-y-1 pointer-events-none flex flex-col justify-center">
+                            <h2 className="text-white text-sm font-bold font-['Space_Grotesk'] tracking-tight line-clamp-3 w-full px-2 leading-snug">
                                 {currentSong?.title || "Live Stream"}
                             </h2>
-                            <p className="text-white/70 text-[10px] font-medium truncate w-full px-2">
+                            <p className="text-white/70 text-[10px] font-medium line-clamp-2 w-full px-2 leading-tight">
                                 {currentSong?.artist || stationName}
                             </p>
 
