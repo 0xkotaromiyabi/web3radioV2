@@ -23,11 +23,10 @@ const NavBar = () => {
 
   const navLinks = [
     { to: '/', label: 'Home', icon: Home },
-    { to: '/events', label: 'Events', icon: Calendar },
+    { to: '/events', label: 'News &Events', icon: Calendar },
     { to: '/rental', label: 'Rental', icon: Smartphone },
-    { to: '/ply', label: 'PLY', icon: Gift },
+    { to: '/ply', label: 'Prizes', icon: Gift },
     { to: '/dao', label: 'DAO', icon: Users },
-    { to: '/pintu_masuk', label: 'CMS', icon: LockIcon },
   ];
 
   const animate = useCallback((from: number, to: number) => {
