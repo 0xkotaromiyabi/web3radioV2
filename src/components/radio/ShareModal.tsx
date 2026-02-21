@@ -51,7 +51,8 @@ export function ShareModal({ isOpen, onClose, currentSong, stationName }: ShareM
                 useCORS: true,
                 allowTaint: true,
                 backgroundColor: null,
-                scale: 2 // High resolution
+                scale: 4, // Ultra High resolution
+                logging: false
             });
 
             return new Promise((resolve) => {
