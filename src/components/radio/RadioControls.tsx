@@ -1,15 +1,15 @@
-
 import React from 'react';
-import { Volume2, Volume1, VolumeX, Play, Pause } from 'lucide-react';
+import { Volume2, Volume1, VolumeX, Play, Pause, Share2 } from 'lucide-react';
 
 interface RadioControlsProps {
   isPlaying: boolean;
   volume: number;
   togglePlay: () => void;
   setVolume: (volume: number) => void;
+  onShare?: () => void;
 }
 
-const RadioControls = ({ isPlaying, volume, togglePlay, setVolume }: RadioControlsProps) => {
+const RadioControls = ({ isPlaying, volume, togglePlay, setVolume, onShare }: RadioControlsProps) => {
   const VolumeIcon = volume === 0 ? VolumeX : volume < 50 ? Volume1 : Volume2;
 
   return (
@@ -28,9 +28,9 @@ const RadioControls = ({ isPlaying, volume, togglePlay, setVolume }: RadioContro
         </button>
       </div>
 
-      {/* Volume Control - Apple Style Slider */}
+      {/* Volume Control & Share Button */}
       <div className="flex items-center gap-4">
-        <VolumeIcon className="w-4 h-4 text-gray-500 flex-shrink-0" />
+        <VolumeIcon className="w-5 h-5 text-gray-500 flex-shrink-0" />
         <div className="flex-1 relative">
           <input
             type="range"
@@ -44,9 +44,17 @@ const RadioControls = ({ isPlaying, volume, togglePlay, setVolume }: RadioContro
             }}
           />
         </div>
-        <span className="text-sm text-gray-600 font-medium min-w-[2rem] text-right tabular-nums">
-          {volume}
-        </span>
+
+        {/* Share Button (Mobile/Alt Placement) */}
+        {onShare && (
+          <button
+            onClick={onShare}
+            className="p-2.5 rounded-full bg-gray-100/80 hover:bg-gray-200 text-gray-600 hover:text-gray-900 transition-colors flex-shrink-0"
+            title="Share Station"
+          >
+            <Share2 className="w-4 h-4" />
+          </button>
+        )}
       </div>
     </div>
   );

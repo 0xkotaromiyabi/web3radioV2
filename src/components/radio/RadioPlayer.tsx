@@ -64,16 +64,6 @@ const RadioPlayer = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            {/* Share Button */}
-            <button
-              onClick={() => setIsShareModalOpen(true)}
-              className="p-2 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors flex items-center gap-2 group shadow-sm"
-              title="Share Station"
-            >
-              <Share2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
-              <span className="text-xs font-semibold pr-1 hidden sm:inline-block">Share</span>
-            </button>
-
             {/* Window Controls - Apple Style */}
             <div className="flex gap-2">
               <div className="w-3 h-3 rounded-full bg-red-400 hover:bg-red-500 transition-colors cursor-pointer" />
@@ -123,12 +113,13 @@ const RadioPlayer = () => {
         </div>
 
         {/* Controls */}
-        <div className="border-t border-gray-200/30 bg-white/40">
+        <div className="border-t border-gray-200/30 bg-white/40 rounded-b-3xl">
           <RadioControls
             isPlaying={isPlaying}
             volume={volume}
             togglePlay={togglePlay}
             setVolume={setVolume}
+            onShare={() => setIsShareModalOpen(true)}
           />
         </div>
 

@@ -6,12 +6,12 @@ import { useAppKit, useAppKitAccount, useAppKitNetwork } from '@reown/appkit/rea
 import { useDisconnect } from 'wagmi';
 import UnifiedTipComponent from '@/components/wallet/UnifiedTipComponent';
 import CryptoTicker from '@/components/ui/CryptoTicker';
-import { MessageSquare } from 'lucide-react';
-import XmtpChatRoom from '@/components/radio/XmtpChatRoom';
+import { MessageSquare, Volume2, Volume1, VolumeX, Share2 } from 'lucide-react';
 import ListeningTimeTracker from '@/components/radio/ListeningTimeTracker';
+import { ShareModal } from '@/components/radio/ShareModal';
 const IndexV2 = () => {
-  const { isPlaying, togglePlay, currentStation, currentSong, changeStation } = useAudio();
-  const [showChat, setShowChat] = React.useState(false);
+  const { isPlaying, volume, togglePlay, setVolume, currentStation, currentSong, changeStation } = useAudio();
+  const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
 
   // Unified AppKit State
   const { open: openAppKit } = useAppKit();
@@ -355,6 +355,35 @@ const IndexV2 = () => {
         </div>
       </div>
 
+      {/* Volume & Share Controls Below Player */}
+      <div className="w-[90%] md:w-[70%] max-w-[460px] mx-auto mt-2 mb-8 px-6 py-4 bg-white/60 backdrop-blur-md border border-[#515044]/10 rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] flex items-center justify-between gap-6 relative z-10 transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.1)]">
+        <div className="flex items-center gap-3 flex-1">
+          {volume === 0 ? <VolumeX className="w-5 h-5 text-[#515044]/60" /> : volume < 50 ? <Volume1 className="w-5 h-5 text-[#515044]/60" /> : <Volume2 className="w-5 h-5 text-[#515044]/60" />}
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={volume}
+            onChange={(e) => setVolume(parseInt(e.target.value))}
+            className="w-full h-1.5 appearance-none rounded-full cursor-pointer shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)] focus:outline-none"
+            style={{
+              background: `linear-gradient(to right, #515044 0%, #515044 ${volume}%, #e5e7eb ${volume}%, #e5e7eb 100%)`
+            }}
+          />
+          <span className="text-xs font-bold text-[#515044] w-8 text-right tabular-nums block">{volume}</span>
+        </div>
+
+        <div className="w-px h-8 bg-[#515044]/10 shrink-0" />
+
+        <button
+          onClick={() => setIsShareModalOpen(true)}
+          className="p-3 rounded-full bg-white border border-[#515044]/10 hover:bg-[#515044] hover:text-white text-[#515044] transition-all shadow-sm group relative"
+          title="Share Station"
+        >
+          <Share2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
+        </button>
+      </div>
+
       {/* Listening Time Information (Minimalist text-based) */}
       <ListeningTimeTracker isPlaying={isPlaying} />
 
@@ -428,43 +457,15 @@ const IndexV2 = () => {
           </div>
         </div>
 
-        {/* Centered Chat Button */}
-        {currentStation && (
-          <div className="flex flex-col items-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <button
-              onClick={() => setShowChat(true)}
-              className="group relative flex flex-col items-center gap-6 p-12 rounded-[60px] bg-white/40 hover:bg-white/60 backdrop-blur-xl border border-white/20 transition-all hover:scale-105 hover:shadow-2xl active:scale-95 shadow-xl shadow-[#515044]/5"
-            >
-              <div className="absolute inset-0 bg-gradient-to-tr from-[#515044]/5 to-transparent rounded-[60px] opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="w-32 h-32 rounded-[32px] bg-white shadow-inner flex items-center justify-center relative overflow-hidden">
-                <img
-                  src="https://i.imgur.com/g3FTYNs.png"
-                  alt="Chat Logo"
-                  className="w-20 h-20 object-contain group-hover:scale-110 transition-transform duration-500"
-                />
-              </div>
-              <div className="text-center relative">
-                <p className="text-[12px] font-bold text-[#515044]/40 uppercase tracking-[0.4em] mb-2">Web3 Relay Chat</p>
-                <h4 className="text-3xl font-black text-[#515044] tracking-tight">{stationData.name} Chatroom</h4>
-              </div>
-
-              <div className="flex items-center gap-3 mt-4 px-8 py-3 rounded-full bg-[#515044] text-white text-[12px] font-bold uppercase tracking-[0.3em] shadow-lg shadow-[#515044]/20 group-hover:bg-black transition-colors">
-                <div className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse" />
-                Live Chat
-              </div>
-            </button>
-          </div>
-        )}
       </div>
 
-      {/* XMTP Chatroom Popup */}
-      {showChat && (
-        <XmtpChatRoom
-          stationId={currentStation}
-          stationName={stationData.name}
-          onClose={() => setShowChat(false)}
-        />
-      )}
+      {/* Share Modal Popup */}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        currentSong={currentSong || null}
+        stationName={stationData.name}
+      />
     </div>
   );
 };
