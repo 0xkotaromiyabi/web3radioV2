@@ -19,22 +19,28 @@ const CryptoPriceTicker = ({ isMobile }: CryptoPriceTickerProps) => {
     const fetchPrices = async () => {
       try {
         const response = await fetch(
-          "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,binancecoin,cardano,polkadot&vs_currencies=usd"
+          "https://api.freecryptoapi.com/v1/getData?symbol=BTC+ETH+SOL+BNB+ADA+DOT",
+          {
+            headers: {
+              "Authorization": "Bearer qfb2dddbggnatwgo72bd"
+            }
+          }
         );
         if (!response.ok) throw new Error('API error');
         const data = await response.json();
-        const prices: CryptoPrice[] = [
-          { symbol: 'BTC', price: data.bitcoin?.usd || 0 },
-          { symbol: 'ETH', price: data.ethereum?.usd || 0 },
-          { symbol: 'SOL', price: data.solana?.usd || 0 },
-          { symbol: 'BNB', price: data.binancecoin?.usd || 0 },
-          { symbol: 'ADA', price: data.cardano?.usd || 0 },
-          { symbol: 'DOT', price: data.polkadot?.usd || 0 },
-        ];
-        setCryptoPrices(prices);
+        if (data.status === "success" && data.symbols) {
+          const prices: CryptoPrice[] = data.symbols.map((item: any) => ({
+            symbol: item.symbol,
+            price: parseFloat(item.last) || 0,
+            change: parseFloat(item.daily_change_percentage) || 0
+          }));
+          setCryptoPrices(prices);
+        } else {
+          throw new Error('Invalid data format');
+        }
       } catch (error) {
         // CORS or network error - use fallback static data
-        console.warn("CoinGecko API unavailable, using fallback data");
+        console.warn("freecryptoapi.com API unavailable, using fallback data", error);
         setCryptoPrices([
           { symbol: 'BTC', price: 95000 },
           { symbol: 'ETH', price: 3200 },

@@ -23,19 +23,11 @@ export default function CryptoTicker() {
         const fetchPrices = async () => {
             try {
                 const res = await fetch(
-                    'https://oiciwwjpfypcivbbwjwa.supabase.co/functions/v1/w3r-api',
+                    'https://api.freecryptoapi.com/v1/getData?symbol=BTC+ETH+SOL+BNB+XRP+ADA+DOT+DOGE+LINK+TRX',
                     {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            action: 'get_markets',
-                            vs_currency: 'usd',
-                            order: 'market_cap_desc',
-                            per_page: 10,
-                            page: 1,
-                            sparkline: false,
-                            price_change_percentage: '24h'
-                        })
+                        headers: {
+                            'Authorization': 'Bearer qfb2dddbggnatwgo72bd'
+                        }
                     }
                 );
 
@@ -44,8 +36,19 @@ export default function CryptoTicker() {
                     return;
                 }
 
-                const data: CoinData[] = await res.json();
-                setCoins(shuffle(data));
+                const data = await res.json();
+
+                if (data.status === "success" && data.symbols) {
+                    const mappedData: CoinData[] = data.symbols.map((item: any) => ({
+                        id: item.symbol.toLowerCase(),
+                        symbol: item.symbol.toLowerCase(),
+                        current_price: parseFloat(item.last) || 0,
+                        price_change_percentage_24h: parseFloat(item.daily_change_percentage) || 0
+                    }));
+                    setCoins(shuffle(mappedData));
+                } else {
+                    setCoins(shuffle(fallbackData));
+                }
             } catch (err) {
                 // Catch CORS or Network errors silently and use fallback
                 setCoins(shuffle(fallbackData));
