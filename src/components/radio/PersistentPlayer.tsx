@@ -121,15 +121,15 @@ const PersistentPlayer = () => {
                         </Link>
                     </div>
                 </div>
-
-                {/* Share Modal */}
-                <ShareModal
-                    isOpen={isShareModalOpen}
-                    onClose={() => setIsShareModalOpen(false)}
-                    currentSong={currentSong || null}
-                    stationName={stationName}
-                />
             </div>
+
+            {/* Share Modal */}
+            <ShareModal
+                isOpen={isShareModalOpen}
+                onClose={() => setIsShareModalOpen(false)}
+                currentSong={currentSong || null}
+                stationName={stationName}
+            />
         </>
     );
 };
