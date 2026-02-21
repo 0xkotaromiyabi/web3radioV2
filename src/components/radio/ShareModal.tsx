@@ -3,6 +3,7 @@ import html2canvas from 'html2canvas';
 import { Share2, Twitter, Instagram, Link as LinkIcon, Download, X, Music } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import logo from '@/assets/web3radio-logo.png';
+import RealAudioVisualizer from './RealAudioVisualizer';
 
 interface ShareModalProps {
     isOpen: boolean;
@@ -157,6 +158,8 @@ export function ShareModal({ isOpen, onClose, currentSong, stationName }: ShareM
                             <p className="text-white/70 text-[10px] font-medium truncate w-full px-2">
                                 {currentSong?.artist || stationName}
                             </p>
+
+                            <RealAudioVisualizer />
 
                             <div className="inline-block mt-2 px-2.5 py-1 rounded-full bg-white/10 border border-white/10 backdrop-blur-md">
                                 <p className="text-white/90 text-[8px] font-bold uppercase tracking-widest flex items-center gap-1.5">

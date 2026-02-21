@@ -20,6 +20,7 @@ interface AudioContextType {
     changeStation: (station: string) => void;
     toggleMute: () => void;
     isLoading: boolean;
+    analyser: AnalyserNode | null;
 }
 
 import { STATIONS as STATION_DATA, getStationById } from '@/data/stations';
@@ -36,6 +37,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const { toast } = useToast();
 
     const audioRef = useRef<HTMLAudioElement | null>(null);
+    const audioContextRef = useRef<AudioContext | null>(null);
+    const analyserRef = useRef<AnalyserNode | null>(null);
+    const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
 
     // Helper to get stream URL safely
     const getStreamUrl = (stationId: string) => {
@@ -90,6 +94,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         if (!streamUrl) return;
 
         const audio = new Audio(streamUrl);
+        audio.crossOrigin = "anonymous"; // Needed for Web Audio API analyser
         audioRef.current = audio;
         audio.volume = volume / 100;
 
@@ -184,6 +189,30 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 audioRef.current.pause();
             } else {
                 setIsLoading(true);
+
+                // Initialize AudioContext on first play
+                if (!audioContextRef.current) {
+                    audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+                    analyserRef.current = audioContextRef.current.createAnalyser();
+                    analyserRef.current.fftSize = 256;
+                }
+
+                // Connect source if not already connected
+                if (audioRef.current && !sourceRef.current) {
+                    try {
+                        sourceRef.current = audioContextRef.current.createMediaElementSource(audioRef.current);
+                        sourceRef.current.connect(analyserRef.current!);
+                        analyserRef.current!.connect(audioContextRef.current.destination);
+                    } catch (e) {
+                        console.error("Failed to connect audio source to analyser", e);
+                    }
+                }
+
+                // Resume AudioContext if suspended
+                if (audioContextRef.current.state === 'suspended') {
+                    audioContextRef.current.resume();
+                }
+
                 audioRef.current.play()
                     .then(() => {
                         // Fetch real metadata after play starts
@@ -220,7 +249,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             togglePlay,
             setVolume,
             changeStation,
-            toggleMute
+            toggleMute,
+            analyser: analyserRef.current
         }}>
             {children}
         </AudioContext.Provider>
