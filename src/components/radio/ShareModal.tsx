@@ -107,12 +107,15 @@ export function ShareModal({ isOpen, onClose, currentSong, stationName }: ShareM
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-            <div className="bg-white/10 backdrop-blur-2xl rounded-3xl p-6 w-full max-w-[400px] border border-white/20 shadow-2xl relative flex flex-col items-center">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300 pointer-events-none" />
+
+            <div className="bg-white/10 backdrop-blur-2xl rounded-3xl p-6 w-full max-w-[400px] max-h-[90vh] overflow-y-auto border border-white/20 shadow-2xl relative flex flex-col items-center animate-in zoom-in-95 duration-300 scrollbar-hide">
                 {/* Close Button */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 p-2 rounded-full bg-black/20 hover:bg-black/40 text-white transition-colors"
+                    className="absolute top-4 right-4 p-2 rounded-full bg-black/20 hover:bg-black/40 text-white transition-colors z-50"
                 >
                     <X className="w-5 h-5" />
                 </button>
@@ -125,19 +128,19 @@ export function ShareModal({ isOpen, onClose, currentSong, stationName }: ShareM
                 {/* --- THE IG STORY CARD (Captured via html2canvas) --- */}
                 <div
                     ref={cardRef}
-                    className="relative w-full aspect-[9/16] max-h-[500px] rounded-[32px] overflow-hidden bg-gradient-to-br from-[#1a1c29] to-[#0f1016] shadow-2xl mb-8 flex flex-col items-center justify-center p-8"
+                    className="relative w-full aspect-[9/16] shrink-0 rounded-[32px] overflow-hidden bg-gradient-to-br from-[#1a1c29] to-[#0f1016] shadow-2xl mb-8 flex flex-col items-center justify-center p-8"
                 >
                     {/* Subtle Background Art Blur */}
                     {currentSong?.artwork && (
                         <div
-                            className="absolute inset-0 opacity-40 blur-3xl scale-125"
+                            className="absolute inset-0 opacity-40 blur-3xl scale-125 pointer-events-none"
                             style={{ backgroundImage: `url(${currentSong.artwork})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
                         />
                     )}
 
                     <div className="relative z-10 flex flex-col items-center w-full">
                         {/* Artwork */}
-                        <div className="w-48 h-48 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] mb-8 border border-white/10 bg-black/40 flex items-center justify-center">
+                        <div className="w-48 h-48 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] mb-8 border border-white/10 bg-black/40 flex items-center justify-center pointer-events-none">
                             {currentSong?.artwork ? (
                                 <img src={currentSong.artwork} alt="Artwork" className="w-full h-full object-cover" crossOrigin="anonymous" />
                             ) : (
@@ -146,7 +149,7 @@ export function ShareModal({ isOpen, onClose, currentSong, stationName }: ShareM
                         </div>
 
                         {/* Song Info */}
-                        <div className="text-center w-full space-y-2">
+                        <div className="text-center w-full space-y-2 pointer-events-none">
                             <h2 className="text-white text-2xl font-bold font-['Space_Grotesk'] tracking-tight truncate w-full px-4">
                                 {currentSong?.title || "Live Stream"}
                             </h2>
@@ -164,7 +167,7 @@ export function ShareModal({ isOpen, onClose, currentSong, stationName }: ShareM
                     </div>
 
                     {/* Branding Watermark */}
-                    <div className="absolute bottom-6 flex items-center gap-3 opacity-80">
+                    <div className="absolute bottom-6 flex items-center gap-3 opacity-80 pointer-events-none">
                         <img src={logo} alt="Web3Radio" className="w-8 h-8 rounded-lg" />
                         <div className="text-left">
                             <p className="text-white text-sm font-bold tracking-wider">Web3Radio</p>
@@ -174,7 +177,7 @@ export function ShareModal({ isOpen, onClose, currentSong, stationName }: ShareM
                 </div>
 
                 {/* --- Action Buttons --- */}
-                <div className="grid grid-cols-3 gap-4 w-full">
+                <div className="grid grid-cols-3 gap-4 w-full shrink-0">
                     <button
                         onClick={handleInstagramShare}
                         disabled={isCapturing}
