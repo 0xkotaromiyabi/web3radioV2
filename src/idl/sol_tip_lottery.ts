@@ -1,4 +1,5 @@
 export const IDL = {
+    "address": "FqUyWR1VRDbsepJE1cayAqLcdp1WuMqPKjLgbkP24ruB",
     "version": "0.1.0",
     "name": "sol_tip_lottery",
     "instructions": [

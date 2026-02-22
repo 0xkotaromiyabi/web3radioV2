@@ -17,10 +17,9 @@ import { AnchorProvider, Program, BN } from "@coral-xyz/anchor";
 import { IDL, PROGRAM_ID } from '../../idl/sol_tip_lottery';
 import { SolTipLottery } from '../../../sol_tip_lottery/target/types/sol_tip_lottery';
 
-const SOLANA_PROGRAM_ID = new PublicKey(PROGRAM_ID);
-const TREASURY_PUBKEY = new PublicKey("8RFfbcfkqKJ8cC66MAhk7aPScRzsQaWZERJSbPmKR8q5");
-const PRIZE_VAULT_PUBKEY = new PublicKey("8RFfbcfkqKJ8cC66MAhk7aPScRzsQaWZERJSbPmKR8q5");
-const EPOCH_STATE_PUBKEY = new PublicKey("C2LJsczAxcGM6bqyP6Mn4UiwrnoXGEaas2nJjodUme9P");
+const TREASURY_PUBKEY = new anchor.web3.PublicKey("8RFfbcfkqKJ8cC66MAhk7aPScRzsQaWZERJSbPmKR8q5");
+const PRIZE_VAULT_PUBKEY = new anchor.web3.PublicKey("8RFfbcfkqKJ8cC66MAhk7aPScRzsQaWZERJSbPmKR8q5");
+const EPOCH_STATE_PUBKEY = new anchor.web3.PublicKey("C2LJsczAxcGM6bqyP6Mn4UiwrnoXGEaas2nJjodUme9P");
 
 const EVM_DESTINATION = "0x242dfb7849544ee242b2265ca7e585bdec60456b";
 const SOLANA_RPC = import.meta.env.VITE_SOLANA_RPC || 'https://rpc.ankr.com/solana';
@@ -142,6 +141,7 @@ export default function UnifiedTipComponent() {
                 }
 
                 const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
+                console.log("Solana Tip Debug:", { address, walletProvider: !!walletProvider, programId: PROGRAM_ID });
 
                 // Construct Anchor Provider
                 const provider = new AnchorProvider(
@@ -150,20 +150,20 @@ export default function UnifiedTipComponent() {
                     { commitment: 'confirmed' }
                 );
 
-                const program = new Program(IDL as any, SOLANA_PROGRAM_ID, provider);
+                const program = new Program(IDL as any, provider);
 
                 // Derive Participant PDA
-                const userPubkey = new PublicKey(address);
-                const [participantPda] = PublicKey.findProgramAddressSync(
+                const userPubkey = new anchor.web3.PublicKey(address);
+                const [participantPda] = anchor.web3.PublicKey.findProgramAddressSync(
                     [Buffer.from("participant"), userPubkey.toBuffer()],
-                    SOLANA_PROGRAM_ID
+                    program.programId
                 );
 
                 // Convert cryptoAmount to lamports (u64 BN)
                 const lamports = Math.floor(parseFloat(cryptoAmount) * LAMPORTS_PER_SOL);
                 const tipAmount = new BN(lamports);
 
-                console.log(`Sending Anchor tip: ${cryptoAmount} SOL (${lamports} lamports)`);
+                console.log(`Sending Anchor tip: ${cryptoAmount} SOL (${lamports} lamports) to Program ${program.programId.toBase58()}`);
 
                 // Execute the Tip RPC Instruction
                 const signature = await program.methods

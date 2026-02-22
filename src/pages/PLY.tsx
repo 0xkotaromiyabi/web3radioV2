@@ -24,6 +24,7 @@ import {
     Users
 } from 'lucide-react';
 import { useAppKit, useAppKitAccount, useAppKitProvider } from '@reown/appkit/react';
+import * as anchor from "@coral-xyz/anchor";
 import { AnchorProvider, Program, BN } from '@coral-xyz/anchor';
 import { Connection, PublicKey, SystemProgram } from '@solana/web3.js';
 import { useState } from 'react';
@@ -61,16 +62,14 @@ const PLY = () => {
                 { preflightCommitment: "confirmed" }
             );
 
-            const programId = new PublicKey(PROGRAM_ID);
-            const program = new Program(IDL as any, programId, provider);
+            const program = new Program(IDL as any, provider);
 
-            const userPubkey = new PublicKey(address);
+            const userPubkey = new anchor.web3.PublicKey(address);
 
             // Find Participant PDA
-            // seeds = [b"participant", user.key().as_ref()]
-            const [participantPda] = PublicKey.findProgramAddressSync(
+            const [participantPda] = anchor.web3.PublicKey.findProgramAddressSync(
                 [Buffer.from("participant"), userPubkey.toBuffer()],
-                programId
+                program.programId
             );
 
             // Tip amount (0.01 SOL = 10_000_000 Lamports)
