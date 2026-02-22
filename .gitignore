@@ -25,3 +25,10 @@ dist-ssr
 
 # Ignore .env file
 .env
+
+# Solana & Anchor
+solana-release/
+solana.tar.bz2
+sol_tip_lottery/target/
+sol_tip_lottery/node_modules/
+sol_tip_lottery/.anchor/

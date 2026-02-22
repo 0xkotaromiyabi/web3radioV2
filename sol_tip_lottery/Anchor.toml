@@ -1,0 +1,23 @@
+[toolchain]
+package_manager = "yarn"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+sol_tip_lottery = "FqUyWR1VRDbsepJE1cayAqLcdp1WuMqPKjLgbkP24ruB"
+
+[programs.devnet]
+sol_tip_lottery = "FqUyWR1VRDbsepJE1cayAqLcdp1WuMqPKjLgbkP24ruB"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "devnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "yarn run mocha -t 1000000 tests/"
+init = "npx ts-node scripts/init.ts"

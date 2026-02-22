@@ -23,33 +23,106 @@ import {
     History,
     Users
 } from 'lucide-react';
-import { useAccount } from 'wagmi';
-import { useAppKit } from '@reown/appkit/react';
+import { useAppKit, useAppKitAccount, useAppKitProvider } from '@reown/appkit/react';
+import { AnchorProvider, Program, BN } from '@coral-xyz/anchor';
+import { Connection, PublicKey, SystemProgram } from '@solana/web3.js';
+import { useState } from 'react';
+import { IDL, PROGRAM_ID } from '../idl/sol_tip_lottery';
+import { toast } from 'sonner';
 
 const PLY = () => {
-    const { address, isConnected } = useAccount();
+    const { address, isConnected } = useAppKitAccount();
     const { open } = useAppKit();
+    const { walletProvider } = useAppKitProvider<any>('solana');
+    const [isTipping, setIsTipping] = useState(false);
+
+    // NOTE: After you deploy and run the initialize script, replace these placeholder addresses!
+    // Real addresses from init_output.json:
+    const TREASURY_PUBKEY = new PublicKey("8RFfbcfkqKJ8cC66MAhk7aPScRzsQaWZERJSbPmKR8q5");
+    const PRIZE_VAULT_PUBKEY = new PublicKey("8RFfbcfkqKJ8cC66MAhk7aPScRzsQaWZERJSbPmKR8q5");
+    const EPOCH_STATE_PUBKEY = new PublicKey("C2LJsczAxcGM6bqyP6Mn4UiwrnoXGEaas2nJjodUme9P");
+
+    const handleTip = async () => {
+        if (!isConnected || !address || !walletProvider) {
+            toast.error("Please connect your Solana wallet first");
+            return;
+        }
+
+        try {
+            setIsTipping(true);
+            toast.loading("Sending tip transaction to Devnet...");
+
+            const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
+
+            // Setup Anchor Provider with Reown's walletProvider
+            const provider = new AnchorProvider(
+                connection,
+                walletProvider as any,
+                { preflightCommitment: "confirmed" }
+            );
+
+            const programId = new PublicKey(PROGRAM_ID);
+            const program = new Program(IDL as any, programId, provider);
+
+            const userPubkey = new PublicKey(address);
+
+            // Find Participant PDA
+            // seeds = [b"participant", user.key().as_ref()]
+            const [participantPda] = PublicKey.findProgramAddressSync(
+                [Buffer.from("participant"), userPubkey.toBuffer()],
+                programId
+            );
+
+            // Tip amount (0.01 SOL = 10_000_000 Lamports)
+            // Let's assume the user clicks tip to send 0.05 SOL in this mockup
+            const tipAmount = new BN(50_000_000);
+
+            // Execute the Tip RPC Instruction
+            const tx = await program.methods
+                .tip(tipAmount)
+                .accounts({
+                    user: userPubkey,
+                    treasury: TREASURY_PUBKEY,
+                    prizeVault: PRIZE_VAULT_PUBKEY,
+                    epoch: EPOCH_STATE_PUBKEY,
+                    participant: participantPda,
+                    systemProgram: SystemProgram.programId,
+                })
+                .rpc();
+
+            console.log("Tip transaction successful! Signature:", tx);
+            toast.success(`Tip sent successfully! Tx: ${tx.slice(0, 8)}...`);
+
+        } catch (error) {
+            console.error("Tip error:", error);
+            toast.error("Failed to process tip. See console for details.");
+        } finally {
+            setIsTipping(false);
+            toast.dismiss();
+        }
+    };
+
 
     // Mock data for demonstration
     const currentEpoch = {
         id: 7,
         daysRemaining: 8,
-        totalTips: 1250000,
-        prizePool: 125000,
+        totalTips: 125.5,
+        prizePool: 12.55,
         participants: 342,
         progress: 47
     };
 
     const previousWinners = [
-        { address: '0x1234...5678', prize: 8500, epoch: 6 },
-        { address: '0xabcd...efgh', prize: 6200, epoch: 5 },
-        { address: '0x9876...4321', prize: 9800, epoch: 4 },
+        { address: '0x1234...5678', prize: 8.5, epoch: 6 },
+        { address: '0xabcd...efgh', prize: 6.2, epoch: 5 },
+        { address: '0x9876...4321', prize: 9.8, epoch: 4 },
     ];
 
     const myTips = [
-        { amount: 5000, date: '2026-01-28', epochId: 7 },
-        { amount: 2500, date: '2026-01-25', epochId: 7 },
-        { amount: 10000, date: '2026-01-15', epochId: 6 },
+        { amount: 0.5, date: '2026-01-28', epochId: 7 },
+        { amount: 0.25, date: '2026-01-25', epochId: 7 },
+        { amount: 1.0, date: '2026-01-15', epochId: 6 },
     ];
 
     return (
@@ -80,8 +153,8 @@ const PLY = () => {
                                 <Wallet className="w-4 h-4 mr-2" /> Connect Wallet
                             </Button>
                         ) : (
-                            <Button size="lg" className="bg-[#515044] hover:bg-black text-white rounded-2xl px-10 py-7 font-bold text-xs uppercase tracking-widest shadow-xl shadow-[#515044]/10 transition-all hover:scale-105 active:scale-95">
-                                <Gift className="w-4 h-4 mr-2" /> Tip Now
+                            <Button size="lg" onClick={handleTip} disabled={isTipping} className="bg-[#515044] hover:bg-black text-white rounded-2xl px-10 py-7 font-bold text-xs uppercase tracking-widest shadow-xl shadow-[#515044]/10 transition-all hover:scale-105 active:scale-95">
+                                <Gift className="w-4 h-4 mr-2" /> {isTipping ? "Processing..." : "Tip Now"}
                             </Button>
                         )}
                         <Button variant="outline" size="lg" className="rounded-2xl border-[#515044]/10 bg-white/50 backdrop-blur text-[#515044] px-8 py-7 font-bold text-xs uppercase tracking-widest hover:bg-white transition-all shadow-lg hover:shadow-xl">
@@ -131,7 +204,7 @@ const PLY = () => {
                                         <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#515044]/30 mb-2">Current Prize Pool</span>
                                         <div className="flex items-baseline gap-3">
                                             <span className="text-6xl md:text-7xl font-bold text-[#515044] tracking-tight">{currentEpoch.prizePool.toLocaleString()}</span>
-                                            <span className="text-xs font-bold text-[#515044]/40 uppercase tracking-[0.2em] mb-2">IDRX</span>
+                                            <span className="text-xs font-bold text-[#515044]/40 uppercase tracking-[0.2em] mb-2">SOL</span>
                                         </div>
                                     </div>
 
@@ -177,16 +250,16 @@ const PLY = () => {
                                     <div className="mb-6 inline-flex p-5 rounded-[24px] bg-[#515044]/5 text-[#515044]/40">
                                         <Coins className="w-10 h-10" />
                                     </div>
-                                    <h3 className="text-4xl font-bold text-[#515044] mb-2">{isConnected ? '17,500' : '0'}</h3>
-                                    <p className="text-[10px] font-bold text-[#515044]/30 uppercase tracking-[0.3em]">IDRX Tipped</p>
+                                    <h3 className="text-4xl font-bold text-[#515044] mb-2">{isConnected ? '1.75' : '0'}</h3>
+                                    <p className="text-[10px] font-bold text-[#515044]/30 uppercase tracking-[0.3em]">SOL Tipped</p>
                                     {isConnected && (
                                         <div className="mt-4 bg-green-500/10 text-green-600 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest inline-block">
                                             ~14% Win Chance
                                         </div>
                                     )}
                                 </div>
-                                <Button className="w-full bg-[#515044] hover:bg-black text-white rounded-2xl py-7 font-bold text-xs uppercase tracking-widest shadow-xl shadow-[#515044]/10 transition-all hover:scale-[1.02]" disabled={!isConnected}>
-                                    <Gift className="w-4 h-4 mr-2" /> Tip Now
+                                <Button onClick={handleTip} className="w-full bg-[#515044] hover:bg-black text-white rounded-2xl py-7 font-bold text-xs uppercase tracking-widest shadow-xl shadow-[#515044]/10 transition-all hover:scale-[1.02]" disabled={!isConnected || isTipping}>
+                                    <Gift className="w-4 h-4 mr-2" /> {isTipping ? "Processing..." : "Tip Now"}
                                 </Button>
                             </Card>
                         </div>
@@ -245,7 +318,7 @@ const PLY = () => {
                                                 </div>
                                             </div>
                                             <div className="bg-[#515044]/5 text-[#515044] px-4 py-2 rounded-xl text-xs font-bold font-mono group-hover:bg-[#515044] group-hover:text-white transition-all">
-                                                +{winner.prize.toLocaleString()} IDRX
+                                                +{winner.prize.toLocaleString()} SOL
                                             </div>
                                         </div>
                                     ))}
@@ -258,7 +331,7 @@ const PLY = () => {
                         {/* Steps */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {[
-                                { step: 1, title: 'Tip Streamers', icon: Coins, desc: 'Send IDRX tips to your favorite streamers. 90% goes to them, 10% enters the Prize Pool.' },
+                                { step: 1, title: 'Tip Streamers', icon: Coins, desc: 'Send SOL tips to your favorite streamers. 90% goes to them, 10% enters the Prize Pool.' },
                                 { step: 2, title: 'Wait 15 Days', icon: Timer, desc: 'Each epoch lasts 15 days. The Prize Pool grows with every tip across the network.' },
                                 { step: 3, title: 'Win & Earn!', icon: Trophy, desc: 'Winners are selected transparently with Pyth Entropy. Rewards are auto-distributed.' }
                             ].map((item) => (
@@ -283,7 +356,7 @@ const PLY = () => {
                             </CardHeader>
                             <CardContent className="p-0 space-y-6">
                                 {[
-                                    { phase: 'Days 1-15', title: 'Tipping Phase', icon: Clock, desc: 'Listener tips for broadcaster support; smart contracts record all entries.' },
+                                    { phase: 'Days 1-15', title: 'Tipping Phase', icon: Clock, desc: 'Listener tips for broadcaster support; Solana program records weighted entries (0.01 SOL = 1 entry).' },
                                     { phase: 'Day 15 (End)', title: 'Epoch Settlement', icon: CheckCircle, desc: 'Epoch closes, protocol calculates the final Prize and Contributor pools.' },
                                     { phase: 'Draw Phase', title: 'Pyth Randomness', icon: Shuffle, desc: 'Chain-verified randomness determines winners in a transparent way.' },
                                     { phase: 'Reward Phase', title: 'Distribution', icon: Trophy, desc: 'Rewards are instantly distributed to winners and broadcasters.' },
@@ -309,10 +382,10 @@ const PLY = () => {
                         {/* Smart Contracts */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {[
-                                { name: 'TipRouter', desc: 'Receives IDRX' },
-                                { name: 'EpochManager', desc: 'Manage Cycles' },
-                                { name: 'PLYLottery', desc: 'Pyth Entropy' },
-                                { name: 'ContributorVault', desc: 'Secure Rewards' },
+                                { name: 'sol_tip_lottery', desc: 'Main Program' },
+                                { name: 'GlobalState', desc: 'Authority & Vaults' },
+                                { name: 'EpochState', desc: 'Track 15-day cycle' },
+                                { name: 'Participant', desc: 'Track user entries' },
                             ].map((contract, index) => (
                                 <div key={index} className="p-6 rounded-[28px] bg-white/60 backdrop-blur border border-[#515044]/5 text-center shadow-lg transition-all hover:scale-105">
                                     <code className="text-xs font-mono font-bold text-[#515044]">{contract.name}</code>
@@ -343,7 +416,7 @@ const PLY = () => {
                                                     </div>
                                                 </div>
                                                 <div className="bg-[#515044]/5 text-[#515044] px-4 py-2 rounded-xl text-xs font-bold font-mono">
-                                                    {tip.amount.toLocaleString()} IDRX
+                                                    {tip.amount.toLocaleString()} SOL
                                                 </div>
                                             </div>
                                         ))}
@@ -379,7 +452,7 @@ const PLY = () => {
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                                                <p className="font-bold text-[#515044] text-lg font-mono">{(Math.random() * 10000 + 5000).toFixed(0)} IDRX</p>
+                                                <p className="font-bold text-[#515044] text-lg font-mono">{(Math.random() * 10 + 2).toFixed(2)} SOL</p>
                                                 <p className="text-[8px] text-[#515044]/30 font-bold uppercase tracking-widest">Final Prize Pool</p>
                                             </div>
                                         </div>

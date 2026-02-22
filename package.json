@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@coinbase/onchainkit": "^1.1.2",
+    "@coral-xyz/anchor": "^0.32.1",
     "@hookform/resolvers": "3.9.0",
     "@openzeppelin/contracts": "^5.4.0",
     "@radix-ui/react-avatar": "^1.0.4",

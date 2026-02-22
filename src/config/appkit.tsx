@@ -10,6 +10,7 @@ import {
   bsc,
   sepolia,
   solana,
+  solanaDevnet,
 } from '@reown/appkit/networks'
 import { http } from 'viem'
 import { WagmiProvider } from 'wagmi'
@@ -62,6 +63,7 @@ createAppKit({
     bsc,
     sepolia,
     solanaWithRpc,
+    solanaDevnet,
   ],
   projectId,
   metadata: {

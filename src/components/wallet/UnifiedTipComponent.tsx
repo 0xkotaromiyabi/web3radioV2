@@ -12,9 +12,17 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Heart, RefreshCw, Coins, Wallet, ShieldCheck, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import * as anchor from "@coral-xyz/anchor";
+import { AnchorProvider, Program, BN } from "@coral-xyz/anchor";
+import { IDL, PROGRAM_ID } from '../../idl/sol_tip_lottery';
+import { SolTipLottery } from '../../../sol_tip_lottery/target/types/sol_tip_lottery';
+
+const SOLANA_PROGRAM_ID = new PublicKey(PROGRAM_ID);
+const TREASURY_PUBKEY = new PublicKey("8RFfbcfkqKJ8cC66MAhk7aPScRzsQaWZERJSbPmKR8q5");
+const PRIZE_VAULT_PUBKEY = new PublicKey("8RFfbcfkqKJ8cC66MAhk7aPScRzsQaWZERJSbPmKR8q5");
+const EPOCH_STATE_PUBKEY = new PublicKey("C2LJsczAxcGM6bqyP6Mn4UiwrnoXGEaas2nJjodUme9P");
 
 const EVM_DESTINATION = "0x242dfb7849544ee242b2265ca7e585bdec60456b";
-const SOLANA_DESTINATION = "9xhz4Cb4C2Z4z9xdD2geCafovNYVngC4E4XpWtQmeEuv";
 const SOLANA_RPC = import.meta.env.VITE_SOLANA_RPC || 'https://rpc.ankr.com/solana';
 
 const IDR_PRESETS = [
@@ -133,53 +141,45 @@ export default function UnifiedTipComponent() {
                     throw new Error("Solana wallet provider not found");
                 }
 
-                const RPCS = [
-                    import.meta.env.VITE_SOLANA_RPC,
-                    'https://solana-rpc.publicnode.com',
-                    'https://api.mainnet-beta.solana.com'
-                ].filter(Boolean);
+                const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
 
-                let lastError = null;
-                let success = false;
+                // Construct Anchor Provider
+                const provider = new AnchorProvider(
+                    connection,
+                    walletProvider as any,
+                    { commitment: 'confirmed' }
+                );
 
-                for (const rpcUrl of RPCS) {
-                    try {
-                        console.log(`Trying Solana RPC: ${rpcUrl}`);
-                        // @ts-ignore
-                        const solanaConnection = new Connection(rpcUrl, {
-                            commitment: "confirmed",
-                            confirmTransactionInitialTimeout: 30000,
-                        });
+                const program = new Program(IDL as any, SOLANA_PROGRAM_ID, provider);
 
-                        const transaction = new Transaction().add(
-                            SystemProgram.transfer({
-                                fromPubkey: new PublicKey(address),
-                                toPubkey: new PublicKey(SOLANA_DESTINATION),
-                                lamports: Math.floor(parseFloat(cryptoAmount) * LAMPORTS_PER_SOL),
-                            })
-                        );
+                // Derive Participant PDA
+                const userPubkey = new PublicKey(address);
+                const [participantPda] = PublicKey.findProgramAddressSync(
+                    [Buffer.from("participant"), userPubkey.toBuffer()],
+                    SOLANA_PROGRAM_ID
+                );
 
-                        const { blockhash } = await solanaConnection.getLatestBlockhash('confirmed');
-                        transaction.recentBlockhash = blockhash;
-                        transaction.feePayer = new PublicKey(address);
+                // Convert cryptoAmount to lamports (u64 BN)
+                const lamports = Math.floor(parseFloat(cryptoAmount) * LAMPORTS_PER_SOL);
+                const tipAmount = new BN(lamports);
 
-                        // @ts-ignore
-                        const signature = await walletProvider.sendTransaction(transaction, solanaConnection);
-                        await solanaConnection.confirmTransaction(signature, 'confirmed');
+                console.log(`Sending Anchor tip: ${cryptoAmount} SOL (${lamports} lamports)`);
 
-                        success = true;
-                        console.log(`Solana transaction successful via ${rpcUrl}`);
-                        break; // Exit loop on success
-                    } catch (err: any) {
-                        console.warn(`RPC ${rpcUrl} failed:`, err.message);
-                        lastError = err;
-                        // Continue to next RPC
-                    }
-                }
+                // Execute the Tip RPC Instruction
+                const signature = await program.methods
+                    .tip(tipAmount)
+                    .accounts({
+                        user: userPubkey,
+                        treasury: TREASURY_PUBKEY,
+                        prizeVault: PRIZE_VAULT_PUBKEY,
+                        epoch: EPOCH_STATE_PUBKEY,
+                        participant: participantPda,
+                        systemProgram: SystemProgram.programId,
+                    } as any)
+                    .rpc();
 
-                if (!success) {
-                    throw lastError || new Error("All Solana RPC endpoints failed");
-                }
+                await connection.confirmTransaction(signature, 'confirmed');
+                console.log(`Anchor tip successful via Devnet. Signature: ${signature}`);
 
                 toast({ title: "Tip Sent! 💖", description: "Thank you for supporting Web3Radio!" });
                 setIsProcessing(false);
@@ -244,7 +244,7 @@ export default function UnifiedTipComponent() {
                                     <span className="text-[#515044]/40">To</span>
                                     <span className="font-mono text-[#515044]">
                                         {isSolana
-                                            ? `${SOLANA_DESTINATION.slice(0, 6)}...${SOLANA_DESTINATION.slice(-4)}`
+                                            ? `${TREASURY_PUBKEY.toBase58().slice(0, 6)}...${TREASURY_PUBKEY.toBase58().slice(-4)}`
                                             : `${EVM_DESTINATION.slice(0, 6)}...${EVM_DESTINATION.slice(-4)}`
                                         }
                                     </span>
