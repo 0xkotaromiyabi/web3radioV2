@@ -9,6 +9,7 @@ import { fetchEvents, subscribeToTable } from '@/lib/supabase';
 import { Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Event } from '@/types/content';
+import NewspaperLayout from '@/components/events/NewspaperLayout';
 
 const Events = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -179,17 +180,7 @@ const Events = () => {
           </TabsContent>
 
           <TabsContent value="news" className="mt-0 ring-0 focus:outline-none">
-            {newsAndJobs.length > 0 ? (
-              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                {newsAndJobs.map((event) => renderEventCard(event))}
-              </div>
-            ) : (
-              <div className="text-center py-32 bg-white/40 backdrop-blur-xl rounded-[48px] border-2 border-dashed border-[#515044]/5">
-                <Briefcase className="h-16 w-16 text-[#515044]/10 mx-auto mb-6" />
-                <h3 className="text-2xl font-bold text-[#515044] uppercase tracking-widest">No News or Jobs</h3>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/20 mt-2">Join our community to stay updated</p>
-              </div>
-            )}
+            <NewspaperLayout />
           </TabsContent>
         </Tabs>
       </main>

@@ -15,6 +15,7 @@ export const supabase = (supabaseUrl && supabaseAnonKey && !isDummyUrl)
   : null as any;
 
 export const fetchEvents = async () => {
+  if (!supabase) return { data: [], error: new Error('Supabase not initialized') };
   return await supabase
     .from('events')
     .select('*')
@@ -22,6 +23,7 @@ export const fetchEvents = async () => {
 };
 
 export const addEvent = async (event: any) => {
+  if (!supabase) return { data: null, error: new Error('Supabase not initialized') };
   return await supabase
     .from('events')
     .insert([event])
@@ -29,6 +31,7 @@ export const addEvent = async (event: any) => {
 };
 
 export const deleteEvent = async (id: number) => {
+  if (!supabase) return { data: null, error: new Error('Supabase not initialized') };
   return await supabase
     .from('events')
     .delete()
@@ -36,6 +39,7 @@ export const deleteEvent = async (id: number) => {
 };
 
 export const fetchStations = async () => {
+  if (!supabase) return { data: [], error: new Error('Supabase not initialized') };
   return await supabase
     .from('stations')
     .select('*')
@@ -43,6 +47,7 @@ export const fetchStations = async () => {
 };
 
 export const addStation = async (station: any) => {
+  if (!supabase) return { data: null, error: new Error('Supabase not initialized') };
   return await supabase
     .from('stations')
     .insert([station])
@@ -50,6 +55,7 @@ export const addStation = async (station: any) => {
 };
 
 export const deleteStation = async (id: number) => {
+  if (!supabase) return { data: null, error: new Error('Supabase not initialized') };
   return await supabase
     .from('stations')
     .delete()
@@ -57,6 +63,7 @@ export const deleteStation = async (id: number) => {
 };
 
 export const getEventBySlug = async (slug: string) => {
+  if (!supabase) return { data: null, error: new Error('Supabase not initialized') };
   return await supabase
     .from('events')
     .select('*')
@@ -65,6 +72,7 @@ export const getEventBySlug = async (slug: string) => {
 };
 
 export const getStationBySlug = async (slug: string) => {
+  if (!supabase) return { data: null, error: new Error('Supabase not initialized') };
   return await supabase
     .from('stations')
     .select('*')
@@ -73,6 +81,7 @@ export const getStationBySlug = async (slug: string) => {
 };
 
 export const fetchPages = async () => {
+  if (!supabase) return { data: [], error: new Error('Supabase not initialized') };
   return await supabase
     .from('pages')
     .select('*')
@@ -80,6 +89,7 @@ export const fetchPages = async () => {
 };
 
 export const getPageBySlug = async (slug: string) => {
+  if (!supabase) return { data: null, error: new Error('Supabase not initialized') };
   return await supabase
     .from('pages')
     .select('*')
@@ -89,6 +99,10 @@ export const getPageBySlug = async (slug: string) => {
 
 // Real-time subscription helper with unique channel ID
 export const subscribeToTable = (tableName: string, callback: (payload: any) => void) => {
+  if (!supabase) {
+    console.warn(`⚠️ Supabase not initialized. Real-time subscription for ${tableName} skipped.`);
+    return { unsubscribe: () => { } };
+  }
   const uniqueId = `${tableName}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   return supabase
     .channel(uniqueId)

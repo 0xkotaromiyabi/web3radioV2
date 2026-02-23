@@ -1,0 +1,204 @@
+@import url('https://fonts.googleapis.com/css?family=Merriweather:300,400,700|Open+Sans+Condensed:700');
+
+.newspaper-container {
+  box-sizing: border-box;
+  color: #222;
+  background: #faf8e9;
+  font-family: "Merriweather", serif;
+  font-size: 62.5%;
+  /* This might affect rem units globally if not careful, better to use local scaling */
+}
+
+.newspaper-container *,
+.newspaper-container *::after,
+.newspaper-container *::before {
+  margin: 0;
+  padding: 0;
+  box-sizing: inherit;
+}
+
+.newspaper-container .newspaper-inner {
+  max-width: 1200px;
+  background: #fdfdf9;
+  margin: 40px auto;
+  padding: 40px;
+  box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.2);
+  font-size: 1.4rem;
+  /* Reduced from 1.6rem */
+}
+
+.newspaper-container img {
+  max-width: 100%;
+  margin-bottom: 20px;
+  transition: all .4s;
+}
+
+.newspaper-container img:hover {
+  transform: scale(1.05);
+  box-shadow: 0px 10px 10px rgba(0, 0, 0, 0.2);
+}
+
+.newspaper-container header {
+  border-bottom: solid 2px #222;
+  margin-bottom: 30px;
+  padding-bottom: 30px;
+}
+
+.newspaper-container header .logo {
+  font-family: "Merriweather", serif;
+  text-align: center;
+  font-size: 5rem;
+  /* Reduced from 7rem */
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+
+.newspaper-container header .sub {
+  display: flex;
+  justify-content: space-between;
+}
+
+.newspaper-container h1,
+.newspaper-container h2,
+.newspaper-container h3 {
+  font-family: "Open Sans Condensed", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: -1px;
+}
+
+.newspaper-container h1 {
+  font-size: 4rem;
+  /* Reduced from 6rem */
+  text-transform: uppercase;
+  line-height: 100%;
+}
+
+.newspaper-container h2 {
+  font-size: 3rem;
+  /* Reduced from 4.5rem */
+  line-height: 90%;
+}
+
+.newspaper-container .serif {
+  font-family: "Merriweather", serif;
+  font-weight: 100;
+  line-height: 100%;
+}
+
+.newspaper-container p,
+.newspaper-container .paragraph-short {
+  font-size: 1.3rem;
+  /* Reduced from 1.5rem */
+  line-height: 1.6;
+}
+
+.newspaper-container .paragraph-short::after {
+  content: '';
+  display: block;
+  background: #e0e0e0;
+  width: 100%;
+  height: 1px;
+  margin-top: 20px;
+}
+
+.newspaper-container .headline {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  grid-gap: 30px;
+}
+
+.newspaper-container main h1 {
+  text-align: center;
+}
+
+.newspaper-container .publish {
+  margin: 20px 0;
+  font-size: 1.2rem;
+  /* Reduced from 1.5rem */
+  text-align: center;
+  border-top: solid 1px #e0e0e0;
+  border-bottom: solid 1px #e0e0e0;
+  padding: 10px 0;
+  letter-spacing: 1px;
+}
+
+.newspaper-container .btn {
+  margin-top: 20px;
+  text-decoration: none;
+  font-size: 1.3rem;
+  /* Reduced from 1.5rem */
+  font-family: "Open Sans Condensed", sans-serif;
+  text-transform: uppercase;
+  display: block;
+  text-align: center;
+}
+
+.newspaper-container .btn-secondary {
+  padding: 16px 0;
+  color: #bbbbbb;
+  border-top: solid 1px #bbbbbb;
+  transition: all .4s;
+}
+
+.newspaper-container .btn-secondary:hover {
+  color: #222;
+  border-top: solid 1px #222;
+}
+
+.newspaper-container .extra-news {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-auto-rows: minmax(50px, auto);
+  grid-gap: 30px;
+  grid-template-areas:
+    "first second third"
+    "first second forth"
+    "fifth sixth sixth";
+  margin-top: 30px;
+}
+
+.newspaper-container .extra-news .news:nth-child(1) {
+  grid-area: first;
+}
+
+.newspaper-container .extra-news .news:nth-child(2) {
+  grid-area: second;
+}
+
+.newspaper-container .extra-news .news:nth-child(3) {
+  grid-area: third;
+  /* height: 200px; Remove fixed height to allow content to grow */
+}
+
+.newspaper-container .extra-news .news:nth-child(4) {
+  grid-area: forth;
+}
+
+.newspaper-container .extra-news .news:nth-child(5) {
+  grid-area: fifth;
+}
+
+.newspaper-container .extra-news .news:nth-child(6) {
+  grid-area: sixth;
+}
+
+@media (max-width: 900px) {
+  .newspaper-container .headline {
+    grid-template-columns: 1fr;
+  }
+
+  .newspaper-container .extra-news {
+    grid-template-columns: 1fr;
+    grid-template-areas: none;
+  }
+
+  .newspaper-container .extra-news .news {
+    grid-area: auto !important;
+    margin-top: 0 !important;
+  }
+
+  .newspaper-container header .logo {
+    font-size: 4rem;
+  }
+}
