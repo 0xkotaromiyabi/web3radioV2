@@ -27,21 +27,93 @@ import { useAppKit, useAppKitAccount, useAppKitProvider } from '@reown/appkit/re
 import * as anchor from "@coral-xyz/anchor";
 import { AnchorProvider, Program, BN } from '@coral-xyz/anchor';
 import { Connection, PublicKey, SystemProgram } from '@solana/web3.js';
-import { useState } from 'react';
 import { IDL, PROGRAM_ID } from '../idl/sol_tip_lottery';
 import { toast } from 'sonner';
+import { useEffect, useCallback, useState } from 'react';
 
 const PLY = () => {
     const { address, isConnected } = useAppKitAccount();
     const { open } = useAppKit();
     const { walletProvider } = useAppKitProvider<any>('solana');
     const [isTipping, setIsTipping] = useState(false);
+    const [isClosingEpoch, setIsClosingEpoch] = useState(false);
+    const [isFinalizingDraw, setIsFinalizingDraw] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [tipAmountInput, setTipAmountInput] = useState("0.05");
+    const [winnerInput, setWinnerInput] = useState("");
 
-    // NOTE: After you deploy and run the initialize script, replace these placeholder addresses!
-    // Real addresses from init_output.json:
+    // SOL Tip Lottery Accounts (from init_output.json)
+    const GLOBAL_STATE_PUBKEY = new PublicKey("61T5AiHoXDw9Z2aLbguGxKPyVNw86AMvgMZVZ8onumYz");
     const TREASURY_PUBKEY = new PublicKey("8RFfbcfkqKJ8cC66MAhk7aPScRzsQaWZERJSbPmKR8q5");
-    const PRIZE_VAULT_PUBKEY = new PublicKey("8RFfbcfkqKJ8cC66MAhk7aPScRzsQaWZERJSbPmKR8q5");
+    const PRIZE_VAULT_PUBKEY = new PublicKey("FuCXGZAs4airoKob9WYaubXMamD5F9Le9YDaJc8ak4Wo");
     const EPOCH_STATE_PUBKEY = new PublicKey("C2LJsczAxcGM6bqyP6Mn4UiwrnoXGEaas2nJjodUme9P");
+
+    const [globalData, setGlobalData] = useState<any>(null);
+    const [epochData, setEpochData] = useState<any>(null);
+    const [participantData, setParticipantData] = useState<any>(null);
+
+    const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
+
+    const fetchData = useCallback(async () => {
+        try {
+            const provider = new AnchorProvider(
+                connection,
+                (walletProvider || {
+                    publicKey: PublicKey.default,
+                    signTransaction: async (tx: any) => tx,
+                    signAllTransactions: async (txs: any[]) => txs,
+                }) as any,
+                { preflightCommitment: "confirmed" }
+            );
+
+            const program = new Program(IDL as any, provider);
+
+            // Fetch Global State
+            try {
+                const gData = await program.account.globalState.fetch(GLOBAL_STATE_PUBKEY);
+                setGlobalData(gData);
+                console.log("Global data fetched:", gData);
+            } catch (e) {
+                console.warn("Failed to fetch global state:", e);
+            }
+
+            // Fetch Current Epoch State
+            try {
+                const eData = await program.account.epochState.fetch(EPOCH_STATE_PUBKEY);
+                setEpochData(eData);
+                console.log("Epoch data fetched:", eData);
+            } catch (e) {
+                console.warn("Failed to fetch epoch state:", e);
+            }
+
+            // Fetch Participant State if connected
+            if (address) {
+                try {
+                    const userPubkey = new PublicKey(address);
+                    const [participantPda] = PublicKey.findProgramAddressSync(
+                        [Buffer.from("participant"), userPubkey.toBuffer()],
+                        new PublicKey(PROGRAM_ID)
+                    );
+                    const pData = await program.account.participant.fetch(participantPda);
+                    setParticipantData(pData);
+                    console.log("Participant data fetched:", pData);
+                } catch (e) {
+                    console.log("Participant account not found yet (user hasn't tipped).");
+                    setParticipantData(null);
+                }
+            }
+        } catch (error) {
+            console.error("Error fetching PLY data:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [address, walletProvider]);
+
+    useEffect(() => {
+        fetchData();
+        const interval = setInterval(fetchData, 30000); // Polling every 30s
+        return () => clearInterval(interval);
+    }, [fetchData]);
 
     const handleTip = async () => {
         if (!isConnected || !address || !walletProvider) {
@@ -72,9 +144,13 @@ const PLY = () => {
                 program.programId
             );
 
-            // Tip amount (0.01 SOL = 10_000_000 Lamports)
-            // Let's assume the user clicks tip to send 0.05 SOL in this mockup
-            const tipAmount = new BN(50_000_000);
+            // Tip amount from input
+            const amountInSol = parseFloat(tipAmountInput);
+            if (isNaN(amountInSol) || amountInSol <= 0) {
+                toast.error("Please enter a valid SOL amount");
+                return;
+            }
+            const tipAmount = new BN(amountInSol * 1e9);
 
             // Execute the Tip RPC Instruction
             const tx = await program.methods
@@ -92,37 +168,84 @@ const PLY = () => {
             console.log("Tip transaction successful! Signature:", tx);
             toast.success(`Tip sent successfully! Tx: ${tx.slice(0, 8)}...`);
 
+            // Refresh data after 2 seconds to allow chain to update
+            setTimeout(fetchData, 2000);
+
         } catch (error) {
             console.error("Tip error:", error);
             toast.error("Failed to process tip. See console for details.");
         } finally {
-            setIsTipping(false);
+        }
+    };
+
+    const handleCloseEpoch = async () => {
+        if (!isConnected || !address || !walletProvider) return;
+        try {
+            setIsClosingEpoch(true);
+            toast.loading("Closing epoch...");
+            const provider = new AnchorProvider(connection, walletProvider as any, { preflightCommitment: "confirmed" });
+            const program = new Program(IDL as any, provider);
+            const tx = await program.methods.closeEpoch().accounts({ epoch: EPOCH_STATE_PUBKEY }).rpc();
+            toast.success(`Epoch closed! Tx: ${tx.slice(0, 8)}...`);
+            setTimeout(fetchData, 2000);
+        } catch (error: any) {
+            console.error("Close epoch error:", error);
+            toast.error(error.message || "Failed to close epoch");
+        } finally {
+            setIsClosingEpoch(false);
+            toast.dismiss();
+        }
+    };
+
+    const handleFinalizeDraw = async () => {
+        if (!isConnected || !address || !walletProvider || !winnerInput) {
+            toast.error("Please provide a winner address");
+            return;
+        }
+        try {
+            const winnerPubkey = new PublicKey(winnerInput);
+            setIsFinalizingDraw(true);
+            toast.loading("Finalizing draw...");
+            const provider = new AnchorProvider(connection, walletProvider as any, { preflightCommitment: "confirmed" });
+            const program = new Program(IDL as any, provider);
+            const randomness = new BN(Math.floor(Math.random() * 1000000));
+            const tx = await program.methods.finalizeDraw(randomness).accounts({
+                epoch: EPOCH_STATE_PUBKEY,
+                prizeVault: PRIZE_VAULT_PUBKEY,
+                winner: winnerPubkey,
+            }).rpc();
+            toast.success(`Draw finalized! Tx: ${tx.slice(0, 8)}...`);
+            setTimeout(fetchData, 2000);
+        } catch (error: any) {
+            console.error("Finalize draw error:", error);
+            const msg = error.name === "Error" ? "Invalid winner address" : (error.message || "Failed to finalize draw");
+            toast.error(msg);
+        } finally {
+            setIsFinalizingDraw(false);
             toast.dismiss();
         }
     };
 
 
-    // Mock data for demonstration
-    const currentEpoch = {
-        id: 7,
-        daysRemaining: 8,
-        totalTips: 125.5,
-        prizePool: 12.55,
-        participants: 342,
-        progress: 47
+
+    // Derived data from fetched accounts
+    const displayEpoch = {
+        id: epochData?.epochId?.toNumber() || 1,
+        daysRemaining: epochData ? Math.max(0, Math.ceil((epochData.endTime.toNumber() - Date.now() / 1000) / 86400)) : 15,
+        totalTips: epochData ? (epochData.prizePool.toNumber() * 10 / 1e9) : 0, // Since prizePool is 10% of total tips
+        prizePool: epochData ? (epochData.prizePool.toNumber() / 1e9) : 0,
+        participants: epochData ? (epochData.totalEntries.toNumber() > 0 ? "Active" : "None") : "–",
+        progress: epochData ? Math.min(100, Math.round(((Date.now() / 1000 - epochData.startTime.toNumber()) / (1296000)) * 100)) : 0
     };
 
-    const previousWinners = [
-        { address: '0x1234...5678', prize: 8.5, epoch: 6 },
-        { address: '0xabcd...efgh', prize: 6.2, epoch: 5 },
-        { address: '0x9876...4321', prize: 9.8, epoch: 4 },
-    ];
+    const myEntries = participantData ? participantData.entries.toNumber() : 0;
+    const myTippedAmount = myEntries * 0.01; // Each entry is 0.01 SOL
 
-    const myTips = [
-        { amount: 0.5, date: '2026-01-28', epochId: 7 },
-        { amount: 0.25, date: '2026-01-25', epochId: 7 },
-        { amount: 1.0, date: '2026-01-15', epochId: 6 },
-    ];
+    // For history and previous winners, we would normally fetch from an indexer or 
+    // past signatures. For now, we'll keep them empty to reflect "real" state
+    // where no winners have been selected yet in this deployment.
+    const previousWinners: any[] = [];
+    const myTips: any[] = [];
 
     return (
         <div className="min-h-screen w-full bg-[#fef29c] relative overflow-y-auto font-['Raleway',_sans-serif] text-[#515044] flex flex-col items-center">
@@ -146,18 +269,37 @@ const PLY = () => {
                         Every tip you give helps build the ecosystem and could come back to you as a reward every 15 days!
                     </p>
 
-                    <div className="flex flex-wrap justify-center gap-4 pt-6">
-                        {!isConnected ? (
-                            <Button onClick={() => open()} size="lg" className="bg-[#515044] hover:bg-black text-white rounded-2xl px-10 py-7 font-bold text-xs uppercase tracking-widest shadow-xl shadow-[#515044]/10 transition-all hover:scale-105 active:scale-95">
-                                <Wallet className="w-4 h-4 mr-2" /> Connect Wallet
+                    <div className="flex flex-col items-center gap-4 pt-6">
+                        <div className="flex flex-wrap justify-center gap-4">
+                            {!isConnected ? (
+                                <Button onClick={() => open()} size="lg" className="bg-[#515044] hover:bg-black text-white rounded-2xl px-10 py-7 font-bold text-xs uppercase tracking-widest shadow-xl shadow-[#515044]/10 transition-all hover:scale-105 active:scale-95">
+                                    <Wallet className="w-4 h-4 mr-2" /> Connect Wallet
+                                </Button>
+                            ) : (
+                                <div className="flex flex-col sm:flex-row gap-4 items-center">
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            value={tipAmountInput}
+                                            onChange={(e) => setTipAmountInput(e.target.value)}
+                                            className="bg-white/50 border border-[#515044]/10 rounded-2xl px-6 py-4 outline-none focus:ring-2 focus:ring-[#515044]/20 w-32 font-bold text-[#515044]"
+                                            placeholder="0.05"
+                                            step="0.01"
+                                            min="0.01"
+                                        />
+                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-[#515044]/40 uppercase tracking-widest">SOL</span>
+                                    </div>
+                                    <Button size="lg" onClick={handleTip} disabled={isTipping} className="bg-[#515044] hover:bg-black text-white rounded-2xl px-10 py-7 font-bold text-xs uppercase tracking-widest shadow-xl shadow-[#515044]/10 transition-all hover:scale-105 active:scale-95">
+                                        <Gift className="w-4 h-4 mr-2" /> {isTipping ? "Processing..." : "Tip Now"}
+                                    </Button>
+                                </div>
+                            )}
+                            <Button variant="outline" size="lg" className="rounded-2xl border-[#515044]/10 bg-white/50 backdrop-blur text-[#515044] px-8 py-7 font-bold text-xs uppercase tracking-widest hover:bg-white transition-all shadow-lg hover:shadow-xl">
+                                Learn More <ArrowRight className="w-4 h-4 ml-2" />
                             </Button>
-                        ) : (
-                            <Button size="lg" onClick={handleTip} disabled={isTipping} className="bg-[#515044] hover:bg-black text-white rounded-2xl px-10 py-7 font-bold text-xs uppercase tracking-widest shadow-xl shadow-[#515044]/10 transition-all hover:scale-105 active:scale-95">
-                                <Gift className="w-4 h-4 mr-2" /> {isTipping ? "Processing..." : "Tip Now"}
-                            </Button>
-                        )}
-                        <Button variant="outline" size="lg" className="rounded-2xl border-[#515044]/10 bg-white/50 backdrop-blur text-[#515044] px-8 py-7 font-bold text-xs uppercase tracking-widest hover:bg-white transition-all shadow-lg hover:shadow-xl">
-                            Learn More <ArrowRight className="w-4 h-4 ml-2" />
+                        </div>
+                        <Button onClick={fetchData} variant="ghost" size="sm" className="text-[#515044]/40 hover:text-[#515044] text-[8px] uppercase tracking-widest">
+                            <Shuffle className="w-3 h-3 mr-2" /> Refresh Data
                         </Button>
                     </div>
                 </div>
@@ -190,10 +332,10 @@ const PLY = () => {
                                         </div>
                                         <div>
                                             <CardTitle className="text-2xl font-bold text-[#515044]">
-                                                Epoch #{currentEpoch.id}
+                                                Epoch #{displayEpoch.id}
                                             </CardTitle>
                                             <CardDescription className="text-[#515044]/40 text-[10px] font-bold uppercase tracking-widest">
-                                                {currentEpoch.daysRemaining} days remaining
+                                                {displayEpoch.daysRemaining} days remaining
                                             </CardDescription>
                                         </div>
                                     </div>
@@ -202,7 +344,9 @@ const PLY = () => {
                                     <div className="flex flex-col">
                                         <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#515044]/30 mb-2">Current Prize Pool</span>
                                         <div className="flex items-baseline gap-3">
-                                            <span className="text-6xl md:text-7xl font-bold text-[#515044] tracking-tight">{currentEpoch.prizePool.toLocaleString()}</span>
+                                            <span className="text-6xl md:text-7xl font-bold text-[#515044] tracking-tight">
+                                                {isLoading ? "..." : displayEpoch.prizePool.toFixed(4)}
+                                            </span>
                                             <span className="text-xs font-bold text-[#515044]/40 uppercase tracking-[0.2em] mb-2">SOL</span>
                                         </div>
                                     </div>
@@ -210,12 +354,12 @@ const PLY = () => {
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-[#515044]/40">
                                             <span>Epoch Progression</span>
-                                            <span>{currentEpoch.progress}%</span>
+                                            <span>{displayEpoch.progress}%</span>
                                         </div>
                                         <div className="h-2 w-full bg-[#515044]/5 rounded-full overflow-hidden">
                                             <div
                                                 className="h-full bg-[#515044] opacity-80 transition-all duration-1000"
-                                                style={{ width: `${currentEpoch.progress}%` }}
+                                                style={{ width: `${displayEpoch.progress}%` }}
                                             />
                                         </div>
                                     </div>
@@ -223,15 +367,17 @@ const PLY = () => {
                                     <div className="grid grid-cols-3 gap-6 pt-4 border-t border-[#515044]/5">
                                         <div>
                                             <p className="text-[8px] font-bold text-[#515044]/30 uppercase tracking-[0.2em] mb-1">Total Tips</p>
-                                            <p className="font-bold text-[#515044] text-lg">{currentEpoch.totalTips.toLocaleString()}</p>
+                                            <p className="font-bold text-[#515044] text-lg">
+                                                {isLoading ? "..." : displayEpoch.totalTips.toFixed(2)}
+                                            </p>
                                         </div>
                                         <div>
-                                            <p className="text-[8px] font-bold text-[#515044]/30 uppercase tracking-[0.2em] mb-1">Participants</p>
-                                            <p className="font-bold text-[#515044] text-lg">{currentEpoch.participants}</p>
+                                            <p className="text-[8px] font-bold text-[#515044]/30 uppercase tracking-[0.2em] mb-1">Status</p>
+                                            <p className="font-bold text-[#515044] text-lg text-[10px] uppercase">{epochData?.isClosed ? "Closed" : "Live"}</p>
                                         </div>
                                         <div>
                                             <p className="text-[8px] font-bold text-[#515044]/30 uppercase tracking-[0.2em] mb-1">Your Entries</p>
-                                            <p className="font-bold text-[#515044] text-lg">{isConnected ? '3' : '–'}</p>
+                                            <p className="font-bold text-[#515044] text-lg">{isConnected ? myEntries : '–'}</p>
                                         </div>
                                     </div>
                                 </CardContent>
@@ -242,18 +388,20 @@ const PLY = () => {
                                 <div className="space-y-2 mb-8">
                                     <CardTitle className="text-lg font-bold text-[#515044]">Your Stats</CardTitle>
                                     <div className="bg-[#515044]/5 text-[#515044]/40 text-[8px] font-bold uppercase tracking-[0.2em] px-2 py-1 rounded-lg inline-block">
-                                        Epoch #{currentEpoch.id}
+                                        Epoch #{displayEpoch.id}
                                     </div>
                                 </div>
                                 <div className="text-center py-6">
                                     <div className="mb-6 inline-flex p-5 rounded-[24px] bg-[#515044]/5 text-[#515044]/40">
                                         <Coins className="w-10 h-10" />
                                     </div>
-                                    <h3 className="text-4xl font-bold text-[#515044] mb-2">{isConnected ? '1.75' : '0'}</h3>
+                                    <h3 className="text-4xl font-bold text-[#515044] mb-2">
+                                        {isConnected ? (isLoading ? "..." : myTippedAmount.toFixed(2)) : '0'}
+                                    </h3>
                                     <p className="text-[10px] font-bold text-[#515044]/30 uppercase tracking-[0.3em]">SOL Tipped</p>
-                                    {isConnected && (
+                                    {isConnected && !isLoading && myEntries > 0 && (
                                         <div className="mt-4 bg-green-500/10 text-green-600 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest inline-block">
-                                            ~14% Win Chance
+                                            {displayEpoch.id > 0 ? "Entry recorded" : "No entries"}
                                         </div>
                                     )}
                                 </div>
@@ -305,22 +453,44 @@ const PLY = () => {
                             </div>
                             <CardContent className="p-0">
                                 <div className="space-y-4">
-                                    {previousWinners.map((winner, index) => (
-                                        <div key={index} className="flex items-center justify-between p-5 rounded-[24px] bg-white border border-[#515044]/5 transition-all hover:shadow-xl group hover:scale-[1.01]">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-2xl bg-[#515044]/5 flex items-center justify-center text-[#515044]/40 group-hover:bg-[#515044] group-hover:text-white transition-all">
-                                                    <Trophy className="w-5 h-5" />
+                                    {(epochData?.winner || previousWinners.length > 0) ? (
+                                        <>
+                                            {epochData?.winner && (
+                                                <div className="flex items-center justify-between p-5 rounded-[24px] bg-white border-2 border-[#515044]/10 transition-all shadow-xl group hover:scale-[1.01]">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-12 h-12 rounded-2xl bg-[#515044] flex items-center justify-center text-white transition-all">
+                                                            <Trophy className="w-5 h-5" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-mono text-sm font-bold text-[#515044]">{epochData.winner.toBase58().slice(0, 12)}...</p>
+                                                            <p className="text-[10px] text-[#515044]/40 font-bold uppercase tracking-widest">Current Epoch Winner</p>
+                                                        </div>
+                                                    </div>
+                                                    <Badge className="bg-[#515044] text-white">Winner</Badge>
                                                 </div>
-                                                <div>
-                                                    <p className="font-mono text-sm font-bold text-[#515044]">{winner.address}</p>
-                                                    <p className="text-[10px] text-[#515044]/40 font-bold uppercase tracking-widest">Epoch #{winner.epoch}</p>
+                                            )}
+                                            {previousWinners.map((winner, index) => (
+                                                <div key={index} className="flex items-center justify-between p-5 rounded-[24px] bg-white border border-[#515044]/5 transition-all hover:shadow-xl group hover:scale-[1.01]">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-12 h-12 rounded-2xl bg-[#515044]/5 flex items-center justify-center text-[#515044]/40 group-hover:bg-[#515044] group-hover:text-white transition-all">
+                                                            <Trophy className="w-5 h-5" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-mono text-sm font-bold text-[#515044]">{winner.address}</p>
+                                                            <p className="text-[10px] text-[#515044]/40 font-bold uppercase tracking-widest">Epoch #{winner.epoch}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="bg-[#515044]/5 text-[#515044] px-4 py-2 rounded-xl text-xs font-bold font-mono group-hover:bg-[#515044] group-hover:text-white transition-all">
+                                                        +{winner.prize.toLocaleString()} SOL
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div className="bg-[#515044]/5 text-[#515044] px-4 py-2 rounded-xl text-xs font-bold font-mono group-hover:bg-[#515044] group-hover:text-white transition-all">
-                                                +{winner.prize.toLocaleString()} SOL
-                                            </div>
+                                            ))}
+                                        </>
+                                    ) : (
+                                        <div className="text-center py-12 text-[#515044]/20">
+                                            <p className="text-sm font-bold uppercase tracking-widest">No winners yet</p>
                                         </div>
-                                    ))}
+                                    )}
                                 </div>
                             </CardContent>
                         </Card>
@@ -403,7 +573,7 @@ const PLY = () => {
                             <CardContent className="p-0">
                                 {isConnected ? (
                                     <div className="space-y-4">
-                                        {myTips.map((tip, index) => (
+                                        {myTips.length > 0 ? myTips.map((tip, index) => (
                                             <div key={index} className="flex items-center justify-between p-5 rounded-[24px] bg-white border border-[#515044]/5 transition-all hover:shadow-xl group hover:scale-[1.01]">
                                                 <div className="flex items-center gap-4">
                                                     <div className="w-12 h-12 rounded-2xl bg-[#515044]/5 flex items-center justify-center text-[#515044]/40 group-hover:bg-[#515044] group-hover:text-white transition-all">
@@ -418,7 +588,11 @@ const PLY = () => {
                                                     {tip.amount.toLocaleString()} SOL
                                                 </div>
                                             </div>
-                                        ))}
+                                        )) : (
+                                            <div className="text-center py-12 text-[#515044]/20">
+                                                <p className="text-sm font-bold uppercase tracking-widest">No tips sent yet in this epoch</p>
+                                            </div>
+                                        )}
                                     </div>
                                 ) : (
                                     <div className="text-center py-16 text-[#515044]/20 bg-[#515044]/5 rounded-[32px] border border-dashed border-[#515044]/10">
@@ -439,28 +613,62 @@ const PLY = () => {
                             </div>
                             <CardContent className="p-0">
                                 <div className="space-y-4">
-                                    {[6, 5, 4].map((epochId) => (
-                                        <div key={epochId} className="flex items-center justify-between p-5 rounded-[24px] bg-white border border-[#515044]/5 transition-all hover:shadow-xl group hover:scale-[1.01]">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-2xl bg-green-500/10 flex items-center justify-center text-green-600">
-                                                    <CheckCircle className="w-5 h-5" />
-                                                </div>
-                                                <div>
-                                                    <p className="font-bold text-[#515044]">Epoch #{epochId}</p>
-                                                    <p className="text-[10px] text-green-600 font-bold uppercase tracking-widest">Completed</p>
-                                                </div>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="font-bold text-[#515044] text-lg font-mono">{(Math.random() * 10 + 2).toFixed(2)} SOL</p>
-                                                <p className="text-[8px] text-[#515044]/30 font-bold uppercase tracking-widest">Final Prize Pool</p>
-                                            </div>
-                                        </div>
-                                    ))}
+                                    {/* Real epoch history would be fetched from past accounts or an indexer */}
+                                    <div className="text-center py-12 text-[#515044]/20 border border-dashed border-[#515044]/10 rounded-[24px]">
+                                        <p className="text-sm font-bold uppercase tracking-widest">No past epochs recorded yet</p>
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>
                     </TabsContent>
                 </Tabs>
+
+                {/* Admin Panel */}
+                {address && globalData && address === globalData.authority.toBase58() && (
+                    <Card className="mt-12 bg-[#515044] text-white rounded-[40px] border-none shadow-2xl overflow-hidden">
+                        <CardHeader className="p-8 md:p-10 pb-4">
+                            <div className="flex items-center gap-3">
+                                <Shield className="w-6 h-6 text-yellow-400" />
+                                <CardTitle className="text-2xl font-bold">Authority Panel</CardTitle>
+                            </div>
+                            <CardDescription className="text-white/60">Manage the PLY lottery system</CardDescription>
+                        </CardHeader>
+                        <CardContent className="p-8 md:p-10 pt-4 space-y-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="space-y-4">
+                                    <h4 className="font-bold text-sm uppercase tracking-widest text-white/40">Epoch Management</h4>
+                                    <Button
+                                        onClick={handleCloseEpoch}
+                                        disabled={isClosingEpoch || epochData?.isClosed}
+                                        className="w-full bg-white text-[#515044] hover:bg-white/90 rounded-2xl py-6 font-bold uppercase tracking-widest text-[10px]"
+                                    >
+                                        {epochData?.isClosed ? "Epoch Closed" : (isClosingEpoch ? "Closing..." : "Close Current Epoch")}
+                                    </Button>
+                                    <p className="text-[10px] text-white/40 italic">Note: Only works if epoch end time is reached.</p>
+                                </div>
+                                <div className="space-y-4">
+                                    <h4 className="font-bold text-sm uppercase tracking-widest text-white/40">Draw Finalization</h4>
+                                    <div className="space-y-3">
+                                        <input
+                                            type="text"
+                                            value={winnerInput}
+                                            onChange={(e) => setWinnerInput(e.target.value)}
+                                            placeholder="Winner Wallet Address"
+                                            className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-white/20 text-sm font-mono text-white placeholder:text-white/20"
+                                        />
+                                        <Button
+                                            onClick={handleFinalizeDraw}
+                                            disabled={isFinalizingDraw || !epochData?.isClosed || epochData?.winner}
+                                            className="w-full bg-yellow-400 text-[#515044] hover:bg-yellow-300 rounded-2xl py-6 font-bold uppercase tracking-widest text-[10px]"
+                                        >
+                                            {epochData?.winner ? "Draw Finalized" : (isFinalizingDraw ? "Finalizing..." : "Finalize Draw & Send Prize")}
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
             </div>
         </div>
     );
