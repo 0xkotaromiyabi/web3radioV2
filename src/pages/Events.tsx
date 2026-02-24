@@ -10,7 +10,6 @@ import { Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Event } from '@/types/content';
 import NewspaperLayout from '@/components/events/NewspaperLayout';
-import CoinfestLayout from '@/components/events/CoinfestLayout';
 
 const Events = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -120,7 +119,7 @@ const Events = () => {
       `}</style>
       <NavBar />
 
-      <main className="container mx-auto px-6 py-12 md:py-24 max-w-7xl">
+      <main className="container mx-auto px-6 py-12 md:py-24 max-max-w-7xl">
         <div className="flex flex-col md:flex-row justify-between items-end gap-8 mb-16">
           <div className="space-y-4 max-w-2xl">
             <Badge className="bg-[#515044]/5 text-[#515044] hover:bg-[#515044]/10 border-[#515044]/10 px-4 py-1.5 rounded-full text-[10px] uppercase tracking-widest font-bold">
@@ -167,9 +166,6 @@ const Events = () => {
           </div>
 
           <TabsContent value="events" className="mt-0 ring-0 focus:outline-none">
-            <div className="mb-16">
-              <CoinfestLayout />
-            </div>
 
             {web3Events.length > 0 ? (
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import NavBar from '@/components/navigation/NavBar';
-import RentalListingCard from '@/components/rental/RentalListingCard';
+import RentalNFTCard from '@/components/rental/RentalNFTCard';
 import CreateListingModal from '@/components/rental/CreateListingModal';
 import RentModal from '@/components/rental/RentModal';
 import { Button } from "@/components/ui/button";
@@ -101,7 +101,32 @@ const RentalAccess = () => {
             <style>{`
                 @import url('https://fonts.googleapis.com/css?family=Raleway:400,300,700');
                 body { font-family: 'Raleway', sans-serif; }
+                .rental-bg-text {
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    pointer-events: none;
+                    z-index: 0;
+                }
+                .rental-bg-text h1 {
+                    font-size: 15rem;
+                    color: #515044;
+                    opacity: 0.03;
+                    margin: 0;
+                    white-space: nowrap;
+                    font-weight: 800;
+                    text-transform: lowercase;
+                }
+                @media (max-width: 768px) {
+                    .rental-bg-text h1 { font-size: 5rem; }
+                }
             `}</style>
+
+            <div className="rental-bg-text">
+                <h1>web3radio</h1>
+            </div>
+
             <NavBar />
 
             <main className="container mx-auto px-6 py-12 md:py-20 max-w-7xl">
@@ -290,9 +315,9 @@ const RentalAccess = () => {
                         </Button>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 animate-in fade-in slide-in-from-bottom-8 duration-700 relative z-10">
                         {filteredListings.map(listing => (
-                            <RentalListingCard
+                            <RentalNFTCard
                                 key={listing.id}
                                 listing={listing}
                                 onRent={handleRent}
