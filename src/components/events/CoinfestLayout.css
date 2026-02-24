@@ -1,0 +1,131 @@
+@import url('https://fonts.googleapis.com/css2?family=Abel&family=Open+Sans:wght@300&display=swap');
+
+.coinfest-container {
+  margin: 0;
+  background: transparent;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 300;
+  text-transform: uppercase;
+  min-height: auto;
+  padding: 1em;
+  color: #515044;
+}
+
+.coinfest-container *,
+.coinfest-container *::before,
+.coinfest-container *::after {
+  box-sizing: border-box;
+}
+
+.coinfest-container img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.coinfest-container sup {
+  font-size: 0.6em;
+}
+
+.coinfest-text-light {
+  font-weight: 300;
+}
+
+.coinfest-text-bold {
+  font-weight: bold;
+}
+
+.coinfest-grid {
+  display: grid;
+  grid-gap: 2em;
+  min-height: auto;
+}
+
+.coinfest-grid span {
+  display: block;
+}
+
+.coinfest-cover img {
+  height: auto;
+  max-height: 80vh;
+  /* Prevent it from being too tall */
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05),
+    0 40px 60px -15px rgba(0, 0, 0, 0.2);
+  transform: rotate(-1deg);
+  /* Slight rotation for "pasted" look */
+  transition: all 0.5s ease;
+}
+
+.coinfest-cover img:hover {
+  transform: rotate(0deg) scale(1.02);
+  box-shadow: 0 50px 70px -20px rgba(0, 0, 0, 0.3);
+}
+
+.coinfest-title .coinfest-text-bold {
+  font-family: 'Abel', sans-serif;
+}
+
+.coinfest-title--primary,
+.coinfest-title--secondary,
+.coinfest-info {
+  z-index: 2;
+}
+
+.coinfest-title--secondary {
+  text-align: right;
+}
+
+.coinfest-title--secondary .coinfest-text-bold {
+  font-size: max(6vw, 40px);
+}
+
+.coinfest-title--primary .coinfest-text-bold {
+  font-size: max(10vw, 60px);
+}
+
+.coinfest-info {
+  grid-column: 1/2;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.coinfest-info li {
+  margin-top: 1.5em;
+}
+
+@media (min-width: 860px) {
+  .coinfest-grid {
+    grid-template-rows: minmax(1em, auto) max-content auto 3em minmax(1em, auto);
+    grid-template-columns: 4fr repeat(4, 1fr) 4fr;
+    grid-gap: 0 10px;
+    height: auto;
+    min-height: 600px;
+  }
+
+  .coinfest-title--secondary {
+    grid-row: 2/3;
+    grid-column: 1 / 3;
+  }
+
+  .coinfest-title--primary {
+    grid-row: 4/6;
+    grid-column: 5/7;
+  }
+
+  .coinfest-cover {
+    grid-row: 2/5;
+    grid-column: 2 / span 4;
+  }
+
+  .coinfest-info {
+    grid-row: 3/5;
+    grid-column: 1/2;
+    align-self: flex-end;
+  }
+}

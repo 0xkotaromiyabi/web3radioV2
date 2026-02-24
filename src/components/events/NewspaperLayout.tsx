@@ -29,7 +29,7 @@ const NewspaperLayout: React.FC = () => {
                         <h1>Web3Radio V2 Revolutionizes Decentralized Broadcasting</h1>
                         <div className="publish">
                             <span className="publish-date">{formattedDate} ·</span>
-                            <span className="author">Antigravity</span>
+                            <span className="author">Admin</span>
                         </div>
                         <img src="/images/news/studio.png" alt="Futuristic Studio" />
                         <p>Web3Radio has officially launched its V2 update, bringing a seamless integration of on-chain data and real-time audio streaming. The new platform allows listeners to engage with their favorite stations while earning rewards and participating in DAO governance. This milestone marks a significant step forward for the decentralized audio ecosystem, bridging the gap between traditional radio and blockchain technology.</p>

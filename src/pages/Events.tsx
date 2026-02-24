@@ -10,6 +10,7 @@ import { Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Event } from '@/types/content';
 import NewspaperLayout from '@/components/events/NewspaperLayout';
+import CoinfestLayout from '@/components/events/CoinfestLayout';
 
 const Events = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -166,6 +167,10 @@ const Events = () => {
           </div>
 
           <TabsContent value="events" className="mt-0 ring-0 focus:outline-none">
+            <div className="mb-16">
+              <CoinfestLayout />
+            </div>
+
             {web3Events.length > 0 ? (
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {web3Events.map((event) => renderEventCard(event))}
