@@ -5,7 +5,7 @@ const STATION_METADATA: Record<string, { type: string; metadataUrl: string; moun
     'web3': {
         type: 'shoutcast',
         // metadataUrl: 'https://web3radio.cloud/status-json.xsl', // Obsolete
-        metadataUrl: 'https://shoutcast.webthreeradio.xyz/status-json.xsl',
+        metadataUrl: 'https://shoutcast.webthreeradio.xyz/now_playing/',
         mount: '/stream'
     },
     'ozradio': {
