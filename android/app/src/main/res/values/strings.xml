@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">web3radio</string>
+    <string name="title_activity_main">web3radio</string>
+    <string name="package_name">com.web3radio.app</string>
+    <string name="custom_url_scheme">com.web3radio.app</string>
+</resources>

@@ -21,6 +21,8 @@ interface AudioContextType {
     toggleMute: () => void;
     isLoading: boolean;
     analyser: AnalyserNode | null;
+    handleBackground: () => void;
+    handleForeground: () => void;
 }
 
 import { STATIONS as STATION_DATA, getStationById } from '@/data/stations';
@@ -93,9 +95,16 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const streamUrl = getStreamUrl(currentStation);
         if (!streamUrl) return;
 
-        const audio = new Audio(streamUrl);
-        audio.crossOrigin = "anonymous"; // Needed for Web Audio API analyser
-        audioRef.current = audio;
+        // Ensure singleton audio object
+        if (!audioRef.current) {
+            audioRef.current = new Audio(streamUrl);
+            audioRef.current.crossOrigin = "anonymous";
+            audioRef.current.preload = "none";
+        } else {
+            audioRef.current.src = streamUrl;
+        }
+
+        const audio = audioRef.current;
         audio.volume = volume / 100;
 
         const onPlay = () => {
@@ -104,7 +113,6 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         };
         const onPause = () => {
             setIsPlaying(false);
-            // setCurrentSong(null); // Keep metadata visible while paused? User preference.
         };
         const onError = (e: Event) => {
             console.error("Audio Error:", e);
@@ -119,20 +127,31 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const onWaiting = () => setIsLoading(true);
         const onPlaying = () => setIsLoading(false);
 
+        // Anti-reload / Stall protection
+        const onStalled = () => {
+            console.log("Stream stalled, retrying...");
+            if (audioRef.current && isPlaying) {
+                audioRef.current.load();
+                audioRef.current.play().catch(e => console.error("Re-play failed after stall", e));
+            }
+        };
+
         audio.addEventListener('play', onPlay);
         audio.addEventListener('pause', onPause);
         audio.addEventListener('error', onError);
         audio.addEventListener('waiting', onWaiting);
         audio.addEventListener('playing', onPlaying);
+        audio.addEventListener('stalled', onStalled);
 
         return () => {
-            audio.pause();
+            // Note: We don't pause here if we want background play to persist 
+            // but since this is the global provider, it only happens on app close.
             audio.removeEventListener('play', onPlay);
             audio.removeEventListener('pause', onPause);
             audio.removeEventListener('error', onError);
             audio.removeEventListener('waiting', onWaiting);
             audio.removeEventListener('playing', onPlaying);
-            audioRef.current = null;
+            audio.removeEventListener('stalled', onStalled);
         };
     }, []);
 
@@ -238,6 +257,16 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const toggleMute = () => setIsMuted(!isMuted);
 
+    const handleBackground = () => {
+        console.log('App moved to background - Audio continuing...');
+        // Radio should keep playing in background
+    };
+
+    const handleForeground = () => {
+        console.log('App moved to foreground');
+        // Add any specific foreground logic here if needed
+    };
+
     return (
         <AudioContext.Provider value={{
             isPlaying,
@@ -250,7 +279,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             setVolume,
             changeStation,
             toggleMute,
-            analyser: analyserRef.current
+            analyser: analyserRef.current,
+            handleBackground,
+            handleForeground
         }}>
             {children}
         </AudioContext.Provider>

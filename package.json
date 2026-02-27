@@ -14,6 +14,10 @@
     "build:extension": "tsc && vite build --mode extension"
   },
   "dependencies": {
+    "@capacitor/android": "^8.1.0",
+    "@capacitor/app": "^8.0.1",
+    "@capacitor/cli": "^8.1.0",
+    "@capacitor/core": "^8.1.0",
     "@coinbase/onchainkit": "^1.1.2",
     "@coral-xyz/anchor": "^0.32.1",
     "@hookform/resolvers": "3.9.0",

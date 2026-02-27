@@ -6,13 +6,14 @@ const router = express.Router();
 // Station metadata sources configuration with static fallback info
 const STATION_METADATA = {
     'web3': {
-        type: 'static', // No live metadata available
-        name: 'Oz Radio Jakarta',
-        defaultArtist: 'Oz Radio Jakarta',
+        type: 'xspf',
+        metadataUrl: 'https://shoutcast.webthreeradio.xyz/radio.mp3.xspf',
+        name: 'Web3 Radio',
+        defaultArtist: 'Web3 Radio',
         defaultTitle: 'Live Broadcast',
         defaultAlbum: 'Web3 Radio Network',
-        defaultArtwork: 'https://upload.wikimedia.org/wikipedia/id/1/13/OZ_Radio_logo.png',
-        genre: 'Top 40 / Pop'
+        defaultArtwork: 'https://i.imgur.com/RbUjvJM.png',
+        genre: 'community'
     },
     'ozradio': {
         type: 'icecast',
@@ -158,6 +159,31 @@ function parseShoutcastCurrentsong(text) {
     return null;
 }
 
+// Parse XSPF metadata
+function parseXspfMetadata(data) {
+    try {
+        if (data && typeof data === 'string') {
+            const trackBlockMatch = data.match(/<track>([\s\S]*?)<\/track>/i);
+
+            if (trackBlockMatch && trackBlockMatch[1]) {
+                const trackContent = trackBlockMatch[1];
+                const trackCreatorMatch = trackContent.match(/<creator>(.*?)<\/creator>/i);
+                const trackTitleMatch = trackContent.match(/<title>(.*?)<\/title>/i);
+
+                return {
+                    title: trackTitleMatch ? trackTitleMatch[1] : 'Live Broadcast',
+                    artist: trackCreatorMatch ? trackCreatorMatch[1] : 'Web3 Radio',
+                    album: 'Web3 Radio',
+                    source: 'xspf'
+                };
+            }
+        }
+    } catch (e) {
+        console.error('Error parsing XSPF metadata:', e);
+    }
+    return null;
+}
+
 // Fetch album artwork from iTunes Search API
 async function fetchAlbumArt(artist, title) {
     try {
@@ -272,6 +298,9 @@ router.get('/:station', async (req, res) => {
             case 'shoutcast':
                 // Shoutcast currentsong returns plain text
                 metadata = parseShoutcastCurrentsong(data.raw || JSON.stringify(data));
+                break;
+            case 'xspf':
+                metadata = parseXspfMetadata(data.raw || JSON.stringify(data));
                 break;
             default:
                 metadata = { raw: data };

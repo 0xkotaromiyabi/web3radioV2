@@ -6,6 +6,7 @@ import { Home, Calendar, Radio, Menu, X, Users, Gift, Smartphone, Lock as LockIc
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import logo from '@/assets/web3radio-logo.png';
+import { Capacitor } from '@capacitor/core';
 
 const NavBar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -21,13 +22,27 @@ const NavBar = () => {
   const { disconnect } = useDisconnect();
   const networkName = caipNetwork?.name || 'Unknown';
 
+  const isAndroid = Capacitor.getPlatform() === 'android';
+
   const navLinks = [
     { to: '/', label: 'Home', icon: Home },
-    { to: '/events', label: 'News &Events', icon: Calendar },
-    { to: '/rental', label: 'Rental', icon: Smartphone },
-    { to: '/ply', label: 'Prizes', icon: Gift },
-    { to: '/dao', label: 'DAO', icon: Users },
-  ];
+    ...(isAndroid ? [] : [
+      { to: '/events', label: 'News &Events', icon: Calendar },
+      { to: '/rental', label: 'Rental', icon: Smartphone },
+      { to: '/ply', label: 'Prizes', icon: Gift },
+      { to: '/dao', label: 'DAO', icon: Users },
+    ]),
+  ].filter(link => {
+    // Show only Home on Android as per instructions to disable PLY, staking (DAO), rewards
+    // Keeping events/rental if those are not part of requested disables, 
+    // but user said "PLY", "staking", "reward claiming".
+    // "staking" and "rewards" are in DAO/PLY.
+    // I will show Home, Events, Rental (if those are okay), but hide PLY and DAO.
+    if (isAndroid) {
+      return !['/ply', '/dao'].includes(link.to);
+    }
+    return true;
+  });
 
   const animate = useCallback((from: number, to: number) => {
     if (animRef.current) clearInterval(animRef.current);

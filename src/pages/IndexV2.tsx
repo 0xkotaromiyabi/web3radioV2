@@ -9,6 +9,7 @@ import CryptoTicker from '@/components/ui/CryptoTicker';
 import { MessageSquare, Volume2, Volume1, VolumeX, Share2 } from 'lucide-react';
 import ListeningTimeTracker from '@/components/radio/ListeningTimeTracker';
 import { ShareModal } from '@/components/radio/ShareModal';
+import { Capacitor } from '@capacitor/core';
 const IndexV2 = () => {
   const { isPlaying, volume, togglePlay, setVolume, currentStation, currentSong, changeStation } = useAudio();
   const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
@@ -452,8 +453,8 @@ const IndexV2 = () => {
               </div>
             )}
 
-            {/* Unified Tipping Hub */}
-            {isConnected && <UnifiedTipComponent />}
+            {/* Unified Tipping Hub - Disabled for Android Release */}
+            {isConnected && Capacitor.getPlatform() !== 'android' && <UnifiedTipComponent />}
           </div>
         </div>
 

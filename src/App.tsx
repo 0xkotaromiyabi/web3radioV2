@@ -23,10 +23,16 @@ import PLY from "./pages/PLY";
 import { AudioProvider } from "./contexts/AudioProvider";
 import PersistentPlayer from "./components/radio/PersistentPlayer";
 import ExtensionHome from "./pages/ExtensionHome";
+import { useCapacitorLifecycle } from "./hooks/useCapacitorLifecycle";
 
 import IndexV2 from "./pages/IndexV2";
 
 import "./App.css";
+
+function CapacitorLifecycleManager() {
+  useCapacitorLifecycle();
+  return null;
+}
 
 function App() {
   return (
@@ -35,6 +41,7 @@ function App() {
         <W3RTokenProvider>
           <XMTPProvider>
             <AudioProvider>
+              <CapacitorLifecycleManager />
               {import.meta.env.MODE === 'extension' ? (
                 <HashRouter>
                   <Routes>

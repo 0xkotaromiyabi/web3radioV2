@@ -12,7 +12,7 @@ export const STATIONS: Station[] = [
     {
         id: 'web3',
         name: 'Web3 Radio',
-        streamUrl: 'https://shoutcast.webthreeradio.xyz/stream',
+        streamUrl: 'https://shoutcast.webthreeradio.xyz/radio.mp3',
         genre: 'community',
         description: 'Community-Powered Web3 Broadcasting',
         image_url: "https://i.imgur.com/RbUjvJM.png"

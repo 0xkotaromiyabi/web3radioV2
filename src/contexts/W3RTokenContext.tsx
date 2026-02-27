@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
+import { Capacitor } from '@capacitor/core';
 import { W3RBackendApi } from "@/services/w3rBackendApi";
 import { W3RSmartContract } from "@/services/w3rSmartContract";
 
@@ -208,15 +209,17 @@ export const W3RTokenProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const calculatedRewardEligible = listeningTime >= REWARD_INTERVAL && listeningTime % REWARD_INTERVAL < 60;
   const calculatedNextRewardIn = REWARD_INTERVAL - (listeningTime % REWARD_INTERVAL);
 
+  const isAndroid = Capacitor.getPlatform() === 'android';
+
   const value: W3RTokenContextType = {
     balance,
     isLoading,
     listeningTime,
-    rewardEligible: rewardEligible || calculatedRewardEligible,
-    nextRewardIn: nextRewardIn || calculatedNextRewardIn,
+    rewardEligible: !isAndroid && (rewardEligible || calculatedRewardEligible),
+    nextRewardIn: isAndroid ? 0 : (nextRewardIn || calculatedNextRewardIn),
     refreshBalance,
     updateListeningTime,
-    claimReward,
+    claimReward: isAndroid ? async () => false : claimReward,
     submitListeningSession,
   };
 
