@@ -4,7 +4,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 const STATION_METADATA: Record<string, { type: string; metadataUrl: string; mount?: string }> = {
     'web3': {
         type: 'shoutcast',
-        metadataUrl: 'https://shoutcast.webthreeradio.xyz/now_playing/',
+        metadataUrl: 'https://radio-cms.webthreeradio.xyz/api/nowplaying/1',
         mount: '/stream'
     },
     'ozradio': {
