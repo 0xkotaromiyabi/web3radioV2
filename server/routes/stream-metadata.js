@@ -7,7 +7,7 @@ const router = express.Router();
 const STATION_METADATA = {
     'web3': {
         type: 'xspf',
-        metadataUrl: 'https://shoutcast.webthreeradio.xyz/radio.mp3.xspf',
+        metadataUrl: 'https://shoutcast.webthreeradio.xyz/radio.xspf',
         name: 'Web3 Radio',
         defaultArtist: 'Web3 Radio',
         defaultTitle: 'Live Broadcast',
