@@ -3,9 +3,9 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 // Station metadata sources configuration
 const STATION_METADATA: Record<string, { type: string; metadataUrl: string; mount?: string }> = {
     'web3': {
-        type: 'shoutcast',
-        metadataUrl: 'https://radio-cms.webthreeradio.xyz/api/nowplaying/1',
-        mount: '/stream'
+        type: 'icecast',
+        metadataUrl: 'https://shoutcast.webthreeradio.xyz/status-json.xsl',
+        mount: '/listen'
     },
     'ozradio': {
         type: 'icecast',
@@ -61,11 +61,22 @@ function parseIcecastMetadata(data: any, mount: string): Metadata | null {
         }
 
         if (source) {
-            const title = source.title || source.yp_currently_playing || '';
-            const parts = title.split(' - ');
+            let artist = source.artist;
+            let title = source.title;
+
+            if (!artist && !title && source.yp_currently_playing) {
+                const parts = source.yp_currently_playing.split(' - ');
+                artist = parts.length > 1 ? parts[0] : 'Unknown Artist';
+                title = parts.length > 1 ? parts.slice(1).join(' - ') : source.yp_currently_playing;
+            } else if (!artist && title && title.includes(' - ')) {
+                const parts = title.split(' - ');
+                artist = parts[0];
+                title = parts.slice(1).join(' - ');
+            }
+
             return {
-                title: parts.length > 1 ? parts[1] : title,
-                artist: parts.length > 1 ? parts[0] : 'Unknown Artist',
+                title: title || 'Unknown Title',
+                artist: artist || 'Unknown Artist',
                 album: source.genre || 'Live Stream',
                 listeners: source.listeners,
                 source: 'icecast'
