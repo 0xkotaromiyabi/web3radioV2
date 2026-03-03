@@ -143,13 +143,11 @@ const Dashboard = () => {
 
   if (isAuthenticated === null || loading) {
     return (
-      <div className="min-h-screen bg-[#fef29c] font-['Raleway',_sans-serif] text-[#515044] flex flex-col items-center justify-center p-6 text-center">
-        <style>{`
-          @import url('https://fonts.googleapis.com/css?family=Raleway:400,300,700');
-          body { font-family: 'Raleway', sans-serif; }
-        `}</style>
-        <Loader2 className="w-12 h-12 text-[#515044]/40 animate-spin mb-6" />
-        <h2 className="text-2xl font-bold tracking-tight">Initializing Control Panel...</h2>
+      <div className="min-h-screen w-full bg-transparent flex justify-center items-center text-white">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin opacity-20" />
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] opacity-30">Loading Dashboard</p>
+        </div>
       </div>
     );
   }
@@ -169,7 +167,7 @@ const Dashboard = () => {
         return (
           <div className="space-y-4 sm:space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-              <h2 className="text-xl sm:text-2xl font-bold text-[#515044]">Events Management</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-white">Events Management</h2>
               <button
                 onClick={() => setShowEditor(!showEditor)}
                 className="bg-[#515044] hover:bg-black text-white font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#515044]/10 uppercase text-[10px] tracking-widest w-full sm:w-auto"
@@ -224,7 +222,7 @@ const Dashboard = () => {
         return (
           <div className="space-y-4 sm:space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-              <h2 className="text-xl sm:text-2xl font-bold text-[#515044]">Radio Stations</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-white">Radio Stations</h2>
               <button
                 onClick={() => setShowEditor(!showEditor)}
                 className="bg-[#515044] hover:bg-black text-white font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#515044]/10 uppercase text-[10px] tracking-widest w-full sm:w-auto"
@@ -290,11 +288,7 @@ const Dashboard = () => {
 
   // Dashboard
   return (
-    <div className="min-h-screen w-full bg-[#fef29c] font-['Raleway',_sans-serif] text-[#515044] flex relative overflow-hidden">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css?family=Raleway:400,300,700');
-        body { font-family: 'Raleway', sans-serif; }
-      `}</style>
+    <div className="min-h-screen w-full bg-transparent text-white flex relative overflow-hidden">
       {/* Sidebar */}
       <CMSSidebar
         onLogout={handleLogout}
@@ -323,7 +317,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="p-4 sm:p-10 pb-20">
+        <div className="p-4 sm:p-10 pb-32">
           {renderContent()}
         </div>
       </div>

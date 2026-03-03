@@ -10,12 +10,12 @@ export interface Station {
 
 export const STATIONS: Station[] = [
     {
-        id: 'web3',
-        name: 'Web3 Radio',
-        streamUrl: 'https://shoutcast.webthreeradio.xyz/radio.mp3',
-        genre: 'community',
-        description: 'Community-Powered Web3 Broadcasting',
-        image_url: "https://i.imgur.com/RbUjvJM.png"
+        id: 'female',
+        name: 'Female Radio',
+        streamUrl: 'https://s1.cloudmu.id/listen/female_radio/radio.mp3',
+        genre: 'pop',
+        description: 'Music & Lifestyle for Modern Women',
+        image_url: "https://femalecircle.id/img/coverArt.png"
     },
     {
         id: 'ozradio',
@@ -26,12 +26,12 @@ export const STATIONS: Station[] = [
         image_url: "https://images.noiceid.cc/catalog/content-1631518434114.png"
     },
     {
-        id: 'female',
-        name: 'Female Radio',
-        streamUrl: 'https://s1.cloudmu.id/listen/female_radio/radio.mp3',
-        genre: 'pop',
-        description: 'Music & Lifestyle for Modern Women',
-        image_url: "https://femalecircle.id/img/coverArt.png"
+        id: 'web3',
+        name: 'Web3 Radio',
+        streamUrl: 'https://shoutcast.webthreeradio.xyz/radio.mp3',
+        genre: 'community',
+        description: 'Community-Powered Web3 Broadcasting',
+        image_url: "https://i.imgur.com/RbUjvJM.png"
     },
     {
         id: 'delta',

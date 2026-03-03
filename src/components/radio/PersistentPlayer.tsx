@@ -25,7 +25,7 @@ const PersistentPlayer = () => {
     } = useAudio();
 
     // Do not show on Home page ('/') or if explicitly hidden
-    if (location.pathname === '/' || location.pathname === '/dashboard') {
+    if (location.pathname === '/') {
         return null;
     }
 
@@ -36,18 +36,18 @@ const PersistentPlayer = () => {
             {/* Spacer so the fixed player doesn't cover page content */}
             <div className="h-24 w-full shrink-0" />
 
-            <div className="fixed bottom-0 left-0 right-0 h-24 bg-white/80 backdrop-blur-xl border-t border-[#515044]/5 z-50 flex items-center px-6 md:px-10 shadow-[0_-10px_40px_rgba(81,80,68,0.05)] transition-all duration-500 font-['Raleway',_sans-serif]">
+            <div className="fixed bottom-0 left-0 right-0 h-24 bg-white/10 backdrop-blur-xl border-t border-white/10 z-50 flex items-center px-6 md:px-10 shadow-[0_-10px_40px_rgba(0,0,0,0.3)] transition-all duration-500 font-['Raleway',_sans-serif]">
                 <style>{`
                     @import url('https://fonts.googleapis.com/css?family=Raleway:400,300,700');
                 `}</style>
 
                 {/* Progress Bar */}
-                <div className="absolute top-0 left-0 right-0 h-0.5 bg-[#515044]/5">
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-white/5">
                     {isPlaying && !isLoading && (
-                        <div className="h-full bg-[#515044]/20 w-full animate-pulse" />
+                        <div className="h-full bg-white/20 w-full animate-pulse" />
                     )}
                     {isLoading && (
-                        <div className="h-full w-1/3 bg-[#515044]/40 animate-loading-bar" />
+                        <div className="h-full w-1/3 bg-white/40 animate-loading-bar" />
                     )}
                 </div>
 
@@ -55,19 +55,19 @@ const PersistentPlayer = () => {
                 <div className="flex items-center gap-4 w-1/3 min-w-0">
                     <div className="relative group">
                         {currentSong?.artwork ? (
-                            <img src={currentSong.artwork} alt="Album Art" className="w-14 h-14 rounded-2xl object-cover shadow-md bg-[#515044]/5 transition-transform group-hover:scale-105" />
+                            <img src={currentSong.artwork} alt="Album Art" className="w-14 h-14 rounded-2xl object-cover shadow-md bg-white/5 transition-transform group-hover:scale-105" />
                         ) : (
-                            <div className="w-14 h-14 rounded-2xl bg-[#515044]/5 flex items-center justify-center text-[#515044]/20">
+                            <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center text-white/20">
                                 <Music className="w-6 h-6" />
                             </div>
                         )}
                         {isPlaying && !isLoading && (
-                            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-pulse" />
+                            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-black animate-pulse" />
                         )}
                     </div>
                     <div className="min-w-0">
-                        <p className="font-bold text-sm text-[#515044] truncate tracking-tight">{currentSong?.title || 'Live Stream'}</p>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/40 truncate mt-1">{currentSong?.artist || stationName}</p>
+                        <p className="font-bold text-sm text-white truncate tracking-tight">{currentSong?.title || 'Live Stream'}</p>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-white/50 truncate mt-1">{currentSong?.artist || stationName}</p>
                     </div>
                 </div>
 
@@ -77,7 +77,7 @@ const PersistentPlayer = () => {
                         onClick={togglePlay}
                         className={cn(
                             "rounded-[20px] h-12 w-12 flex items-center justify-center shadow-xl transition-all active:scale-90",
-                            isPlaying ? "bg-[#515044]/5 text-[#515044] hover:bg-[#515044]/10" : "bg-[#515044] text-white hover:bg-black shadow-[#515044]/20"
+                            isPlaying ? "bg-white/10 text-white hover:bg-white/20" : "bg-white text-black hover:bg-gray-200 shadow-white/20"
                         )}
                     >
                         {isLoading ? (
@@ -93,7 +93,7 @@ const PersistentPlayer = () => {
                 {/* Volume & Extras */}
                 <div className="flex items-center justify-end gap-6 w-1/3">
                     <div className="hidden md:flex items-center gap-3 w-32 group">
-                        <button onClick={toggleMute} className="text-[#515044]/40 hover:text-[#515044] transition-colors">
+                        <button onClick={toggleMute} className="text-white/50 hover:text-white transition-colors">
                             {isMuted || volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
                         </button>
                         <Slider
@@ -102,20 +102,20 @@ const PersistentPlayer = () => {
                             max={100}
                             step={1}
                             onValueChange={(val) => setVolume(val[0])}
-                            className="cursor-pointer opacity-40 hover:opacity-100 transition-opacity [&_.bg-primary]:!bg-[#515044] [&_.bg-secondary]:!bg-[#515044]/20 [&_.border-primary]:!border-[#515044]"
+                            className="cursor-pointer opacity-50 hover:opacity-100 transition-opacity [&_.bg-primary]:!bg-white [&_.bg-secondary]:!bg-white/20 [&_.border-primary]:!border-white"
                         />
                     </div>
 
                     <div className="flex gap-2">
                         <button
                             onClick={() => setIsShareModalOpen(true)}
-                            className="p-3 rounded-2xl bg-[#515044]/5 text-[#515044]/40 hover:text-[#515044] hover:bg-[#515044]/10 transition-all"
+                            className="p-3 rounded-2xl bg-white/5 text-white/50 hover:text-white hover:bg-white/10 transition-all"
                             title="Share Station"
                         >
                             <Share2 className="w-4 h-4" />
                         </button>
                         <Link to="/">
-                            <button className="p-3 rounded-2xl bg-[#515044]/5 text-[#515044]/40 hover:text-[#515044] hover:bg-[#515044]/10 transition-all">
+                            <button className="p-3 rounded-2xl bg-white/5 text-white/50 hover:text-white hover:bg-white/10 transition-all">
                                 <Maximize2 className="w-4 h-4" />
                             </button>
                         </Link>

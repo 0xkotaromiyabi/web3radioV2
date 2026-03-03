@@ -27,10 +27,11 @@ const NavBar = () => {
   const navLinks = [
     { to: '/', label: 'Home', icon: Home },
     ...(isAndroid ? [] : [
-      { to: '/events', label: 'News &Events', icon: Calendar },
+      { to: '/events', label: 'News & Events', icon: Calendar },
       { to: '/rental', label: 'Rental', icon: Smartphone },
       { to: '/ply', label: 'Prizes', icon: Gift },
       { to: '/dao', label: 'DAO', icon: Users },
+      { to: 'https://app.webthreeradio.xyz/', label: 'App', icon: Radio, external: true },
     ]),
   ].filter(link => {
     // Show only Home on Android as per instructions to disable PLY, staking (DAO), rewards
@@ -135,11 +136,12 @@ const NavBar = () => {
           margin-top: 25px;
           padding: 0 10px;
           border-radius: 20px;
-          background: rgba(255, 255, 255, 0.5);
+          background: rgba(255, 255, 255, 0.1);
           overflow: visible;
-          border: 1px solid rgba(255, 255, 255, 0.3);
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.04);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
           backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
           display: flex;
           align-items: center;
           gap: 5px;
@@ -175,13 +177,13 @@ const NavBar = () => {
           bottom: 6px;
           width: 10px;
           height: 10px;
-          background: #515044;
+          background: #ffffff;
           border-radius: 50%;
           transform: translateX(var(--translate-x, 0)) translateY(var(--translate-y, 0)) rotate(var(--rotate-x, 0deg));
           transition: none;
           opacity: 0;
           z-index: -1;
-          box-shadow: 0 2px 8px rgba(81, 80, 68, 0.4);
+          box-shadow: 0 2px 8px rgba(255, 255, 255, 0.4);
           border: 1.5px solid rgba(255, 255, 255, 0.8);
         }
 
@@ -195,7 +197,7 @@ const NavBar = () => {
           display: flex;
           justify-content: center;
           align-items: center;
-          color: #515044;
+          color: rgba(255, 255, 255, 0.7);
           text-decoration: none;
           font-weight: 800;
           font-size: 0.7rem;
@@ -204,12 +206,11 @@ const NavBar = () => {
           padding-inline: 14px;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           white-space: nowrap;
-          opacity: 0.7;
         }
 
         .nav-link:hover, .nav-link.active {
           opacity: 1;
-          color: #000;
+          color: #ffffff;
           transform: translateY(-2px);
         }
 
@@ -240,13 +241,25 @@ const NavBar = () => {
         <ul ref={navRef} className="nav-list" onMouseLeave={handleMouseLeaveNav}>
           {navLinks.map((link) => (
             <li key={link.to}>
-              <Link
-                to={link.to}
-                className={cn("nav-link", location.pathname === link.to && "active")}
-                onMouseEnter={handleMouseEnter}
-              >
-                {link.label}
-              </Link>
+              {link.to.startsWith('http') ? (
+                <a
+                  href={link.to}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="nav-link"
+                  onMouseEnter={handleMouseEnter}
+                >
+                  {link.label}
+                </a>
+              ) : (
+                <Link
+                  to={link.to}
+                  className={cn("nav-link", location.pathname === link.to && "active")}
+                  onMouseEnter={handleMouseEnter}
+                >
+                  {link.label}
+                </Link>
+              )}
             </li>
           ))}
         </ul>
@@ -256,7 +269,7 @@ const NavBar = () => {
           {!isConnected ? (
             <button
               onClick={() => openAppKit()}
-              className="px-4 py-2 bg-[#515044] text-white rounded-xl font-bold text-[9px] uppercase tracking-wider shadow-sm hover:bg-black transition-all flex items-center gap-2"
+              className="px-4 py-2 bg-white text-black rounded-xl font-bold text-[9px] uppercase tracking-wider shadow-sm hover:bg-gray-200 transition-all flex items-center gap-2"
             >
               <div className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
               Connect
@@ -264,7 +277,7 @@ const NavBar = () => {
           ) : (
             <button
               onClick={() => openAppKit({ view: 'Account' })}
-              className="px-3 py-2 bg-white/50 border border-[#515044]/10 text-[#515044] rounded-xl font-mono text-[9px] shadow-sm hover:bg-white/80 transition-all flex items-center gap-1.5"
+              className="px-3 py-2 bg-white/10 border border-white/20 text-white rounded-xl font-mono text-[9px] shadow-sm hover:bg-white/20 transition-all flex items-center gap-1.5"
             >
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               {address?.slice(0, 4)}...{address?.slice(-4)}
@@ -298,24 +311,38 @@ const NavBar = () => {
         <div className="md:hidden mt-16 mx-auto w-[92vw] glass border border-white/30 rounded-3xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-top-4 duration-300">
           <div className="p-5 flex flex-col gap-3">
             {navLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className={cn(
-                  "flex items-center gap-4 px-5 py-4 rounded-2xl text-sm font-bold transition-all",
-                  location.pathname === link.to ? "bg-[#515044] text-white shadow-lg" : "text-[#515044] hover:bg-[#515044]/5"
-                )}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <link.icon size={20} />
-                <span className="uppercase tracking-widest text-[11px]">{link.label}</span>
-              </Link>
+              link.to.startsWith('http') ? (
+                <a
+                  key={link.to}
+                  href={link.to}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-4 px-5 py-4 rounded-2xl text-sm font-bold text-white/70 hover:bg-white/10 transition-all"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <link.icon size={20} />
+                  <span className="uppercase tracking-widest text-[11px]">{link.label}</span>
+                </a>
+              ) : (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={cn(
+                    "flex items-center gap-4 px-5 py-4 rounded-2xl text-sm font-bold transition-all",
+                    location.pathname === link.to ? "bg-white text-black shadow-lg" : "text-white/70 hover:bg-white/10"
+                  )}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <link.icon size={20} />
+                  <span className="uppercase tracking-widest text-[11px]">{link.label}</span>
+                </Link>
+              )
             ))}
-            <div className="h-px bg-[#515044]/10 my-1" />
+            <div className="h-px bg-white/10 my-1" />
             {!isConnected ? (
               <button
                 onClick={() => openAppKit()}
-                className="w-full py-4 bg-[#515044] text-white rounded-2xl font-bold uppercase tracking-widest text-[11px] shadow-sm"
+                className="w-full py-4 bg-white text-black rounded-2xl font-bold uppercase tracking-widest text-[11px] shadow-sm"
               >
                 Connect Wallet
               </button>
@@ -323,17 +350,17 @@ const NavBar = () => {
               <div className="flex flex-col gap-2">
                 <button
                   onClick={() => { openAppKit({ view: 'Account' }); setMobileMenuOpen(false); }}
-                  className="w-full px-5 py-4 bg-white border border-[#515044]/10 rounded-2xl flex items-center justify-between"
+                  className="w-full px-5 py-4 bg-white/10 border border-white/20 rounded-2xl flex items-center justify-between"
                 >
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/40">{networkName}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-white/50">{networkName}</span>
                   </div>
-                  <span className="text-[11px] font-mono font-bold">{address?.slice(0, 8)}...{address?.slice(-4)}</span>
+                  <span className="text-[11px] font-mono font-bold text-white">{address?.slice(0, 8)}...{address?.slice(-4)}</span>
                 </button>
                 <button
                   onClick={() => { disconnect(); setMobileMenuOpen(false); }}
-                  className="w-full py-2 text-[10px] font-bold text-red-500/60 uppercase tracking-widest"
+                  className="w-full py-2 text-[10px] font-bold text-red-400 hover:text-red-500 uppercase tracking-widest transition-colors"
                 >
                   Disconnect
                 </button>

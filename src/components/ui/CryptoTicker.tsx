@@ -97,8 +97,8 @@ export default function CryptoTicker() {
             <div className="ticker-track">
                 {tickerItems.map((coin, i) => (
                     <div key={`${coin.id}-${i}`} className="flex items-center gap-1.5 whitespace-nowrap py-2">
-                        <span className="text-[11px] font-bold text-[#515044]/70 uppercase">{coin.symbol}</span>
-                        <span className="text-[11px] font-mono text-[#515044]">
+                        <span className="text-[11px] font-bold text-white/70 uppercase">{coin.symbol}</span>
+                        <span className="text-[11px] font-mono text-white">
                             ${coin.current_price >= 1 ? coin.current_price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : coin.current_price.toFixed(4)}
                         </span>
                         <span className={`text-[10px] font-bold ${coin.price_change_percentage_24h >= 0 ? 'text-green-600' : 'text-red-500'}`}>

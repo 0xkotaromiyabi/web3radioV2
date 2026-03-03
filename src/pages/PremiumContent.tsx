@@ -7,11 +7,7 @@ import { Sparkles, Crown, Lock } from "lucide-react";
 
 const PremiumContent = () => {
     return (
-        <div className="min-h-screen w-full bg-[#fef29c] relative overflow-y-auto font-['Raleway',_sans-serif] text-[#515044] flex flex-col items-center">
-            <style>{`
-                @import url('https://fonts.googleapis.com/css?family=Raleway:400,300,700');
-                body { font-family: 'Raleway', sans-serif; }
-            `}</style>
+        <div className="min-h-screen w-full bg-transparent relative overflow-y-auto text-white flex flex-col items-center">
             <NavBar />
 
             <main className="container py-24 md:py-32 px-6 max-w-lg mx-auto text-center flex flex-col items-center">

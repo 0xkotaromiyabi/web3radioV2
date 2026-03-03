@@ -65,19 +65,17 @@ export default function RadioHub() {
                     </nav>
                 </ScrollArea>
 
-                <div className="p-4 border-t border-zinc-800">
-                    <div className="flex items-center gap-3">
-                        <Avatar className="w-8 h-8 border border-zinc-700">
-                            <AvatarImage src="https://github.com/shadcn.png" />
-                            <AvatarFallback>DJ</AvatarFallback>
-                        </Avatar>
-                        {sidebarOpen && (
-                            <div className="flex flex-col">
-                                <span className="text-xs font-semibold">DJ Kotaro</span>
-                                <span className="text-[10px] text-zinc-500">Station Admin</span>
-                            </div>
-                        )}
-                    </div>
+                <div className="flex items-center gap-3 pb-24">
+                    <Avatar className="w-8 h-8 border border-zinc-700">
+                        <AvatarImage src="https://github.com/shadcn.png" />
+                        <AvatarFallback>DJ</AvatarFallback>
+                    </Avatar>
+                    {sidebarOpen && (
+                        <div className="flex flex-col">
+                            <span className="text-xs font-semibold">DJ Kotaro</span>
+                            <span className="text-[10px] text-zinc-500">Station Admin</span>
+                        </div>
+                    )}
                 </div>
             </aside>
 
@@ -100,7 +98,7 @@ export default function RadioHub() {
                 </header>
 
                 {/* DASHBOARD GRID CONTENT */}
-                <div className="flex-1 p-4 lg:p-6 overflow-y-auto bg-gradient-to-br from-zinc-900 to-black">
+                <div className="flex-1 p-4 lg:p-6 overflow-y-auto bg-gradient-to-br from-zinc-900 to-black pb-32">
 
                     {/* MODE: DASHBOARD (Overview - Grid View) */}
                     {activeTab === 'dashboard' && (

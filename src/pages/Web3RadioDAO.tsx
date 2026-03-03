@@ -25,29 +25,25 @@ export default function Web3RadioDAO() {
     const { open } = useAppKit();
 
     return (
-        <div className="min-h-screen w-full bg-[#fef29c] relative overflow-y-auto font-['Raleway',_sans-serif] text-[#515044] flex flex-col items-center">
-            <style>{`
-                @import url('https://fonts.googleapis.com/css?family=Raleway:400,300,700');
-                body { font-family: 'Raleway', sans-serif; }
-            `}</style>
+        <div className="min-h-screen w-full bg-transparent relative overflow-y-auto text-white flex flex-col items-center">
             <NavBar />
 
             {/* Hero Section */}
             <div className="w-full px-4 pt-24 md:pt-32 pb-12 text-center">
                 <div className="container mx-auto max-w-4xl space-y-6">
-                    <div className="bg-[#515044]/5 text-[#515044]/60 text-[10px] font-bold uppercase tracking-[0.4em] px-4 py-2 rounded-full inline-flex items-center gap-2 mb-2">
+                    <div className="bg-white/10 text-white/60 text-[10px] font-bold uppercase tracking-[0.4em] px-4 py-2 rounded-full inline-flex items-center gap-2 mb-2">
                         Governance Live
                     </div>
-                    <h1 className="text-4xl md:text-6xl font-bold text-[#515044] tracking-tight leading-tight">
+                    <h1 className="text-4xl md:text-6xl font-bold text-white tracking-tight leading-tight">
                         Web3Radio DAO
                     </h1>
-                    <p className="text-lg md:text-xl text-[#515044]/60 max-w-2xl mx-auto font-light leading-relaxed">
+                    <p className="text-lg md:text-xl text-white/60 max-w-2xl mx-auto font-light leading-relaxed">
                         A decentralized community where every listener, creator, and developer has an equal voice in shaping the future of Web3 broadcasting.
                     </p>
 
                     <div className="flex flex-wrap justify-center gap-4 pt-6">
                         {!isConnected ? (
-                            <Button onClick={() => open()} size="lg" className="bg-[#515044] hover:bg-black text-white rounded-2xl px-10 py-7 font-bold text-xs uppercase tracking-widest shadow-xl shadow-[#515044]/10 transition-all hover:scale-105 active:scale-95">
+                            <Button onClick={() => open()} size="lg" className="bg-white hover:bg-gray-200 text-black rounded-2xl px-10 py-7 font-bold text-xs uppercase tracking-widest shadow-xl shadow-white/10 transition-all hover:scale-105 active:scale-95">
                                 <Wallet className="w-4 h-4 mr-2" /> Connect to Join
                             </Button>
                         ) : (
@@ -55,7 +51,7 @@ export default function Web3RadioDAO() {
                                 <ShieldCheck className="w-4 h-4 mr-2" /> Member Verified
                             </Button>
                         )}
-                        <Button variant="outline" size="lg" className="rounded-2xl border-[#515044]/10 bg-white/50 backdrop-blur text-[#515044] px-8 py-7 font-bold text-xs uppercase tracking-widest hover:bg-white transition-all shadow-lg hover:shadow-xl">
+                        <Button variant="outline" size="lg" className="rounded-2xl border-white/10 bg-white/5 backdrop-blur text-white px-8 py-7 font-bold text-xs uppercase tracking-widest hover:bg-white/10 transition-all shadow-lg hover:shadow-xl">
                             Read Manifesto
                         </Button>
                     </div>
@@ -65,14 +61,14 @@ export default function Web3RadioDAO() {
             <div className="container mx-auto px-4 py-12 max-w-6xl">
                 <Tabs defaultValue="governance" className="space-y-12">
                     <div className="flex justify-center">
-                        <TabsList className="bg-white/50 backdrop-blur p-1.5 rounded-2xl border border-[#515044]/10 shadow-sm">
-                            <TabsTrigger value="governance" className="rounded-xl px-8 py-3 data-[state=active]:bg-[#515044] data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest transition-all">
+                        <TabsList className="bg-white/10 backdrop-blur p-1.5 rounded-2xl border border-white/10 shadow-sm">
+                            <TabsTrigger value="governance" className="rounded-xl px-8 py-3 data-[state=active]:bg-white data-[state=active]:text-black font-bold text-[10px] uppercase tracking-widest transition-all">
                                 <Vote className="w-3 h-3 mr-2" /> Governance
                             </TabsTrigger>
-                            <TabsTrigger value="treasury" className="rounded-xl px-8 py-3 data-[state=active]:bg-[#515044] data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest transition-all">
+                            <TabsTrigger value="treasury" className="rounded-xl px-8 py-3 data-[state=active]:bg-white data-[state=active]:text-black font-bold text-[10px] uppercase tracking-widest transition-all">
                                 <Coins className="w-3 h-3 mr-2" /> Contributor Pool
                             </TabsTrigger>
-                            <TabsTrigger value="community" className="rounded-xl px-8 py-3 data-[state=active]:bg-[#515044] data-[state=active]:text-white font-bold text-[10px] uppercase tracking-widest transition-all">
+                            <TabsTrigger value="community" className="rounded-xl px-8 py-3 data-[state=active]:bg-white data-[state=active]:text-black font-bold text-[10px] uppercase tracking-widest transition-all">
                                 <Users className="w-3 h-3 mr-2" /> Members
                             </TabsTrigger>
                         </TabsList>

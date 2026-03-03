@@ -42,8 +42,11 @@ const Events = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#fef29c] flex justify-center items-center">
-        <Loader2 className="h-8 w-8 animate-spin text-[#515044]/50" />
+      <div className="min-h-screen bg-transparent flex justify-center items-center text-white">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin opacity-20" />
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] opacity-30">Loading Events</p>
+        </div>
       </div>
     );
   }
@@ -112,52 +115,48 @@ const Events = () => {
   );
 
   return (
-    <div className="min-h-screen w-full bg-[#fef29c] relative overflow-y-auto font-['Raleway',_sans-serif] text-[#515044] flex flex-col items-center">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css?family=Raleway:400,300,700');
-        body { font-family: 'Raleway', sans-serif; }
-      `}</style>
+    <div className="min-h-screen w-full bg-transparent relative overflow-y-auto text-white flex flex-col items-center">
       <NavBar />
 
       <main className="container mx-auto px-6 py-12 md:py-24 max-max-w-7xl">
         <div className="flex flex-col md:flex-row justify-between items-end gap-8 mb-16">
           <div className="space-y-4 max-w-2xl">
-            <Badge className="bg-[#515044]/5 text-[#515044] hover:bg-[#515044]/10 border-[#515044]/10 px-4 py-1.5 rounded-full text-[10px] uppercase tracking-widest font-bold">
+            <Badge className="bg-white/5 text-white/60 border-white/10 px-4 py-1.5 rounded-full text-[10px] uppercase tracking-widest font-bold">
               Hub & Broadcast
             </Badge>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-[#515044]">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white">
               Web3 Events & Hub
             </h1>
-            <p className="text-xl text-[#515044]/60 font-light leading-relaxed">
+            <p className="text-xl text-white/60 font-light leading-relaxed">
               Explore the latest in Web3, from industry news and career opportunities to live broadcasts and community events.
             </p>
           </div>
 
-          <div className="bg-white/40 backdrop-blur-xl rounded-[32px] p-4 border border-[#515044]/5 flex items-center gap-6">
-            <div className="flex flex-col items-center px-4 border-r border-[#515044]/10">
-              <span className="text-[8px] font-bold uppercase tracking-widest text-[#515044]/30">Broadcasts</span>
-              <span className="text-xl font-bold">Live</span>
+          <div className="bg-white/10 backdrop-blur-xl rounded-[32px] p-4 border border-white/10 flex items-center gap-6">
+            <div className="flex flex-col items-center px-4 border-r border-white/10">
+              <span className="text-[8px] font-bold uppercase tracking-widest text-white/30">Broadcasts</span>
+              <span className="text-xl font-bold text-white">Live</span>
             </div>
             <div className="flex flex-col items-center px-4">
-              <span className="text-[8px] font-bold uppercase tracking-widest text-[#515044]/30">Active Now</span>
-              <span className="text-xl font-bold">{events.length}</span>
+              <span className="text-[8px] font-bold uppercase tracking-widest text-white/30">Active Now</span>
+              <span className="text-xl font-bold text-white">{events.length}</span>
             </div>
           </div>
         </div>
 
         <Tabs defaultValue="events" className="w-full">
           <div className="flex justify-center mb-16">
-            <TabsList className="bg-white/60 backdrop-blur-xl p-1.5 rounded-3xl border border-[#515044]/5 shadow-sm inline-flex">
+            <TabsList className="bg-white/10 backdrop-blur-xl p-1.5 rounded-3xl border border-white/10 shadow-sm inline-flex">
               <TabsTrigger
                 value="events"
-                className="rounded-2xl px-8 py-4 data-[state=active]:bg-[#515044] data-[state=active]:text-white font-bold text-[10px] uppercase tracking-[0.2em] transition-all"
+                className="rounded-2xl px-8 py-4 data-[state=active]:bg-white data-[state=active]:text-black font-bold text-[10px] uppercase tracking-[0.2em] transition-all"
               >
                 <Sparkles className="h-4 w-4 mr-3" />
                 Web3 Events
               </TabsTrigger>
               <TabsTrigger
                 value="news"
-                className="rounded-2xl px-8 py-4 data-[state=active]:bg-[#515044] data-[state=active]:text-white font-bold text-[10px] uppercase tracking-[0.2em] transition-all"
+                className="rounded-2xl px-8 py-4 data-[state=active]:bg-white data-[state=active]:text-black font-bold text-[10px] uppercase tracking-[0.2em] transition-all"
               >
                 <Newspaper className="h-4 w-4 mr-3" />
                 News & Jobs
@@ -172,10 +171,10 @@ const Events = () => {
                 {web3Events.map((event) => renderEventCard(event))}
               </div>
             ) : (
-              <div className="text-center py-32 bg-white/40 backdrop-blur-xl rounded-[48px] border-2 border-dashed border-[#515044]/5">
-                <Users className="h-16 w-16 text-[#515044]/10 mx-auto mb-6" />
-                <h3 className="text-2xl font-bold text-[#515044] uppercase tracking-widest">No Events Found</h3>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/20 mt-2">Check back later for upcoming Web3 events</p>
+              <div className="text-center py-32 bg-white/5 backdrop-blur-xl rounded-[48px] border-2 border-dashed border-white/10">
+                <Users className="h-16 w-16 text-white/10 mx-auto mb-6" />
+                <h3 className="text-2xl font-bold text-white/60 uppercase tracking-widest">No Events Found</h3>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-white/20 mt-2">Check back later for upcoming Web3 events</p>
               </div>
             )}
           </TabsContent>

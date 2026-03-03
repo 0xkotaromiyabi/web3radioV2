@@ -1,0 +1,232 @@
+/* PremiumPlayer.css */
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600&display=swap");
+
+:root {
+  --primary-clr: rgba(228, 228, 229, 1);
+}
+
+/* Glassmorphism utility for player and components */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(15px) !important;
+  -webkit-backdrop-filter: blur(15px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Full Background Animation - Apply to a persistent top-level element */
+.premium-bg-full {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  background: url(https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/8727c9b1-be21-4932-a221-4257b59a74dd);
+  background-repeat: no-repeat;
+  background-size: cover;
+  animation: slidein 120s forwards infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes slidein {
+
+  0%,
+  100% {
+    background-position: 20% 0%;
+    background-size: 3400px;
+  }
+
+  50% {
+    background-position: 100% 0%;
+    background-size: 2400px;
+  }
+}
+
+.premium-player-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 1400px;
+  /* Allow wider container for 80% feel */
+  margin: 0 auto;
+  min-height: 80vh;
+  font-family: "Nunito", sans-serif;
+}
+
+.album-cover {
+  width: 90%;
+  /* Matching sample */
+}
+
+.swiper {
+  width: 100%;
+  padding: 40px 0 100px;
+  /* Matching sample */
+}
+
+.swiper-slide {
+  position: relative;
+  max-width: 200px;
+  /* Matching sample */
+  aspect-ratio: 1/1;
+  border-radius: 10px;
+  transition: transform 0.3s ease;
+}
+
+.swiper-slide img {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  -webkit-box-reflect: below -5px linear-gradient(transparent, transparent, rgba(0, 0, 0, 0.4));
+  pointer-events: none;
+  user-select: none;
+}
+
+.swiper-slide-active .overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(28, 22, 37, 0.6);
+  border-radius: inherit;
+  opacity: 0;
+  transition: all 0.4s linear;
+}
+
+.swiper-slide:hover .overlay {
+  opacity: 1;
+}
+
+/* Swiper Icon Overlay matching ion-icon from sample */
+.swiper-slide .overlay a {
+  opacity: 0;
+  transition: all 0.4s linear;
+  color: #eb0b0b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.swiper-slide-active:hover .overlay a {
+  font-size: 4rem;
+  /* Exactly as sample */
+  opacity: 1;
+  cursor: pointer;
+}
+
+/* Music Player Section */
+.music-player {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #ffffff;
+  width: 100%;
+  max-width: 420px;
+  padding: 30px;
+  border-radius: 24px;
+  background: transparent;
+}
+
+.music-player h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 8px;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.music-player p {
+  font-size: 1.1rem;
+  font-weight: 500;
+  opacity: 0.8;
+  letter-spacing: 0.5px;
+}
+
+/* Slider Container with Glass Effect & Watermark */
+.slider-wrapper {
+  position: relative;
+  width: 100%;
+  margin: 40px 0 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#progress {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 24px;
+  background: rgba(163, 162, 164, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  cursor: pointer;
+  outline: none;
+  position: relative;
+  z-index: 2;
+}
+
+#progress::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  background: rgba(255, 255, 255, 0.9);
+  width: 40px;
+  height: 18px;
+  border-radius: 9px;
+  border: 2px solid var(--primary-clr);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  margin-top: 0px;
+  /* Centered in track */
+}
+
+.slider-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+  z-index: 1;
+  user-select: none;
+}
+
+/* Music Player Controls matching sample exactly */
+.controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Scale global player container for the "80%" request */
+@media (min-width: 1024px) {
+  .premium-player-container {
+    transform: scale(1.2);
+    /* Make it feel like it takes 80% of view */
+    margin-top: 50px;
+  }
+}
+
+@media (max-width: 640px) {
+  .swiper-slide {
+    max-width: 160px;
+  }
+
+  .music-player {
+    width: 100%;
+  }
+}

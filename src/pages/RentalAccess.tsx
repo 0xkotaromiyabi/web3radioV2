@@ -97,64 +97,35 @@ const RentalAccess = () => {
     const currentHourFormatted = currentTime.hour.toString().padStart(2, '0');
 
     return (
-        <div className="min-h-screen w-full bg-[#fef29c] relative overflow-y-auto font-['Raleway',_sans-serif] text-[#515044] flex flex-col items-center">
-            <style>{`
-                @import url('https://fonts.googleapis.com/css?family=Raleway:400,300,700');
-                body { font-family: 'Raleway', sans-serif; }
-                .rental-bg-text {
-                    position: fixed;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    pointer-events: none;
-                    z-index: 0;
-                }
-                .rental-bg-text h1 {
-                    font-size: 15rem;
-                    color: #515044;
-                    opacity: 0.03;
-                    margin: 0;
-                    white-space: nowrap;
-                    font-weight: 800;
-                    text-transform: lowercase;
-                }
-                @media (max-width: 768px) {
-                    .rental-bg-text h1 { font-size: 5rem; }
-                }
-            `}</style>
-
-            <div className="rental-bg-text">
-                <h1>web3radio</h1>
-            </div>
-
+        <div className="min-h-screen w-full bg-transparent relative overflow-y-auto text-white flex flex-col items-center">
             <NavBar />
 
             <main className="container mx-auto px-6 py-12 md:py-20 max-w-7xl">
                 {/* Header Section */}
                 <div className="flex flex-col lg:flex-row justify-between items-start gap-12 mb-16">
                     <div className="max-w-2xl space-y-6">
-                        <Badge className="bg-[#515044]/5 text-[#515044] hover:bg-[#515044]/10 border-[#515044]/10 px-4 py-1.5 rounded-full text-[10px] uppercase tracking-widest font-bold">
+                        <Badge className="bg-white/10 text-white/60 border-white/10 px-4 py-1.5 rounded-full text-[10px] uppercase tracking-widest font-bold">
                             Temporal Access pass
                         </Badge>
-                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-[#515044]">
+                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white">
                             Rental Access
                         </h1>
-                        <p className="text-xl text-[#515044]/60 font-light leading-relaxed">
+                        <p className="text-xl text-white/60 font-light leading-relaxed">
                             Rent time-specific broadcast slots and manage your on-air presence through our decentralized scheduling system.
                         </p>
 
                         <div className="flex flex-wrap gap-6 pt-4">
                             <div className="flex items-center gap-3">
                                 <div className="w-2.5 h-2.5 rounded-full bg-blue-400"></div>
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/40">Regular: 7 Days max</span>
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">Regular: 7 Days max</span>
                             </div>
                             <div className="flex items-center gap-3">
                                 <div className="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/40">Super: 24h Slots</span>
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">Super: 24h Slots</span>
                             </div>
                             <div className="flex items-center gap-3">
                                 <div className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse"></div>
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/40">Active Slots</span>
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">Active Slots</span>
                             </div>
                         </div>
                     </div>
@@ -176,10 +147,10 @@ const RentalAccess = () => {
                                 variant="outline"
                                 size="icon"
                                 onClick={() => fetchListings(true)}
-                                className={`rounded-xl border-[#515044]/10 bg-white/50 backdrop-blur w-12 h-12 transition-all ${isRefreshing ? 'animate-spin' : 'hover:bg-white active:scale-95'}`}
+                                className={`rounded-xl border-white/10 bg-white/5 backdrop-blur w-12 h-12 transition-all ${isRefreshing ? 'animate-spin' : 'hover:bg-white/10 active:scale-95'}`}
                                 disabled={isRefreshing}
                             >
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" /><path d="M16 21v-5h5" /></svg>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" /><path d="M16 21v-5h5" /></svg>
                             </Button>
                         </div>
                     </div>
@@ -205,17 +176,17 @@ const RentalAccess = () => {
 
                 {/* Controls & Contract Info */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
-                    <div className="lg:col-span-9 bg-white/40 backdrop-blur-xl rounded-[32px] p-4 border border-[#515044]/5 flex flex-wrap gap-4 items-center">
-                        <div className="flex items-center gap-2 px-4 border-r border-[#515044]/10 h-10">
-                            <Filter className="w-4 h-4 text-[#515044]/30" />
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/40">Filters</span>
+                    <div className="lg:col-span-9 bg-white/10 backdrop-blur-xl rounded-[32px] p-4 border border-white/10 flex flex-wrap gap-4 items-center">
+                        <div className="flex items-center gap-2 px-4 border-r border-white/10 h-10">
+                            <Filter className="w-4 h-4 text-white/30" />
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">Filters</span>
                         </div>
 
                         <Select value={filterDay} onValueChange={setFilterDay}>
-                            <SelectTrigger className="w-[160px] bg-transparent border-none text-[#515044] font-bold text-[10px] uppercase tracking-widest focus:ring-0">
+                            <SelectTrigger className="w-[160px] bg-transparent border-none text-white font-bold text-[10px] uppercase tracking-widest focus:ring-0">
                                 <SelectValue placeholder="All Days" />
                             </SelectTrigger>
-                            <SelectContent className="bg-white/95 backdrop-blur-xl border-[#515044]/5">
+                            <SelectContent className="bg-black/80 backdrop-blur-xl border-white/10 text-white">
                                 <SelectItem value="all">All Days</SelectItem>
                                 {DAYS_OF_WEEK.map(day => (
                                     <SelectItem key={day} value={day.toLowerCase()} className="text-[10px] font-bold uppercase tracking-widest">{day}</SelectItem>
@@ -224,10 +195,10 @@ const RentalAccess = () => {
                         </Select>
 
                         <Select value={filterType} onValueChange={setFilterType}>
-                            <SelectTrigger className="w-[160px] bg-transparent border-none text-[#515044] font-bold text-[10px] uppercase tracking-widest focus:ring-0">
+                            <SelectTrigger className="w-[160px] bg-transparent border-none text-white font-bold text-[10px] uppercase tracking-widest focus:ring-0">
                                 <SelectValue placeholder="All Types" />
                             </SelectTrigger>
-                            <SelectContent className="bg-white/95 backdrop-blur-xl border-[#515044]/5">
+                            <SelectContent className="bg-black/80 backdrop-blur-xl border-white/10 text-white">
                                 <SelectItem value="all">All Types</SelectItem>
                                 <SelectItem value="regular">Regular Access</SelectItem>
                                 <SelectItem value="super">Super Access</SelectItem>
@@ -235,25 +206,25 @@ const RentalAccess = () => {
                         </Select>
 
                         <Select value={filterNetwork} onValueChange={setFilterNetwork}>
-                            <SelectTrigger className="w-[160px] bg-transparent border-none text-[#515044] font-bold text-[10px] uppercase tracking-widest focus:ring-0">
+                            <SelectTrigger className="w-[160px] bg-transparent border-none text-white font-bold text-[10px] uppercase tracking-widest focus:ring-0">
                                 <SelectValue placeholder="Network" />
                             </SelectTrigger>
-                            <SelectContent className="bg-white/95 backdrop-blur-xl border-[#515044]/5">
+                            <SelectContent className="bg-black/80 backdrop-blur-xl border-white/10 text-white">
                                 <SelectItem value="sepolia">Sepolia Testnet</SelectItem>
                                 <SelectItem value="base">Base Mainnet</SelectItem>
                             </SelectContent>
                         </Select>
 
                         <div className="flex-1"></div>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/20 pr-4">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-white/20 pr-4">
                             {filteredListings.length} Listings
                         </p>
                     </div>
 
-                    <div className="lg:col-span-3 bg-[#515044]/5 rounded-[32px] p-6 flex flex-col justify-center gap-3">
+                    <div className="lg:col-span-3 bg-white/5 rounded-[32px] p-6 flex flex-col justify-center gap-3">
                         <div className="flex items-center gap-2">
-                            <Shield className="w-3.5 h-3.5 text-[#515044]/30" />
-                            <p className="text-[8px] font-bold uppercase tracking-widest text-[#515044]/30">Verified Contract</p>
+                            <Shield className="w-3.5 h-3.5 text-white/30" />
+                            <p className="text-[8px] font-bold uppercase tracking-widest text-white/30">Verified Contract</p>
                         </div>
                         <a
                             href={filterNetwork === 'sepolia'
@@ -262,7 +233,7 @@ const RentalAccess = () => {
                             }
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-[10px] font-bold text-[#515044] hover:text-black transition-colors flex items-center justify-between group"
+                            className="text-[10px] font-bold text-white/60 hover:text-white transition-colors flex items-center justify-between group"
                         >
                             0xf6cE...906F
                             <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-all" />
@@ -295,12 +266,12 @@ const RentalAccess = () => {
                         ))}
                     </div>
                 ) : filteredListings.length === 0 ? (
-                    <div className="bg-white/40 backdrop-blur-xl rounded-[48px] p-24 text-center border-2 border-dashed border-[#515044]/5 animate-in fade-in zoom-in duration-700">
-                        <div className="w-24 h-24 rounded-[40px] bg-[#515044]/5 flex items-center justify-center mx-auto mb-8">
-                            <Calendar className="w-10 h-10 text-[#515044]/10" />
+                    <div className="bg-white/5 backdrop-blur-xl rounded-[48px] p-24 text-center border-2 border-dashed border-white/10 animate-in fade-in zoom-in duration-700">
+                        <div className="w-24 h-24 rounded-[40px] bg-white/5 flex items-center justify-center mx-auto mb-8">
+                            <Calendar className="w-10 h-10 text-white/10" />
                         </div>
-                        <h3 className="text-2xl font-bold text-[#515044]">No Listings Found</h3>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/20 mt-4 max-w-xs mx-auto leading-relaxed">
+                        <h3 className="text-2xl font-bold text-white/60">No Listings Found</h3>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-white/20 mt-4 max-w-xs mx-auto leading-relaxed">
                             Try adjusting your filters or check back later for new broadcast slots.
                         </p>
                         <Button
@@ -309,7 +280,7 @@ const RentalAccess = () => {
                                 setFilterDay("all");
                                 setFilterType("all");
                             }}
-                            className="mt-6 text-[#515044] font-bold text-[10px] uppercase tracking-[0.2em] underline-offset-8"
+                            className="mt-6 text-white/40 hover:text-white font-bold text-[10px] uppercase tracking-[0.2em] underline-offset-8 transition-colors"
                         >
                             Reset all filters
                         </Button>

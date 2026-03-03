@@ -42,6 +42,7 @@ function App() {
           <XMTPProvider>
             <AudioProvider>
               <CapacitorLifecycleManager />
+              <div className="premium-bg-full" />
               {import.meta.env.MODE === 'extension' ? (
                 <HashRouter>
                   <Routes>

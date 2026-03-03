@@ -248,31 +248,27 @@ const PLY = () => {
     const myTips: any[] = [];
 
     return (
-        <div className="min-h-screen w-full bg-[#fef29c] relative overflow-y-auto font-['Raleway',_sans-serif] text-[#515044] flex flex-col items-center">
-            <style>{`
-                @import url('https://fonts.googleapis.com/css?family=Raleway:400,300,700');
-                body { font-family: 'Raleway', sans-serif; }
-            `}</style>
+        <div className="min-h-screen w-full bg-transparent relative overflow-y-auto text-white flex flex-col items-center">
             <NavBar />
 
             {/* Hero Section */}
             <div className="w-full px-4 pt-24 md:pt-32 pb-12 text-center">
                 <div className="container mx-auto max-w-4xl space-y-6">
-                    <div className="bg-[#515044]/5 text-[#515044]/60 text-[10px] font-bold uppercase tracking-[0.4em] px-4 py-2 rounded-full inline-flex items-center gap-2 mb-2">
+                    <div className="bg-white/10 text-white/60 text-[10px] font-bold uppercase tracking-[0.4em] px-4 py-2 rounded-full inline-flex items-center gap-2 mb-2">
                         <Sparkles className="w-3 h-3" />
                         Prize-Linked Yield
                     </div>
-                    <h1 className="text-4xl md:text-6xl font-bold text-[#515044] tracking-tight leading-tight">
+                    <h1 className="text-4xl md:text-6xl font-bold text-white tracking-tight leading-tight">
                         PLY: Tip & Win
                     </h1>
-                    <p className="text-lg md:text-xl text-[#515044]/60 max-w-2xl mx-auto font-light leading-relaxed">
+                    <p className="text-lg md:text-xl text-white/60 max-w-2xl mx-auto font-light leading-relaxed">
                         Every tip you give helps build the ecosystem and could come back to you as a reward every 15 days!
                     </p>
 
                     <div className="flex flex-col items-center gap-4 pt-6">
                         <div className="flex flex-wrap justify-center gap-4">
                             {!isConnected ? (
-                                <Button onClick={() => open()} size="lg" className="bg-[#515044] hover:bg-black text-white rounded-2xl px-10 py-7 font-bold text-xs uppercase tracking-widest shadow-xl shadow-[#515044]/10 transition-all hover:scale-105 active:scale-95">
+                                <Button onClick={() => open()} size="lg" className="bg-white hover:bg-gray-200 text-black rounded-2xl px-10 py-7 font-bold text-xs uppercase tracking-widest shadow-xl shadow-white/10 transition-all hover:scale-105 active:scale-95">
                                     <Wallet className="w-4 h-4 mr-2" /> Connect Wallet
                                 </Button>
                             ) : (

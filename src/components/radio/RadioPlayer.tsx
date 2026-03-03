@@ -1,15 +1,11 @@
-
-import React, { useState } from 'react';
-import RadioControls from './RadioControls';
+import React from 'react';
+import { useAudio } from '@/contexts/AudioProvider';
+import PremiumPlayer from './PremiumPlayer';
 import StationSelector from './StationSelector';
 import EventsTicker from './EventsTicker';
 import CryptoPriceTicker from './CryptoPriceTicker';
 import AudioVisualizer from './AudioVisualizer';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Music, Share2 } from 'lucide-react';
-import logo from '@/assets/web3radio-logo.png';
-import { useAudio } from '@/contexts/AudioProvider';
-import { ShareModal } from './ShareModal';
 
 const RadioPlayer = () => {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -45,94 +41,18 @@ const RadioPlayer = () => {
       {/* Events Ticker */}
       <EventsTicker isMobile={isMobile} />
 
-      {/* Main Player Card - Frosted Glass Style */}
-      <div className="rounded-3xl overflow-hidden backdrop-blur-xl bg-white/70 border border-white/50 shadow-[0_12px_48px_rgba(0,0,0,0.15),0_4px_12px_rgba(0,0,0,0.1)]">
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200/30 flex items-center justify-between bg-white/40">
-          <div className="flex items-center gap-3">
-            <img
-              src={logo}
-              alt="Web3Radio"
-              className="w-10 h-10 rounded-xl"
-            />
-            <div>
-              <h2 className="font-semibold text-gray-900">{stationNames[currentStation] || currentStation}</h2>
-              <p className="text-sm text-gray-500">
-                {isPlaying ? 'Playing' : 'Paused'}
-              </p>
-            </div>
-          </div>
+      {/* Visualizer & Ticker */}
+      <div className="p-0 space-y-4">
+        <CryptoPriceTicker isMobile={isMobile} />
 
-          <div className="flex items-center gap-4">
-            {/* Window Controls - Apple Style */}
-            <div className="flex gap-2">
-              <div className="w-3 h-3 rounded-full bg-red-400 hover:bg-red-500 transition-colors cursor-pointer" />
-              <div className="w-3 h-3 rounded-full bg-yellow-400 hover:bg-yellow-500 transition-colors cursor-pointer" />
-              <div className="w-3 h-3 rounded-full bg-green-400 hover:bg-green-500 transition-colors cursor-pointer" />
-            </div>
-          </div>
-        </div>
+        {/* PREMIUM PLAYER */}
+        <PremiumPlayer />
 
-        {/* Visualizer & Ticker */}
-        <div className="p-6 space-y-4 bg-white/30">
-          <CryptoPriceTicker isMobile={isMobile} />
-          <AudioVisualizer />
-
-          {/* Now Playing Info */}
-          {currentSong ? (
-            <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/50 shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
-              {currentSong.artwork ? (
-                <img
-                  src={currentSong.artwork}
-                  alt={currentSong.album}
-                  className="w-16 h-16 rounded-xl object-cover flex-shrink-0 shadow-lg"
-                />
-              ) : (
-                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center flex-shrink-0">
-                  <Music className="w-6 h-6 text-blue-500" />
-                </div>
-              )}
-              <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-gray-900 truncate">{currentSong.title}</h3>
-                <p className="text-sm text-gray-500 truncate">{currentSong.artist}</p>
-                <p className="text-xs text-gray-400 truncate">{currentSong.album}</p>
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/60 backdrop-blur-sm border border-white/30 shadow-[0_4px_16px_rgba(0,0,0,0.02)]">
-              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center flex-shrink-0">
-                <Music className="w-6 h-6 text-gray-400" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-gray-500">{stationNames[currentStation] || currentStation}</h3>
-                <p className="text-sm text-gray-400">Press play to start listening</p>
-                <p className="text-xs text-gray-300">Live Radio Stream</p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Controls */}
-        <div className="border-t border-gray-200/30 bg-white/40 rounded-b-3xl">
-          <RadioControls
-            isPlaying={isPlaying}
-            volume={volume}
-            togglePlay={togglePlay}
-            setVolume={setVolume}
-            onShare={() => setIsShareModalOpen(true)}
-          />
-        </div>
-
+        <AudioVisualizer />
       </div>
 
-      {/* Share Modal */}
-      <ShareModal
-        isOpen={isShareModalOpen}
-        onClose={() => setIsShareModalOpen(false)}
-        currentSong={currentSong || null}
-        stationName={stationNames[currentStation] || currentStation}
-      />
     </div>
+    </div >
   );
 };
 

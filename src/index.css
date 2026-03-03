@@ -1,4 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
+@import url("https://fonts.cdnfonts.com/css/pp-neue-montreal");
+
+@font-face {
+  font-family: "PPSupplyMono";
+  src: url("https://assets.codepen.io/7558/PPSupplyMono-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 
 @tailwind base;
 @tailwind components;
@@ -36,6 +45,10 @@
     --ring: 211 100% 50%;
 
     --radius: 12px;
+
+    /* Nexus vars */
+    --font-nexus: "PP Neue Montreal", sans-serif;
+    --font-mono-nexus: "PPSupplyMono", monospace;
 
     /* Apple-style specific variables */
     --glass-bg: rgba(255, 255, 255, 0.72);
@@ -94,8 +107,8 @@
   }
 
   body {
-    @apply bg-background text-foreground;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
+    @apply bg-transparent text-foreground;
+    font-family: 'Raleway', 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-feature-settings: 'cv11', 'ss01';
@@ -274,6 +287,34 @@
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
     background-size: 200% 100%;
     animation: shimmer 2s infinite;
+  }
+
+  /* Nexus Effects */
+  .nexus-grain::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("https://img.freepik.com/premium-photo/white-dust-scratches-black-background_279525-2.jpg?w=640");
+    background-repeat: repeat;
+    opacity: 0.05;
+    mix-blend-mode: screen;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .nexus-heading {
+    font-family: var(--font-nexus);
+    letter-spacing: -0.02em;
+    line-height: 0.9;
+  }
+
+  .nexus-mono {
+    font-family: var(--font-mono-nexus);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
   }
 }
 

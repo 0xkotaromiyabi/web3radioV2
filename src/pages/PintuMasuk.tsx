@@ -46,15 +46,11 @@ const PintuMasuk = () => {
     };
 
     return (
-        <div className="min-h-screen w-full bg-[#fef29c] relative overflow-hidden font-['Raleway',_sans-serif] text-[#515044] flex items-center justify-center p-6">
-            <style>{`
-                @import url('https://fonts.googleapis.com/css?family=Raleway:400,300,700');
-                body { font-family: 'Raleway', sans-serif; }
-            `}</style>
+        <div className="min-h-screen w-full bg-transparent relative overflow-hidden text-white flex items-center justify-center p-6">
 
             {/* Background Decorative Elements */}
-            <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#515044]/5 rounded-full blur-3xl animate-pulse"></div>
-            <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#515044]/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+            <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-white/5 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-white/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
 
             <div className="w-full max-w-md relative z-10 animate-in fade-in slide-in-from-bottom-8 duration-1000">
                 <div className="bg-white/80 backdrop-blur-2xl rounded-[48px] p-12 border border-[#515044]/5 shadow-2xl overflow-hidden group">
@@ -71,12 +67,12 @@ const PintuMasuk = () => {
                             />
                         </div>
                         <div className="space-y-2">
-                            <Badge className="bg-[#515044]/5 text-[#515044] hover:bg-[#515044]/5 border-none px-4 py-1 rounded-full text-[8px] font-bold uppercase tracking-[0.3em] inline-flex items-center gap-2 mb-2">
+                            <Badge className="bg-white/10 text-white/60 border-none px-4 py-1 rounded-full text-[8px] font-bold uppercase tracking-[0.3em] inline-flex items-center gap-2 mb-2">
                                 <Sparkles className="w-2.5 h-2.5" />
                                 Secured Access
                             </Badge>
                             <h1 className="text-3xl font-bold tracking-tight">Pintu Masuk</h1>
-                            <p className="text-[10px] font-bold uppercase tracking-[0.3em] opacity-30">Masuk ke Control Panel Web3Radio</p>
+                            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/30">Masuk ke Control Panel Web3Radio</p>
                         </div>
                     </div>
 
@@ -135,7 +131,7 @@ const PintuMasuk = () => {
                     </form>
 
                     <div className="mt-12 text-center">
-                        <p className="text-[10px] font-bold uppercase tracking-widest opacity-20 leading-relaxed">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-white/20 leading-relaxed">
                             Web3Radio CMS v2.0<br />
                             Authorized personnel only
                         </p>

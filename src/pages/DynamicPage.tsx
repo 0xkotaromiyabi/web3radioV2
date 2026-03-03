@@ -47,15 +47,11 @@ const DynamicPage = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen w-full bg-[#fef29c] relative overflow-y-auto font-['Raleway',_sans-serif] text-[#515044] flex flex-col items-center">
-                <style>{`
-                    @import url('https://fonts.googleapis.com/css?family=Raleway:400,300,700');
-                    body { font-family: 'Raleway', sans-serif; }
-                `}</style>
+            <div className="min-h-screen w-full bg-transparent relative overflow-y-auto text-white flex flex-col items-center">
                 <NavBar />
-                <div className="container py-24 flex flex-col justify-center items-center space-y-4">
-                    <Loader2 className="h-10 w-10 animate-spin text-[#515044]/20" />
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#515044]/30">Fetching Data</p>
+                <div className="container py-24 flex flex-col justify-center items-center space-y-4 text-white">
+                    <Loader2 className="h-10 w-10 animate-spin opacity-20" />
+                    <p className="text-[10px] font-bold uppercase tracking-widest opacity-30">Fetching Data</p>
                 </div>
             </div>
         );
@@ -63,11 +59,7 @@ const DynamicPage = () => {
 
     if (error || !page) {
         return (
-            <div className="min-h-screen w-full bg-[#fef29c] relative overflow-y-auto font-['Raleway',_sans-serif] text-[#515044] flex flex-col items-center">
-                <style>{`
-                    @import url('https://fonts.googleapis.com/css?family=Raleway:400,300,700');
-                    body { font-family: 'Raleway', sans-serif; }
-                `}</style>
+            <div className="min-h-screen w-full bg-transparent relative overflow-y-auto text-white flex flex-col items-center">
                 <NavBar />
                 <div className="container py-24 md:py-32 px-6 max-w-lg mx-auto text-center flex flex-col items-center">
                     <div className="bg-white/90 backdrop-blur-2xl rounded-[48px] p-12 shadow-2xl border border-[#515044]/5 w-full flex flex-col items-center space-y-8">
@@ -91,20 +83,16 @@ const DynamicPage = () => {
     }
 
     return (
-        <div className="min-h-screen w-full bg-[#fef29c] relative overflow-y-auto font-['Raleway',_sans-serif] text-[#515044] flex flex-col items-center">
-            <style>{`
-                @import url('https://fonts.googleapis.com/css?family=Raleway:400,300,700');
-                body { font-family: 'Raleway', sans-serif; }
-            `}</style>
+        <div className="min-h-screen w-full bg-transparent relative overflow-y-auto text-white flex flex-col items-center">
             <NavBar />
 
             <div className="container py-12 md:py-24 px-6 max-w-4xl mx-auto">
                 <div className="text-center mb-16 space-y-6">
-                    <Badge className="bg-[#515044]/5 text-[#515044] hover:bg-[#515044]/10 border-none px-4 py-1.5 rounded-full text-[10px] uppercase tracking-widest font-bold">
+                    <Badge className="bg-white/10 text-white/60 border-none px-4 py-1.5 rounded-full text-[10px] uppercase tracking-widest font-bold">
                         Published Content
                     </Badge>
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-[#515044]">{page.title}</h1>
-                    <div className="h-1 w-20 bg-[#515044]/10 mx-auto rounded-full" />
+                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white">{page.title}</h1>
+                    <div className="h-1 w-20 bg-white/10 mx-auto rounded-full" />
                 </div>
 
                 <div className="bg-white/60 backdrop-blur-xl rounded-[48px] p-8 md:p-16 border border-[#515044]/5 shadow-xl">
@@ -113,7 +101,7 @@ const DynamicPage = () => {
                     </div>
                 </div>
 
-                <div className="mt-12 text-center text-[10px] font-bold uppercase tracking-widest text-[#515044]/20 flex items-center justify-center gap-2">
+                <div className="mt-12 text-center text-[10px] font-bold uppercase tracking-widest text-white/20 flex items-center justify-center gap-2">
                     <FileText className="w-3 h-3" />
                     Last updated {page.created_at ? new Date(page.created_at).toLocaleDateString() : 'recently'}
                 </div>
