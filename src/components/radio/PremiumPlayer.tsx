@@ -67,13 +67,35 @@ const PremiumPlayer = () => {
                     onSwiper={(swiper) => (swiperRef.current = swiper)}
                     onSlideChange={handleSlideChange}
                 >
-                    {STATIONS.map((station) => (
-                        <SwiperSlide key={station.id} className="swiper-slide">
-                            <img src={station.image_url} alt={station.name} />
-                            <div className="overlay">
-                            </div>
-                        </SwiperSlide>
-                    ))}
+                    {STATIONS.map((station) => {
+                        const isActive = station.id === currentStation;
+                        const imgSrc = isActive && currentSong?.artwork
+                            ? currentSong.artwork
+                            : station.image_url;
+                        return (
+                            <SwiperSlide key={station.id} className="swiper-slide">
+                                <div className="relative w-full h-full">
+                                    {/* Station logo base layer — always present */}
+                                    <img
+                                        src={station.image_url}
+                                        alt={station.name}
+                                        className="absolute inset-0 w-full h-full object-cover"
+                                        style={{ opacity: isActive && currentSong?.artwork ? 0 : 1, transition: 'opacity 0.6s ease' }}
+                                    />
+                                    {/* Artwork overlay — fades in when active and has artwork */}
+                                    {isActive && currentSong?.artwork && (
+                                        <img
+                                            src={currentSong.artwork}
+                                            alt={currentSong?.title || station.name}
+                                            className="absolute inset-0 w-full h-full object-cover"
+                                            style={{ opacity: 1, transition: 'opacity 0.6s ease' }}
+                                        />
+                                    )}
+                                </div>
+                                <div className="overlay"></div>
+                            </SwiperSlide>
+                        );
+                    })}
                 </Swiper>
             </div>
 
