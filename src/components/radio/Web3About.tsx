@@ -222,7 +222,7 @@ const Web3About = () => {
 
                     <div className="text-right nexus-mono text-[9px] text-white/20">
                         <p>BROADCASTING STATUS • ONLINE</p>
-                        <p>THE FUTURE OF AUDIO IS HERE</p>
+                        <p>THE FUTURE OF RADIO IS HERE</p>
                     </div>
                 </div>
 
