@@ -12,7 +12,7 @@ export const STATIONS: Station[] = [
     {
         id: 'female',
         name: 'Female Radio',
-        streamUrl: 'https://s1.cloudmu.id/listen/female_radio/radio.mp3',
+        streamUrl: 'https://stream.rcs.revma.com/9thenqqd2ncwv',
         genre: 'pop',
         description: 'Music & Lifestyle for Modern Women',
         image_url: "https://femalecircle.id/img/coverArt.png"
@@ -44,10 +44,18 @@ export const STATIONS: Station[] = [
     {
         id: 'prambors',
         name: 'Prambors FM',
-        streamUrl: 'https://s2.cloudmu.id/listen/prambors/stream',
+        streamUrl: 'https://stream.rcs.revma.com/h77wwp48kxcwv',
         genre: 'pop',
         description: "Jakarta's #1 Hit Music Station",
         image_url: "https://www.pramborsfm.com/img/coverArt.jpg"
+    },
+    {
+        id: 'ebsfm',
+        name: 'EBS FM',
+        streamUrl: 'https://b.alhastream.com:5108/radio',
+        genre: 'pop',
+        description: 'EBS FM Unhas Makassar',
+        image_url: "https://www.ebsfmunhas.com/wp-content/uploads/2018/04/1.-EBS-LOGO-MUBES-PNG-WEB-300x255.png"
     }
 ];
 

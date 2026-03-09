@@ -37,8 +37,9 @@ const STATION_METADATA = {
         genre: 'Pop / CHR'
     },
     'female': {
-        type: 'shoutcast',
-        metadataUrl: 'https://s1.cloudmu.id/listen/female_radio/currentsong?sid=1',
+        type: 'icecast',
+        metadataUrl: 'https://stream.rcs.revma.com/9thenqqd2ncwv/status-json.xsl',
+        mount: '/9thenqqd2ncwv',
         name: 'Female Radio',
         defaultArtist: 'Female Radio',
         defaultTitle: 'Live Broadcast',
@@ -57,14 +58,26 @@ const STATION_METADATA = {
         genre: 'Adult Contemporary'
     },
     'prambors': {
-        type: 'shoutcast',
-        metadataUrl: 'https://s2.cloudmu.id/listen/prambors/currentsong?sid=1',
+        type: 'icecast',
+        metadataUrl: 'https://stream.rcs.revma.com/h77wwp48kxcwv/status-json.xsl',
+        mount: '/h77wwp48kxcwv',
         name: 'Prambors FM',
         defaultArtist: 'Prambors FM',
         defaultTitle: 'Live Broadcast',
         defaultAlbum: 'Top 40 Indonesia',
         defaultArtwork: 'https://pbs.twimg.com/profile_images/1587680139067346944/gqtFkz6a_400x400.jpg',
         genre: 'Top 40 / Pop'
+    },
+    'ebsfm': {
+        type: 'icecast',
+        metadataUrl: 'https://b.alhastream.com:5108/status-json.xsl',
+        mount: '/radio',
+        name: 'EBS FM',
+        defaultArtist: 'EBS FM',
+        defaultTitle: 'Live Broadcast',
+        defaultAlbum: 'Pop Music',
+        defaultArtwork: 'https://www.ebsfmunhas.com/wp-content/uploads/2018/04/1.-EBS-LOGO-MUBES-PNG-WEB-300x255.png',
+        genre: 'Pop'
     }
 };
 
