@@ -17,16 +17,23 @@ const STATION_METADATA: Record<string, { type: string; metadataUrl: string; moun
         metadataUrl: 'https://api.radiojar.com/api/stations/4ywdgup3bnzuv/now_playing/',
     },
     'female': {
-        type: 'shoutcast',
-        metadataUrl: 'https://s1.cloudmu.id/listen/female_radio/currentsong?sid=1',
+        type: 'icecast',
+        metadataUrl: 'https://stream.rcs.revma.com/9thenqqd2ncwv/status-json.xsl',
+        mount: '/9thenqqd2ncwv',
     },
     'delta': {
         type: 'shoutcast',
         metadataUrl: 'https://s1.cloudmu.id/listen/delta_fm/currentsong?sid=1',
     },
     'prambors': {
-        type: 'shoutcast',
-        metadataUrl: 'https://s2.cloudmu.id/listen/prambors/currentsong?sid=1',
+        type: 'icecast',
+        metadataUrl: 'https://stream.rcs.revma.com/h77wwp48kxcwv/status-json.xsl',
+        mount: '/h77wwp48kxcwv',
+    },
+    'ebsfm': {
+        type: 'icecast',
+        metadataUrl: 'https://b.alhastream.com:5108/status-json.xsl',
+        mount: '/radio',
     }
 };
 
@@ -37,7 +44,8 @@ const STATION_NAMES: Record<string, string> = {
     'iradio': 'i-Radio',
     'female': 'Female Radio',
     'delta': 'Delta FM',
-    'prambors': 'Prambors FM'
+    'prambors': 'Prambors FM',
+    'ebsfm': 'EBS FM'
 };
 
 interface Metadata {
