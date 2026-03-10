@@ -9,8 +9,8 @@ const STATION_METADATA: Record<string, { type: string; metadataUrl: string; moun
     },
     'ozradio': {
         type: 'icecast',
-        metadataUrl: 'https://streaming.ozradiojakarta.com:8443/status-json.xsl',
-        mount: '/ozjakarta'
+        metadataUrl: 'https://streaming.ozradio.id:8443/ozbandung/status-json.xsl',
+        mount: '/ozbandung'
     },
     'iradio': {
         type: 'radiojar',

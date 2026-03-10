@@ -19,11 +19,11 @@ export const STATIONS: Station[] = [
     },
     {
         id: 'ozradio',
-        name: 'Oz Radio Jakarta',
-        streamUrl: 'https://streaming.ozradiojakarta.com:8443/ozjakarta',
+        name: 'Oz Radio Bandung',
+        streamUrl: 'https://streaming.ozradio.id:8443/ozbandung',
         genre: 'news',
         description: 'News, Talk & Information',
-        image_url: "https://images.noiceid.cc/catalog/content-1631518434114.png"
+        image_url: "https://images.glints.com/unsafe/glints-dashboard.oss-ap-southeast-1.aliyuncs.com/company-logo/8f0d3c7d79eee4cbc80351517c75d938.png"
     },
     {
         id: 'web3',
