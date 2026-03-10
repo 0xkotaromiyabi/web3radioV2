@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 // Station metadata sources configuration
-const STATION_METADATA: Record<string, { type: string; metadataUrl: string; mount?: string }> = {
+const STATION_METADATA: Record<string, { type: string; metadataUrl?: string; mount?: string; streamUrl?: string }> = {
     'web3': {
         type: 'icecast',
         metadataUrl: 'https://shoutcast.webthreeradio.xyz/status-json.xsl',
@@ -9,7 +9,7 @@ const STATION_METADATA: Record<string, { type: string; metadataUrl: string; moun
     },
     'ozradio': {
         type: 'icecast',
-        metadataUrl: 'https://streaming.ozradio.id:8443/ozbandung/status-json.xsl',
+        metadataUrl: 'http://streaming.ozradio.id:8443/status-json.xsl',
         mount: '/ozbandung'
     },
     'iradio': {
@@ -17,18 +17,16 @@ const STATION_METADATA: Record<string, { type: string; metadataUrl: string; moun
         metadataUrl: 'https://api.radiojar.com/api/stations/4ywdgup3bnzuv/now_playing/',
     },
     'female': {
-        type: 'icecast',
-        metadataUrl: 'https://stream.rcs.revma.com/9thenqqd2ncwv/status-json.xsl',
-        mount: '/9thenqqd2ncwv',
+        type: 'icy',
+        streamUrl: 'https://stream.rcs.revma.com/9thenqqd2ncwv',
     },
     'delta': {
         type: 'shoutcast',
         metadataUrl: 'https://s1.cloudmu.id/listen/delta_fm/currentsong?sid=1',
     },
     'prambors': {
-        type: 'icecast',
-        metadataUrl: 'https://stream.rcs.revma.com/h77wwp48kxcwv/status-json.xsl',
-        mount: '/h77wwp48kxcwv',
+        type: 'icy',
+        streamUrl: 'https://stream.rcs.revma.com/h77wwp48kxcwv',
     },
     'ebsfm': {
         type: 'icecast',
@@ -40,12 +38,23 @@ const STATION_METADATA: Record<string, { type: string; metadataUrl: string; moun
 // Pretty names for fallback
 const STATION_NAMES: Record<string, string> = {
     'web3': 'Web3 Radio',
-    'ozradio': 'Oz Radio Jakarta',
+    'ozradio': 'Oz Radio Bandung',
     'iradio': 'i-Radio',
     'female': 'Female Radio',
     'delta': 'Delta FM',
     'prambors': 'Prambors FM',
     'ebsfm': 'EBS FM'
+};
+
+// Default artwork per station
+const STATION_ARTWORK: Record<string, string> = {
+    'web3': 'https://i.imgur.com/RbUjvJM.png',
+    'ozradio': 'https://images.glints.com/unsafe/glints-dashboard.oss-ap-southeast-1.aliyuncs.com/company-logo/8f0d3c7d79eee4cbc80351517c75d938.png',
+    'iradio': 'https://pbs.twimg.com/profile_images/1478253252506554368/KY8bV8Xq_400x400.jpg',
+    'female': 'https://femalecircle.id/img/coverArt.png',
+    'delta': 'https://pbs.twimg.com/profile_images/1397855976538632195/cNdKclCQ_400x400.jpg',
+    'prambors': 'https://pbs.twimg.com/profile_images/1587680139067346944/gqtFkz6a_400x400.jpg',
+    'ebsfm': 'https://www.ebsfmunhas.com/wp-content/uploads/2018/04/1.-EBS-LOGO-MUBES-PNG-WEB-300x255.png'
 };
 
 interface Metadata {
@@ -159,6 +168,64 @@ function parseShoutcastCurrentsong(text: string, defaultArtist: string = 'Unknow
     return null;
 }
 
+// Fetch ICY in-stream metadata (for Revma and other Icecast-compatible streams)
+function fetchIcyMetadata(streamUrl: string): Promise<{ artist: string; title: string; source: string } | null> {
+    return new Promise((resolve) => {
+        try {
+            const http = streamUrl.startsWith('https') ? require('https') : require('http');
+            const urlObj = new URL(streamUrl);
+            const options = {
+                hostname: urlObj.hostname,
+                port: urlObj.port || (streamUrl.startsWith('https') ? 443 : 80),
+                path: urlObj.pathname + urlObj.search,
+                method: 'GET',
+                headers: { 'Icy-MetaData': '1', 'User-Agent': 'Web3Radio/1.0', 'Connection': 'close' },
+                timeout: 8000
+            };
+            const req = http.request(options, (res: any) => {
+                const metaInterval = parseInt(res.headers['icy-metaint'] || '0', 10);
+                if (!metaInterval) { req.destroy(); return resolve(null); }
+                let bytesRead = 0;
+                let metaFound = false;
+                const chunks: Buffer[] = [];
+                res.on('data', (chunk: Buffer) => {
+                    chunks.push(chunk);
+                    bytesRead += chunk.length;
+                    if (!metaFound && bytesRead >= metaInterval) {
+                        try {
+                            const buffer = Buffer.concat(chunks);
+                            if (buffer.length > metaInterval) {
+                                const metaLenByte = buffer[metaInterval];
+                                const metaLen = metaLenByte * 16;
+                                if (metaLen > 0 && buffer.length >= metaInterval + 1 + metaLen) {
+                                    const metaStr = buffer.slice(metaInterval + 1, metaInterval + 1 + metaLen).toString('utf8');
+                                    const match = metaStr.match(/StreamTitle='([^']*)'/);
+                                    if (match && match[1]) {
+                                        metaFound = true;
+                                        req.destroy();
+                                        const parts = match[1].split(' - ');
+                                        const artist = parts.length > 1 ? parts[0].trim() : 'Unknown Artist';
+                                        const title = parts.length > 1 ? parts.slice(1).join(' - ').trim() : match[1].trim();
+                                        return resolve({ artist, title, source: 'icy' });
+                                    }
+                                }
+                            }
+                        } catch (_) { }
+                    }
+                    if (bytesRead > 256 * 1024) { req.destroy(); resolve(null); }
+                });
+                res.on('end', () => { if (!metaFound) resolve(null); });
+                res.on('error', () => resolve(null));
+            });
+            req.on('error', () => resolve(null));
+            req.on('timeout', () => { req.destroy(); resolve(null); });
+            req.end();
+        } catch (e) {
+            resolve(null);
+        }
+    });
+}
+
 // Fetch album artwork from iTunes Search API
 async function fetchAlbumArt(artist: string, title: string): Promise<string | null> {
     try {
@@ -216,6 +283,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             error: 'Unknown station',
             availableStations: Object.keys(STATION_METADATA)
         });
+    }
+
+    const defaultArtwork = STATION_ARTWORK[stationId] || null;
+
+    // Handle ICY stations (Revma, etc.)
+    if (stationConfig.type === 'icy') {
+        if (!stationConfig.streamUrl) {
+            return res.status(200).json({ station: stationId, nowPlaying: { title: 'Live Broadcast', artist: STATION_NAMES[stationId] || stationId, album: 'Live Stream', artwork: defaultArtwork, source: 'fallback' }, timestamp: new Date().toISOString() });
+        }
+        try {
+            const icyMeta = await fetchIcyMetadata(stationConfig.streamUrl);
+            if (icyMeta && icyMeta.title) {
+                const artwork = await fetchAlbumArt(icyMeta.artist, icyMeta.title);
+                return res.status(200).json({
+                    station: stationId,
+                    nowPlaying: { title: icyMeta.title, artist: icyMeta.artist, album: 'Live Stream', artwork: artwork || defaultArtwork, source: 'icy' },
+                    timestamp: new Date().toISOString()
+                });
+            }
+        } catch (e: any) {
+            console.error(`ICY fetch failed for ${stationId}:`, e.message);
+        }
+        return res.status(200).json({ station: stationId, nowPlaying: { title: 'Live Broadcast', artist: STATION_NAMES[stationId] || stationId, album: 'Live Stream', artwork: defaultArtwork, source: 'fallback' }, timestamp: new Date().toISOString() });
+    }
+
+    if (!stationConfig.metadataUrl) {
+        return res.status(200).json({ station: stationId, nowPlaying: { title: 'Live Broadcast', artist: STATION_NAMES[stationId] || stationId, album: 'Live Stream', artwork: defaultArtwork, source: 'fallback' }, timestamp: new Date().toISOString() });
     }
 
     try {

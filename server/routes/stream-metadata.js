@@ -17,13 +17,14 @@ const STATION_METADATA = {
     },
     'ozradio': {
         type: 'icecast',
-        metadataUrl: 'https://streaming.ozradiojakarta.com:8443/status-json.xsl',
-        mount: '/ozjakarta',
-        name: 'Oz Radio Jakarta',
-        defaultArtist: 'Oz Radio Jakarta',
+        metadataUrl: 'http://streaming.ozradio.id:8443/status-json.xsl',
+        mount: '/ozbandung',
+        streamUrl: 'https://streaming.ozradio.id:8443/ozbandung',
+        name: 'Oz Radio Bandung',
+        defaultArtist: 'Oz Radio Bandung',
         defaultTitle: 'Live Broadcast',
-        defaultAlbum: 'Top 40 Hits',
-        defaultArtwork: 'https://upload.wikimedia.org/wikipedia/id/1/13/OZ_Radio_logo.png',
+        defaultAlbum: 'Pop Hits',
+        defaultArtwork: 'https://images.glints.com/unsafe/glints-dashboard.oss-ap-southeast-1.aliyuncs.com/company-logo/8f0d3c7d79eee4cbc80351517c75d938.png',
         genre: 'Top 40 / Pop'
     },
     'iradio': {
@@ -37,14 +38,13 @@ const STATION_METADATA = {
         genre: 'Pop / CHR'
     },
     'female': {
-        type: 'icecast',
-        metadataUrl: 'https://stream.rcs.revma.com/9thenqqd2ncwv/status-json.xsl',
-        mount: '/9thenqqd2ncwv',
+        type: 'icy',
+        streamUrl: 'https://stream.rcs.revma.com/9thenqqd2ncwv',
         name: 'Female Radio',
         defaultArtist: 'Female Radio',
         defaultTitle: 'Live Broadcast',
         defaultAlbum: 'Urban Contemporary',
-        defaultArtwork: 'https://pbs.twimg.com/profile_images/910697330/LogoFR_400x400.jpg',
+        defaultArtwork: 'https://femalecircle.id/img/coverArt.png',
         genre: 'Urban / Pop'
     },
     'delta': {
@@ -58,9 +58,8 @@ const STATION_METADATA = {
         genre: 'Adult Contemporary'
     },
     'prambors': {
-        type: 'icecast',
-        metadataUrl: 'https://stream.rcs.revma.com/h77wwp48kxcwv/status-json.xsl',
-        mount: '/h77wwp48kxcwv',
+        type: 'icy',
+        streamUrl: 'https://stream.rcs.revma.com/h77wwp48kxcwv',
         name: 'Prambors FM',
         defaultArtist: 'Prambors FM',
         defaultTitle: 'Live Broadcast',
@@ -197,7 +196,86 @@ function parseXspfMetadata(data) {
     return null;
 }
 
-// Fetch album artwork from iTunes Search API
+// Fetch ICY / in-stream metadata (works with Icecast, Shoutcast, Revma, etc.)
+async function fetchIcyMetadata(streamUrl) {
+    return new Promise((resolve) => {
+        try {
+            const http = streamUrl.startsWith('https') ? require('https') : require('http');
+            const urlObj = new URL(streamUrl);
+            const options = {
+                hostname: urlObj.hostname,
+                port: urlObj.port || (streamUrl.startsWith('https') ? 443 : 80),
+                path: urlObj.pathname + urlObj.search,
+                method: 'GET',
+                headers: {
+                    'Icy-MetaData': '1',
+                    'User-Agent': 'Web3Radio/1.0',
+                    'Connection': 'close'
+                },
+                timeout: 8000
+            };
+
+            const req = http.request(options, (res) => {
+                const metaInterval = parseInt(res.headers['icy-metaint'] || '0', 10);
+                if (!metaInterval) {
+                    req.destroy();
+                    return resolve(null);
+                }
+
+                let bytesRead = 0;
+                let metaFound = false;
+                const chunks = [];
+
+                res.on('data', (chunk) => {
+                    chunks.push(chunk);
+                    bytesRead += chunk.length;
+
+                    if (!metaFound && bytesRead >= metaInterval) {
+                        try {
+                            const buffer = Buffer.concat(chunks);
+                            // After metaInterval audio bytes comes 1 byte length indicator
+                            if (buffer.length > metaInterval) {
+                                const metaLenByte = buffer[metaInterval];
+                                const metaLen = metaLenByte * 16;
+                                if (metaLen > 0 && buffer.length >= metaInterval + 1 + metaLen) {
+                                    const metaStr = buffer.slice(metaInterval + 1, metaInterval + 1 + metaLen).toString('utf8');
+                                    const match = metaStr.match(/StreamTitle='([^']*)'/);
+                                    if (match && match[1]) {
+                                        metaFound = true;
+                                        req.destroy();
+                                        const parts = match[1].split(' - ');
+                                        const artist = parts.length > 1 ? parts[0].trim() : 'Unknown Artist';
+                                        const title = parts.length > 1 ? parts.slice(1).join(' - ').trim() : match[1].trim();
+                                        return resolve({ artist, title, source: 'icy' });
+                                    }
+                                }
+                            }
+                        } catch (e) {
+                            // ignore parse errors, keep reading
+                        }
+                    }
+
+                    // Safety: don't read more than 256KB
+                    if (bytesRead > 256 * 1024) {
+                        req.destroy();
+                        resolve(null);
+                    }
+                });
+
+                res.on('end', () => { if (!metaFound) resolve(null); });
+                res.on('error', () => resolve(null));
+            });
+
+            req.on('error', () => resolve(null));
+            req.on('timeout', () => { req.destroy(); resolve(null); });
+            req.end();
+        } catch (e) {
+            resolve(null);
+        }
+    });
+}
+
+// Fetch album art from iTunes Search API
 async function fetchAlbumArt(artist, title) {
     try {
         const searchQuery = encodeURIComponent(`${artist} ${title}`);
@@ -246,6 +324,34 @@ router.get('/:station', async (req, res) => {
         genre: stationConfig.genre || 'Radio',
         source: 'static'
     });
+
+    // For ICY stations (Revma etc.) – use streamUrl, not metadataUrl
+    if (stationConfig.type === 'icy') {
+        if (!stationConfig.streamUrl) {
+            return res.json({ station: stationId, stationName: stationConfig.name, nowPlaying: getDefaultMetadata(), timestamp: new Date().toISOString() });
+        }
+        try {
+            const icyMeta = await fetchIcyMetadata(stationConfig.streamUrl);
+            if (icyMeta && icyMeta.title && icyMeta.title !== 'Unknown Title') {
+                const artwork = await fetchAlbumArt(icyMeta.artist, icyMeta.title);
+                return res.json({
+                    station: stationId,
+                    stationName: stationConfig.name,
+                    nowPlaying: {
+                        title: icyMeta.title,
+                        artist: icyMeta.artist,
+                        album: stationConfig.defaultAlbum || 'Live Stream',
+                        artwork: artwork || stationConfig.defaultArtwork,
+                        source: 'icy'
+                    },
+                    timestamp: new Date().toISOString()
+                });
+            }
+        } catch (e) {
+            console.error(`ICY fetch failed for ${stationId}:`, e.message);
+        }
+        return res.json({ station: stationId, stationName: stationConfig.name, nowPlaying: getDefaultMetadata(), timestamp: new Date().toISOString(), fallback: true });
+    }
 
     // For static stations (no live metadata), return default immediately
     if (stationConfig.type === 'static' || !stationConfig.metadataUrl) {

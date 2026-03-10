@@ -21,8 +21,8 @@ export const STATIONS: Station[] = [
         id: 'ozradio',
         name: 'Oz Radio Bandung',
         streamUrl: 'https://streaming.ozradio.id:8443/ozbandung',
-        genre: 'news',
-        description: 'News, Talk & Information',
+        genre: 'pop',
+        description: 'YOUR FRIENDLY STATION',
         image_url: "https://images.glints.com/unsafe/glints-dashboard.oss-ap-southeast-1.aliyuncs.com/company-logo/8f0d3c7d79eee4cbc80351517c75d938.png"
     },
     {
@@ -37,7 +37,7 @@ export const STATIONS: Station[] = [
         id: 'delta',
         name: 'Delta FM',
         streamUrl: 'https://s1.cloudmu.id/listen/delta_fm/radio.mp3',
-        genre: 'rock',
+        genre: 'pop',
         description: 'Rock & Alternative Music',
         image_url: "https://deltafm.net/img/coverArt.png"
     },
